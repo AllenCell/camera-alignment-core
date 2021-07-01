@@ -48,6 +48,6 @@ build: ## run tox / run tests and lint
 .PHONY: build
 
 docs:
-> source $(ACTIVATE) && sphinx-apidoc -f -o docs aicsfiles aicsfiles/tests
+> source $(ACTIVATE) && sphinx-apidoc -f -o docs camera_alignment_core camera_alignment_core/tests
 > source $(ACTIVATE) && sphinx-build -b html docs docs/build
 .PHONY: docs
