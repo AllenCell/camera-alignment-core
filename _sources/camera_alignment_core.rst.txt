@@ -1,0 +1,29 @@
+camera\_alignment\_core package
+===============================
+
+Subpackages
+-----------
+
+.. toctree::
+   :maxdepth: 4
+
+   camera_alignment_core.bin
+
+Submodules
+----------
+
+camera\_alignment\_core.example module
+--------------------------------------
+
+.. automodule:: camera_alignment_core.example
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Module contents
+---------------
+
+.. automodule:: camera_alignment_core
+   :members:
+   :undoc-members:
+   :show-inheritance:
