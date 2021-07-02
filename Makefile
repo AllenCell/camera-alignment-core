@@ -35,6 +35,10 @@ type-check: venv
 > $(PYTHON) -m mypy --ignore-missing-imports camera_alignment_core
 .PHONY: type-check
 
+fmt:
+> $(PYTHON) -m black camera_alignment_core
+.PHONY: fmt
+
 test: venv
 > $(PYTHON) -m pytest
 .PHONY: test
@@ -51,3 +55,27 @@ docs:
 > source $(ACTIVATE) && sphinx-apidoc -f -o docs camera_alignment_core camera_alignment_core/tests
 > source $(ACTIVATE) && sphinx-build -b html docs docs/build
 .PHONY: docs
+
+docs-serve:
+> $(PYTHON) -m http.server --directory docs/build 8080
+.PHONY: docs-serve
+
+bumpversion-release: venv
+> $(PYTHON) -m bumpversion --list release
+.PHONY: bumpversion-release
+
+bumpversion-major: venv
+> $(PYTHON) -m bumpversion --list major
+.PHONY: bumpversion-major
+
+bumpversion-minor: venv
+> $(PYTHON) -m bumpversion --list minor
+.PHONY: bumpversion-minor
+
+bumpversion-patch: venv
+> $(PYTHON) -m bumpversion --list patch
+.PHONY: bumpversion-patch
+
+bumpversion-dev: venv
+> $(PYTHON) -m bumpversion --list devbuild
+.PHONY: bumpversion-dev

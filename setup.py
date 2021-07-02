@@ -9,6 +9,7 @@ with open("README.md") as readme_file:
     readme = readme_file.read()
 
 setup_requirements = [
+    "pre-commit ~= 2.13",
     "pytest-runner ~= 5.2",
 ]
 
@@ -38,7 +39,9 @@ dev_requirements = [
     "wheel ~= 0.36",
 ]
 
-requirements = []
+requirements = [
+    "numpy ~= 1.21"
+]
 
 extra_requirements = {
     "setup": setup_requirements,
@@ -84,6 +87,6 @@ setup(
     url="https://github.com/aics-int/camera_alignment_core",
     # Do not edit this string manually, always use bumpversion
     # Details in CONTRIBUTING.rst
-    version="0.0.0",
+    version="0.1.0",
     zip_safe=False,
 )

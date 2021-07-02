@@ -22,13 +22,13 @@ jobs:
         pip install .[dev]
     - name: Generate Docs
       run: |
-        make gen-docs
-        touch docs/_build/html/.nojekyll
+        make docs
+        touch docs/build/.nojekyll
     - name: Publish Docs
       uses: JamesIves/github-pages-deploy-action@3.7.1
       with:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         BASE_BRANCH: main # The branch the action should deploy from.
         BRANCH: gh-pages # The branch the action should deploy to.
-        FOLDER: docs/_build/html/ # The folder the action should deploy.
+        FOLDER: docs/build/ # The folder the action should deploy.
 

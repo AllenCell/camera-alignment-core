@@ -8,22 +8,13 @@ Core algorithms for aligning two-camera microscopy imagery
 
 ---
 
-## Features
-
--   Store values and retain the prior value in memory
--   ... some other functionality
-
 ## Quick Start
 
-```python
-from camera_alignment_core import Example
-
-a = Example()
-a.get_value()  # 10
-```
+TODO
 
 ## Installation
 
+TODO
 **Stable Release:** `pip install camera_alignment_core`<br>
 **Development Head:** `pip install git+https://github.com/aics-int/camera_alignment_core.git`
 
@@ -37,25 +28,23 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for information related to developing the
 
 ## The Four Commands You Need To Know
 
-1. `pip install -e .[dev]`
+1. `make install`
 
-    This will install your package in editable mode with all the required development
-    dependencies (i.e. `tox`).
+    This will setup a virtual environment local to this project and install all of the
+    project's dependencies into it. The virtual env will be located in `camera-alignment-core/venv`.
 
-2. `make build`
+2. `make test`
 
-    This will run `tox` which will run all your tests in both Python 3.7
-    and Python 3.8 as well as linting your code.
+    Run tests. Do this often!
 
 3. `make clean`
 
     This will clean up various Python and build generated files so that you can ensure
-    that you are working in a clean environment.
+    that you are working in a clean workspace.
 
 4. `make docs`
 
-    This will generate and launch a web browser to view the most up-to-date
-    documentation for your Python package.
+    This will generate the most up-to-date documentation for your Python package.
 
 #### Additional Optional Setup Steps:
 
