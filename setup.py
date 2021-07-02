@@ -80,7 +80,7 @@ setup(
     keywords="camera_alignment_core",
     name="camera_alignment_core",
     packages=find_packages(exclude=["tests", "*.tests", "*.tests.*"]),
-    python_requires=">=3.7",
+    python_requires=">=3.8",  # This is driven by aicsimageio constraints
     setup_requires=setup_requirements,
     test_suite="camera_alignment_core/tests",
     tests_require=test_requirements,
