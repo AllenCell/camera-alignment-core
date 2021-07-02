@@ -1,17 +1,6 @@
 camera\_alignment\_core.bin package
 ===================================
 
-Submodules
-----------
-
-camera\_alignment\_core.bin.my\_example module
-----------------------------------------------
-
-.. automodule:: camera_alignment_core.bin.my_example
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
 Module contents
 ---------------
 

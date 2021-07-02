@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>Welcome to camera-alignment-core’s documentation! &mdash; camera-alignment-core 0.0.0 documentation</title>
+  <title>Welcome to camera-alignment-core’s documentation! &mdash; camera-alignment-core 0.1.0 documentation</title>
   
 
   
@@ -65,7 +65,7 @@
             
             
               <div class="version">
-                0.0.0
+                0.1.0
               </div>
             
           
@@ -104,8 +104,6 @@
 <li class="toctree-l4"><a class="reference internal" href="camera_alignment_core.bin.html">camera_alignment_core.bin package</a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="camera_alignment_core.html#submodules">Submodules</a></li>
-<li class="toctree-l3"><a class="reference internal" href="camera_alignment_core.html#module-camera_alignment_core.example">camera_alignment_core.example module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="camera_alignment_core.html#module-camera_alignment_core">Module contents</a></li>
 </ul>
 </li>
@@ -202,25 +200,14 @@
 <a class="reference external image-reference" href="https://codecov.io/gh/aics-int/camera_alignment_core"><img alt="Code Coverage" src="https://codecov.io/gh/aics-int/camera_alignment_core/branch/main/graph/badge.svg" /></a>
 <p>Core algorithms for aligning two-camera microscopy imagery</p>
 <hr class="docutils" />
-<div class="section" id="features">
-<h2>Features<a class="headerlink" href="#features" title="Permalink to this headline">¶</a></h2>
-<ul class="simple">
-<li><p>Store values and retain the prior value in memory</p></li>
-<li><p>… some other functionality</p></li>
-</ul>
-</div>
 <div class="section" id="quick-start">
 <h2>Quick Start<a class="headerlink" href="#quick-start" title="Permalink to this headline">¶</a></h2>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">camera_alignment_core</span> <span class="kn">import</span> <span class="n">Example</span>
-
-<span class="n">a</span> <span class="o">=</span> <span class="n">Example</span><span class="p">()</span>
-<span class="n">a</span><span class="o">.</span><span class="n">get_value</span><span class="p">()</span>  <span class="c1"># 10</span>
-</pre></div>
-</div>
+<p>TODO</p>
 </div>
 <div class="section" id="installation">
 <h2>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h2>
-<p><strong>Stable Release:</strong> <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">camera_alignment_core</span></code><span class="raw-html-m2r"><br></span>
+<p>TODO
+<strong>Stable Release:</strong> <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">camera_alignment_core</span></code><span class="raw-html-m2r"><br></span>
 <strong>Development Head:</strong> <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">git+https://github.com/aics-int/camera_alignment_core.git</span></code></p>
 </div>
 <div class="section" id="documentation">
@@ -234,28 +221,26 @@
 <div class="section" id="the-four-commands-you-need-to-know">
 <h2>The Four Commands You Need To Know<a class="headerlink" href="#the-four-commands-you-need-to-know" title="Permalink to this headline">¶</a></h2>
 <ol class="arabic">
-<li><p><code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">-e</span> <span class="pre">.[dev]</span></code></p>
+<li><p><code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">install</span></code></p>
 <blockquote>
-<div><p>This will install your package in editable mode with all the required development
-dependencies (i.e. <code class="docutils literal notranslate"><span class="pre">tox</span></code>).</p>
+<div><p>This will setup a virtual environment local to this project and install all of the
+project’s dependencies into it. The virtual env will be located in <code class="docutils literal notranslate"><span class="pre">camera-alignment-core/venv</span></code>.</p>
 </div></blockquote>
 </li>
-<li><p><code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">build</span></code></p>
+<li><p><code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">test</span></code></p>
 <blockquote>
-<div><p>This will run <code class="docutils literal notranslate"><span class="pre">tox</span></code> which will run all your tests in both Python 3.7
-and Python 3.8 as well as linting your code.</p>
+<div><p>Run tests. Do this often!</p>
 </div></blockquote>
 </li>
 <li><p><code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">clean</span></code></p>
 <blockquote>
 <div><p>This will clean up various Python and build generated files so that you can ensure
-that you are working in a clean environment.</p>
+that you are working in a clean workspace.</p>
 </div></blockquote>
 </li>
 <li><p><code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">docs</span></code></p>
 <blockquote>
-<div><p>This will generate and launch a web browser to view the most up-to-date
-documentation for your Python package.</p>
+<div><p>This will generate the most up-to-date documentation for your Python package.</p>
 </div></blockquote>
 </li>
 </ol>
