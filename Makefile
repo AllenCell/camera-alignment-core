@@ -15,8 +15,9 @@ endif
 
 PYTHON_VERSION = python3.9
 VENV_NAME := venv
-ACTIVATE = $(VENV_NAME)/bin/activate
-PYTHON = $(VENV_NAME)/bin/python3
+VENV_BIN := $(VENV_NAME)/bin
+ACTIVATE = $(VENV_BIN)/activate
+PYTHON = $(VENV_BIN)/python3
 
 $(PYTHON):
 > test -d $(VENV_NAME) || $(PYTHON_VERSION) -m venv $(VENV_NAME)
@@ -26,6 +27,7 @@ venv: $(PYTHON)
 
 install: venv requirements.txt setup.py
 > $(PYTHON) -m pip install -r requirements.txt
+> $(VENV_BIN)/pre-commit install
 
 lint:
 > $(PYTHON) -m flake8 --count --exit-zero camera_alignment_core
