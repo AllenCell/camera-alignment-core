@@ -39,6 +39,10 @@ fmt:
 > $(PYTHON) -m black camera_alignment_core
 .PHONY: fmt
 
+import-sort:
+> $(PYTHON) -m isort camera_alignment_core
+.PHONY: import-sort
+
 test:
 > $(PYTHON) -m pytest --cov-report xml --cov=camera_alignment_core camera_alignment_core/tests/
 .PHONY: test

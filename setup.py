@@ -9,18 +9,18 @@ with open("README.md") as readme_file:
     readme = readme_file.read()
 
 setup_requirements = [
+    "black ~= 21.6b0",
+    "flake8 ~= 3.9",
+    "isort ~= 5.9",
+    "mypy ~= 0.910",
     "pre-commit ~= 2.13",
     "pytest-runner ~= 5.2",
 ]
 
 test_requirements = [
-    "black ~= 21.6b0",
     "codecov ~= 2.1.4",
-    "flake8 ~= 3.9",
-    "mypy ~= 0.910",
-    "flake8-debugger ~= 3.2",
     "pytest ~= 6.2",
-    "pytest-cov ~= 2.9",
+    "pytest-cov ~= 2.12",
     "pytest-raises ~= 0.11",
 ]
 
@@ -29,9 +29,8 @@ dev_requirements = [
     *test_requirements,
     "bump2version ~= 1.0",
     "coverage ~= 5.1",
-    "ipython ~= 7.15",
     "m2r2 ~= 0.2",
-    "pytest-runner ~= 5.2",
+    "pytest-runner ~= 5.3",
     "Sphinx ~= 4.0",
     "sphinx_rtd_theme ~= 0.5",
     "tox ~= 3.15",
