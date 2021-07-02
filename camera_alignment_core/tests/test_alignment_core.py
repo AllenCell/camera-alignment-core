@@ -1,4 +1,7 @@
+from pathlib import Path
+
 import numpy
+from aicsimageio import AICSImage
 
 from camera_alignment_core.alignment_core import (
     AlignmentCore,
@@ -6,14 +9,23 @@ from camera_alignment_core.alignment_core import (
 
 
 class TestAlignmentCore:
+    TEST_RESOURCES_BUCKET = "public-dev-objects.allencell.org"
+    ZSD_100x_OPTICAL_CONTROL_IMAGE_KEY = (
+        "camera-alignment-core/optical-controls/argo_ZSD1_100X_SLF-015_20210624.czi"
+    )
+
     def setup_method(self):
         # You can use this to setup before each test
+        self.zsd_100x_optical_control_image = AICSImage(
+            f"s3://{TestAlignmentCore.TEST_RESOURCES_BUCKET}/{TestAlignmentCore.ZSD_100x_OPTICAL_CONTROL_IMAGE_KEY}"
+        )
         self.alignment_core = AlignmentCore()
 
     def test_generate_alignment_matrix(self):
         # Arrange
-        # TODO, use a test resource that lives in "public-dev-objects.allencell.org" S3 bucket
-        optical_control_image = numpy.random.rand(2, 2, 2, 2)
+        optical_control_image_data = self.zsd_100x_optical_control_image.get_image_data(
+            "CZYX"
+        )
         reference_channel = 0
         shift_channel = 1
         magnification = 100
@@ -41,7 +53,7 @@ class TestAlignmentCore:
             actual_alignment_matrix,
             actual_alignment_info,
         ) = self.alignment_core.generate_alignment_matrix(
-            optical_control_image, reference_channel, shift_channel, magnification
+            optical_control_image_data, reference_channel, shift_channel, magnification
         )
 
         # Assert
