@@ -26,10 +26,11 @@ jobs:
         python-version: ${{ matrix.python-version }}
     - name: Install Dependencies
       run: |
-        make install
+        python -m pip install --upgrade pip
+        pip install .[test]
     - name: Test with pytest
       run: |
-        make test
+        pytest --cov-report xml --cov=camera_alignment_core camera_alignment_core/tests/
     - name: Upload codecov
       uses: codecov/codecov-action@v1
 
@@ -44,10 +45,11 @@ jobs:
         python-version: 3.9
     - name: Install Dependencies
       run: |
-        make install
+        python -m pip install --upgrade pip
+        pip install .[test]
     - name: Lint with flake8
       run: |
-        make lint
+        flake8 camera_alignment_core --count --verbose --show-source --statistics
     - name: Check with black
       run: |
         black --check camera_alignment_core
