@@ -27,11 +27,11 @@ venv: $(PYTHON)
 install: venv requirements.txt setup.py
 > $(PYTHON) -m pip install -r requirements.txt
 
-lint: venv
+lint:
 > $(PYTHON) -m flake8 --count --exit-zero camera_alignment_core
 .PHONY: lint
 
-type-check: venv
+type-check:
 > $(PYTHON) -m mypy --ignore-missing-imports camera_alignment_core
 .PHONY: type-check
 
@@ -39,8 +39,8 @@ fmt:
 > $(PYTHON) -m black camera_alignment_core
 .PHONY: fmt
 
-test: venv
-> $(PYTHON) -m pytest
+test:
+> $(PYTHON) -m pytest --cov-report xml --cov=camera_alignment_core camera_alignment_core/tests/
 .PHONY: test
 
 clean:  ## clean all generated files
@@ -60,22 +60,22 @@ docs-serve:
 > $(PYTHON) -m http.server --directory docs/build 8080
 .PHONY: docs-serve
 
-bumpversion-release: venv
+bumpversion-release:
 > $(PYTHON) -m bumpversion --list release
 .PHONY: bumpversion-release
 
-bumpversion-major: venv
+bumpversion-major:
 > $(PYTHON) -m bumpversion --list major
 .PHONY: bumpversion-major
 
-bumpversion-minor: venv
+bumpversion-minor:
 > $(PYTHON) -m bumpversion --list minor
 .PHONY: bumpversion-minor
 
-bumpversion-patch: venv
+bumpversion-patch:
 > $(PYTHON) -m bumpversion --list patch
 .PHONY: bumpversion-patch
 
-bumpversion-dev: venv
+bumpversion-dev:
 > $(PYTHON) -m bumpversion --list devbuild
 .PHONY: bumpversion-dev
