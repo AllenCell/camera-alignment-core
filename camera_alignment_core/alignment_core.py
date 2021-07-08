@@ -1,6 +1,10 @@
 import typing
 
+import os
+
 import numpy.typing
+
+from aicsimageio import AICSImage
 
 from .alignment_info import AlignmentInfo
 
@@ -25,7 +29,10 @@ class AlignmentCore:
     ) -> numpy.typing.ArrayLike:
         raise NotImplementedError("align_image")
 
-    def get_channel_name_to_index_map(self,im_path):
+    def get_channel_name_to_index_map(
+        self,
+        im_path: os.typing.pathLike
+    ) -> typing.Dict[str, int]:
         # Maps all channels in a split image to an index of where the channel is in the image
         # Format is {"Raw channel_name" : Channel index}
 
