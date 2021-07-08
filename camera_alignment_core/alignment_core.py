@@ -18,6 +18,8 @@ class AlignmentCore:
     ) -> typing.Tuple[numpy.typing.ArrayLike, AlignmentInfo]:
         raise NotImplementedError("generate_alignment_matrix")
 
+        
+
     def align_image(
         self,
         alignment_matrix: numpy.typing.ArrayLike,
