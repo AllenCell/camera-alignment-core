@@ -7,7 +7,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        python-version: [3.7, 3.8, 3.9]
+        python-version: [3.8, 3.9]
         os: [ubuntu-latest, windows-latest, macOS-latest]
 
     steps:
@@ -19,10 +19,10 @@ jobs:
     - name: Install Dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install .[test]
+        pip install .[dev]
     - name: Test with pytest
       run: |
-        pytest camera_alignment_core/tests/
+        python -m pytest camera_alignment_core/tests/
     - name: Upload codecov
       uses: codecov/codecov-action@v1
 
@@ -38,10 +38,10 @@ jobs:
     - name: Install Dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install .[test]
+        pip install .[dev]
     - name: Lint with flake8
       run: |
-        flake8 camera_alignment_core --count --verbose --show-source --statistics
+        python -m flake8 camera_alignment_core --count --verbose --show-source --statistics
     - name: Check with black
       run: |
-        black --check camera_alignment_core
+        python -m black --check camera_alignment_core
