@@ -5,6 +5,7 @@ from skimage import transform as tf
 from skimage.measure import ransac
 from scipy.spatial import distance
 from scipy.optimize import linear_sum_assignment
+from .alignment_info import AlignmentInfo
 
 
 class Executor(object):
@@ -119,7 +120,7 @@ class Executor(object):
             shift_x: Shift in x
             rotate_angle: Rotation angle
         """
-        similarity_matrix_param_dict = {
+        tform_dict = {
             'transform': tform,
             'scaling': tform.scale,
             'shift_y': tform.translation[0],
@@ -128,10 +129,19 @@ class Executor(object):
         }
 
         if method_logging:
-            for param, value in similarity_matrix_param_dict.items():
+            for param, value in tform_dict.items():
                 print(param + ': ' + str(value))
 
-        return similarity_matrix_param_dict
+        align_info = AlignmentInfo(
+            tform = tform,
+            rotation= tform.rotation,
+            shift_x = tform.translation[1],
+            shift_y = tform.translation[0],
+            z_offset = 0,
+            scaling = tform.scale
+        )
+
+        return align_info
 
 
     def execute(self):
@@ -160,8 +170,8 @@ class Executor(object):
             )
             outliers = inliers == False
 
-        similarity_matrix_dict = Executor.report_similarity_matrix_parameters(self, tform)
+        align_info = Executor.report_similarity_matrix_parameters(self, tform)
         num_beads_for_estimation = Executor.report_number_beads(self, bead_centroid_dict)
 
-        return tform, rev_coor_dict, similarity_matrix_dict, num_beads_for_estimation
+        return tform, rev_coor_dict, align_info, num_beads_for_estimation
 
