@@ -21,7 +21,58 @@ class AlignmentCore:
         reference_channel: int,
         shift_channel: int,
         magnification: int,
+        px_size_xy: float,
     ) -> typing.Tuple[numpy.typing.ArrayLike, AlignmentInfo]:
+
+        #if more than 4 dimensions, trip extra dims from beginning
+        while optical_control_image.ndim > 4:
+            optical_control_image = optical_control_image[0, ...]
+
+        # detect center z-slice on reference channel
+        ref_center_z, contrast = get_center_z.Executor(
+            img_stack = optical_control_image[reference_channel, :, :, :]
+        ).execute()
+
+        # Crop with all available rings
+        ref_crop, crop_dims, ref_labelled_grid, ref_props_grid, ref_center_cross_label, ref_number_of_rings = crop.Executor(
+            img=optical_control_image[reference_channel, ref_center_z, :, :],
+            pixel_size=px_size_xy,
+            magnification=magnification,
+            filter_px_size=50
+        ).execute()
+
+        mov_crop = optical_control_image[
+                shift_channel,
+                ref_center_z,
+                crop_dims[0]:crop_dims[1], crop_dims[2]:crop_dims[3]
+                ]
+
+        # segment rings on reference image
+        ref_seg_rings, ref_seg_rings_label, ref_props_df, ref_cross_label = segment.Executor(
+            ref_crop, px_size_xy, magnification, debug_mode=True
+        ).execute()
+
+        # segment rings on moving image
+        mov_seg_rings, mov_seg_rings_label, mov_props_df, mov_cross_label = segment.Executor(
+            mov_crop, px_size_xy, magnification, debug_mode=True
+        ).execute()
+
+            # estimate alignment from segmentation
+        tform, ref_coor_dict, transformation_parameters_dict, num_beads_for_estimation = estimate_alignment.Executor(
+            ref_seg_rings, ref_seg_rings_label, ref_props_df, ref_cross_label,
+            mov_seg_rings, mov_seg_rings_label, mov_props_df, mov_cross_label,
+            'alignV2'
+        ).execute()
+
+        info = AlignmentInfo(
+            rotation=transformation_parameters_dict['rotate_angle'],
+            shift_x=transformation_parameters_dict['shift_x'],
+            shift_y=transformation_parameters_dict['shift_y'],
+            z_offset=0
+        )
+
+        return tform, info
+
         raise NotImplementedError("generate_alignment_matrix")
 
 
