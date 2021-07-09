@@ -1,6 +1,6 @@
 import math
 import numpy as np
-from pipeline_qc.optical_control_qc_methods import segment_argolight_rings
+from . import segment_argolight_rings
 from skimage import measure
 import pandas as pd
 
