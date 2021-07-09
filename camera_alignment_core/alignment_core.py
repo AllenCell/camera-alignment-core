@@ -2,14 +2,14 @@ import typing
 
 from aicsimageio import AICSImage
 import numpy.typing
-
-from .alignment_info import AlignmentInfo
+import numpy
 
 from .alignment_utils import \
     segment_argolight_rings as segment, \
     get_center_z, \
     crop_argolight_rings_img as crop, \
     estimate_alignment
+from .alignment_utils.alignment_info import AlignmentInfo
 
 
 class AlignmentCore:
@@ -58,20 +58,13 @@ class AlignmentCore:
         ).execute()
 
             # estimate alignment from segmentation
-        tform, ref_coor_dict, transformation_parameters_dict, num_beads_for_estimation = estimate_alignment.Executor(
+        tform, ref_coor_dict, align_info, num_beads_for_estimation = estimate_alignment.Executor(
             ref_seg_rings, ref_seg_rings_label, ref_props_df, ref_cross_label,
             mov_seg_rings, mov_seg_rings_label, mov_props_df, mov_cross_label,
             'alignV2'
         ).execute()
 
-        info = AlignmentInfo(
-            rotation=transformation_parameters_dict['rotate_angle'],
-            shift_x=transformation_parameters_dict['shift_x'],
-            shift_y=transformation_parameters_dict['shift_y'],
-            z_offset=0
-        )
-
-        return tform, info
+        return tform, align_info
 
         raise NotImplementedError("generate_alignment_matrix")
 

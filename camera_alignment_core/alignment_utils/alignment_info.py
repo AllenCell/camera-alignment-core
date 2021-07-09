@@ -1,4 +1,5 @@
 import dataclasses
+import numpy.typing
 
 
 @dataclasses.dataclass
@@ -16,3 +17,9 @@ class AlignmentInfo:
 
     # Even better documentation...
     z_offset: int
+
+    # Still better documentation ...
+    scaling: float
+
+    # The best documentation ...
+    tform: numpy.typing.NDArray
