@@ -1,6 +1,7 @@
 import logging
 from typing import Dict, List, Tuple
 
+
 from aicsimageio import AICSImage
 import numpy
 import numpy.typing
@@ -15,6 +16,8 @@ from .alignment_utils import (
 from .constants import LOGGER_NAME
 
 log = logging.getLogger(LOGGER_NAME)
+
+from skimage import transform
 
 
 class AlignmentCore:
@@ -92,13 +95,47 @@ class AlignmentCore:
 
         return tform, align_info
 
+    def similarity_matrix_transform(
+        self,
+        alignment_matrix: numpy.typing.ArrayLike,
+        slice: numpy.typing.ArrayLike,
+    ) -> numpy.typing.ArrayLike:
+        after_transform: numpy.ndarray = None
+        if len(slice.shape) == 2:
+            after_transform = transform.warp(img, inverse_map=alignment_matrix, order=3)
+        elif len(slice.shape) == 3:
+            after_transform = numpy.zeros(slice.shape)
+            for z in range(0, after_transform.shape[0]):
+                after_transform[z, :, :] = transform.warp(img[z, :, :], inverse_map=matrix, order=3)
+        else:
+            raise IncompatibleImageException(
+                f"Cannot perform similarity matrix transform: invalid image dimensions. \
+                Image must be 2D or 3D but detected {len(img.shape)} dimensions")
+
+        if after_transform is not None:
+            after_transform = (after_transform * 65535).astype(numpy.uint16)
+
+        return after_transform
+
     def align_image(
         self,
-        alignment_matrix: numpy.typing.NDArray[numpy.float16],
-        image: numpy.typing.NDArray[numpy.uint16],
-        channels_to_align: List[int],
-    ) -> numpy.typing.NDArray[numpy.uint16]:
-        raise NotImplementedError("align_image")
+        alignment_matrix: numpy.typing.ArrayLike,
+        image: numpy.typing.ArrayLike,
+        channels_to_align: typing.Dict[str, int],
+    ) -> numpy.typing.ArrayLike:
+
+        aligned_image = numpy.zeros(image.shape)
+        for channel, index in channels_to_align:
+            if channel in ('Raw brightfield', 'Raw 638nm'):
+                aligned_slice = self.similarity_matrix_transform(
+                    alignment_matrix,
+                    image[index]
+                )
+                aligned_image[index] = aligned_slice
+            elif channel in ('Raw 488nm', 'Raw 405nm', 'Raw 561nm'):
+                aligned_image[index] = image[index]
+
+        return aligned_image.astype(numpy.uint16)
 
     def get_channel_name_to_index_map(self, image: AICSImage) -> Dict[str, int]:
         """
