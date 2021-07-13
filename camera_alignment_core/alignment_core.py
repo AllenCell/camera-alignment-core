@@ -29,12 +29,12 @@ class AlignmentCore:
             optical_control_image = optical_control_image[0, ...]
 
         # detect center z-slice on reference channel
-        ref_center_z, contrast = get_center_z.Executor(
+        ref_center_z, _ = get_center_z.Executor(
             img_stack = optical_control_image[reference_channel, :, :, :]
         ).execute()
 
         # Crop with all available rings
-        ref_crop, crop_dims, ref_labelled_grid, ref_props_grid, ref_center_cross_label, ref_number_of_rings = crop.Executor(
+        ref_crop, crop_dims, _, _, _, _ = crop.Executor(
             img=optical_control_image[reference_channel, ref_center_z, :, :],
             pixel_size=px_size_xy,
             magnification=magnification,
@@ -57,16 +57,14 @@ class AlignmentCore:
             mov_crop, px_size_xy, magnification, debug_mode=True
         ).execute()
 
-            # estimate alignment from segmentation
-        tform, ref_coor_dict, align_info, num_beads_for_estimation = estimate_alignment.Executor(
+        # estimate alignment from segmentation
+        tform, _, align_info, _ = estimate_alignment.Executor(
             ref_seg_rings, ref_seg_rings_label, ref_props_df, ref_cross_label,
             mov_seg_rings, mov_seg_rings_label, mov_props_df, mov_cross_label,
             'alignV2'
         ).execute()
 
         return tform, align_info
-
-        raise NotImplementedError("generate_alignment_matrix")
 
 
 
