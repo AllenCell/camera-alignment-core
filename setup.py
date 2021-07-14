@@ -27,6 +27,7 @@ test_requirements = [
 dev_requirements = [
     *setup_requirements,
     *test_requirements,
+    "boto3 ~= 1.17",
     "bump2version ~= 1.0",
     "coverage ~= 5.1",
     "m2r2 ~= 0.2",

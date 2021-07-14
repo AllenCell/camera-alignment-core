@@ -46,7 +46,7 @@ import-sort:
 .PHONY: import-sort
 
 test:
-> $(PYTHON) -m pytest --cov-report xml --cov=camera_alignment_core camera_alignment_core/tests/
+> $(PYTHON) -m pytest camera_alignment_core/tests/
 .PHONY: test
 
 clean:  ## clean all generated files
