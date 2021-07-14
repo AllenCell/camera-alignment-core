@@ -13,15 +13,13 @@ from camera_alignment_core import (
 log = logging.getLogger(LOGGER_NAME)
 
 
-ZSD_100x_OPTICAL_CONTROL_IMAGE_URL = "https://s3.us-west-2.amazonaws.com/public-dev-objects.allencell.org/camera-alignment-core/optical-controls/argo_ZSD1_100X_SLF-015_20210624.czi"
-GENERIC_OME_TIFF_URL = (
-    # FMS ID: 0023c446cd384dc3947c90dc7a76f794; 303.38 MB
-    "https://s3.us-west-2.amazonaws.com/public-dev-objects.allencell.org/camera-alignment-core/images/3500003897_100X_20200306_1r-Scene-30-P89-G11.ome.tiff"
-)
-GENERIC_CZI_URL = (
-    # FMS ID: 439c852ea76e46d4b9a9f8813f331b4d; 264.43 MB
-    "https://s3.us-west-2.amazonaws.com/public-dev-objects.allencell.org/camera-alignment-core/images/20200701_N04_001.czi"
-)
+ZSD_100x_OPTICAL_CONTROL_IMAGE_URL = "https://s3.us-west-2.amazonaws.com/public-dev-objects.allencell.org/camera-alignment-core/optical-controls/argo_ZSD1_100X_SLF-015_20210624.czi"  # noqa E501
+
+# FMS ID: 0023c446cd384dc3947c90dc7a76f794; 303.38 MB
+GENERIC_OME_TIFF_URL = "https://s3.us-west-2.amazonaws.com/public-dev-objects.allencell.org/camera-alignment-core/images/3500003897_100X_20200306_1r-Scene-30-P89-G11.ome.tiff"  # noqa E501
+
+# FMS ID: 439c852ea76e46d4b9a9f8813f331b4d; 264.43 MB
+GENERIC_CZI_URL = "https://s3.us-west-2.amazonaws.com/public-dev-objects.allencell.org/camera-alignment-core/images/20200701_N04_001.czi"  # noqa E501
 
 
 class TestAlignmentCore:
