@@ -1,16 +1,22 @@
 """Test fixtures automatically searched-for and made accessible by pytest."""
 import functools
 import logging
-import os
 import pathlib
+import shutil
+import urllib.request
 
 from aicsimageio import AICSImage
-import boto3
 import pytest
 
 from camera_alignment_core import LOGGER_NAME
 
 log = logging.getLogger(LOGGER_NAME)
+
+
+def download_file(url: str, to_path: pathlib.Path) -> None:
+    log.debug(f"Downloading {url} to {to_path}")
+    with urllib.request.urlopen(url) as src, to_path.open(mode="w+b") as dst:
+        shutil.copyfileobj(src, dst)
 
 
 @pytest.fixture(scope="session")
@@ -22,26 +28,17 @@ def get_image(tmp_path_factory: pytest.TempPathFactory) -> AICSImage:
     tmp_dir = tmp_path_factory.mktemp("data")
 
     @functools.lru_cache
-    def _get_image(image: os.PathLike):
+    def _get_image(image: str):
         log.debug("Constructing AICSImage instance for %s", image)
-        image_path = pathlib.Path(image)
-        if str(image_path).endswith((".czi", ".sld")):
-            # Need to download the file if on S3
-            if str(image_path).startswith("s3"):
-                target_path = tmp_dir / image_path.name
-                s3_client = boto3.client("s3")
-                _, bucket, *key_parts = image_path.parts
-                obj_key = "/".join(key_parts)
 
-                log.debug(f"Downloading {obj_key} from {bucket} to {target_path}")
-                s3_client.download_file(
-                    Bucket=bucket, Key=obj_key, Filename=str(target_path)
-                )
-                return AICSImage(target_path)
-            else:
-                # Assume file system path that is accessible
-                return AICSImage(image)
-
-        return AICSImage(image)
+        # Need to download the file if hosted on remote server
+        if image.startswith("http"):
+            path = pathlib.Path(image)
+            target_path = tmp_dir / path.name
+            download_file(image, target_path)
+            return AICSImage(target_path)
+        else:
+            # Assume file system path that is accessible
+            return AICSImage(image)
 
     return _get_image

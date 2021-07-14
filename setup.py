@@ -27,7 +27,6 @@ test_requirements = [
 dev_requirements = [
     *setup_requirements,
     *test_requirements,
-    "boto3 ~= 1.17",
     "bump2version ~= 1.0",
     "coverage ~= 5.1",
     "m2r2 ~= 0.2",
@@ -42,7 +41,6 @@ dev_requirements = [
 requirements = [
     "aicsimageio[czi] ~= 4.0",
     "numpy ~= 1.21",
-    "s3fs == 2021.4.0",  # Used by aicsimagio to directly read images out of S3
 ]
 
 extra_requirements = {

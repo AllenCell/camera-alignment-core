@@ -10,25 +10,17 @@ from camera_alignment_core import (
     AlignmentCore,
 )
 
-logging.getLogger("botocore").setLevel(logging.ERROR)
 log = logging.getLogger(LOGGER_NAME)
 
 
-TEST_RESOURCES_BUCKET = "public-dev-objects.allencell.org"
-ZSD_100x_OPTICAL_CONTROL_IMAGE_S3_KEY = (
-    "camera-alignment-core/optical-controls/argo_ZSD1_100X_SLF-015_20210624.czi"
-)
-GENERIC_OME_TIFF_S3_KEY = (
+ZSD_100x_OPTICAL_CONTROL_IMAGE_URL = "https://s3.us-west-2.amazonaws.com/public-dev-objects.allencell.org/camera-alignment-core/optical-controls/argo_ZSD1_100X_SLF-015_20210624.czi"
+GENERIC_OME_TIFF_URL = (
     # FMS ID: 0023c446cd384dc3947c90dc7a76f794; 303.38 MB
-    "camera-alignment-core/images/3500003897_100X_20200306_1r-Scene-30-P89-G11.ome.tiff"
+    "https://s3.us-west-2.amazonaws.com/public-dev-objects.allencell.org/camera-alignment-core/images/3500003897_100X_20200306_1r-Scene-30-P89-G11.ome.tiff"
 )
-GENERIC_CZI_S3_KEY = (
+GENERIC_CZI_URL = (
     # FMS ID: 439c852ea76e46d4b9a9f8813f331b4d; 264.43 MB
-    "camera-alignment-core/images/20200701_N04_001.czi"
-)
-GENERIC_3i_S3_KEY = (
-    # FMS ID: 55c39720d4424ab8ae0c54f5220d9a34; 145.42 MB
-    "camera-alignment-core/images/20200312_J03_001.sld"
+    "https://s3.us-west-2.amazonaws.com/public-dev-objects.allencell.org/camera-alignment-core/images/20200701_N04_001.czi"
 )
 
 
@@ -45,9 +37,7 @@ class TestAlignmentCore:
     ):
         # Arrange
         caplog.set_level(logging.DEBUG, logger=LOGGER_NAME)
-        zsd_100x_optical_control_image = get_image(
-            f"s3://{TEST_RESOURCES_BUCKET}/{ZSD_100x_OPTICAL_CONTROL_IMAGE_S3_KEY}"
-        )
+        zsd_100x_optical_control_image = get_image(ZSD_100x_OPTICAL_CONTROL_IMAGE_URL)
         optical_control_image_data = zsd_100x_optical_control_image.get_image_data(
             "CZYX"
         )
@@ -89,7 +79,7 @@ class TestAlignmentCore:
         ["image_path", "expectation"],
         [
             (
-                f"s3://{TEST_RESOURCES_BUCKET}/{GENERIC_OME_TIFF_S3_KEY}",
+                GENERIC_OME_TIFF_URL,
                 {
                     "Raw brightfield": 0,
                     "Raw 488nm": 1,
@@ -97,7 +87,7 @@ class TestAlignmentCore:
                     "Raw 405nm": 3,
                 },
             ),
-            (f"s3://{TEST_RESOURCES_BUCKET}/{GENERIC_CZI_S3_KEY}", {"Raw 561nm": 1}),
+            (GENERIC_CZI_URL, {"Raw 561nm": 1}),
         ],
     )
     def test_get_channel_name_to_index_map(
