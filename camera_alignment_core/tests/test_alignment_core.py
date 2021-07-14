@@ -1,27 +1,42 @@
-import numpy
-from aicsimageio import AICSImage
+import logging
+import typing
 
-from camera_alignment_core.alignment_core import (
+from aicsimageio import AICSImage
+import numpy
+import pytest
+
+from camera_alignment_core import (
+    LOGGER_NAME,
     AlignmentCore,
 )
 
+log = logging.getLogger(LOGGER_NAME)
+
+
+ZSD_100x_OPTICAL_CONTROL_IMAGE_URL = "https://s3.us-west-2.amazonaws.com/public-dev-objects.allencell.org/camera-alignment-core/optical-controls/argo_ZSD1_100X_SLF-015_20210624.czi"  # noqa E501
+
+# FMS ID: 0023c446cd384dc3947c90dc7a76f794; 303.38 MB
+GENERIC_OME_TIFF_URL = "https://s3.us-west-2.amazonaws.com/public-dev-objects.allencell.org/camera-alignment-core/images/3500003897_100X_20200306_1r-Scene-30-P89-G11.ome.tiff"  # noqa E501
+
+# FMS ID: 439c852ea76e46d4b9a9f8813f331b4d; 264.43 MB
+GENERIC_CZI_URL = "https://s3.us-west-2.amazonaws.com/public-dev-objects.allencell.org/camera-alignment-core/images/20200701_N04_001.czi"  # noqa E501
+
 
 class TestAlignmentCore:
-    TEST_RESOURCES_BUCKET = "public-dev-objects.allencell.org"
-    ZSD_100x_OPTICAL_CONTROL_IMAGE_KEY = (
-        "camera-alignment-core/optical-controls/argo_ZSD1_100X_SLF-015_20210624.czi"
-    )
-
     def setup_method(self):
-        # You can use this to setup before each test
-        self.zsd_100x_optical_control_image = AICSImage(
-            f"s3://{TestAlignmentCore.TEST_RESOURCES_BUCKET}/{TestAlignmentCore.ZSD_100x_OPTICAL_CONTROL_IMAGE_KEY}"
-        )
+        """You can use this to setup before each test"""
         self.alignment_core = AlignmentCore()
 
-    def test_generate_alignment_matrix(self):
+    @pytest.mark.skip("AlignmentCore::generate_alignment_matrix not yet implemented")
+    def test_generate_alignment_matrix(
+        self,
+        get_image: typing.Callable[[str], AICSImage],
+        caplog: pytest.LogCaptureFixture,
+    ):
         # Arrange
-        optical_control_image_data = self.zsd_100x_optical_control_image.get_image_data(
+        caplog.set_level(logging.DEBUG, logger=LOGGER_NAME)
+        zsd_100x_optical_control_image = get_image(ZSD_100x_OPTICAL_CONTROL_IMAGE_URL)
+        optical_control_image_data = zsd_100x_optical_control_image.get_image_data(
             "CZYX"
         )
         reference_channel = 0
@@ -57,3 +72,35 @@ class TestAlignmentCore:
         # Assert
         assert actual_alignment_matrix == expected_matrix
         assert actual_alignment_info.shift_y == 2
+
+    @pytest.mark.parametrize(
+        ["image_path", "expectation"],
+        [
+            (
+                GENERIC_OME_TIFF_URL,
+                {
+                    "Raw brightfield": 0,
+                    "Raw 488nm": 1,
+                    "Raw 638nm": 2,
+                    "Raw 405nm": 3,
+                },
+            ),
+            (GENERIC_CZI_URL, {"Raw 561nm": 1}),
+        ],
+    )
+    def test_get_channel_name_to_index_map(
+        self,
+        image_path,
+        expectation,
+        get_image: typing.Callable[[str], AICSImage],
+        caplog: pytest.LogCaptureFixture,
+    ):
+        # Arrange
+        caplog.set_level(logging.DEBUG, logger=LOGGER_NAME)
+        image = get_image(image_path)
+
+        # Act
+        result = self.alignment_core.get_channel_name_to_index_map(image)
+
+        # Assert
+        assert result == expectation

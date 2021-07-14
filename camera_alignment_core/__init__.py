@@ -1,6 +1,6 @@
-# -*- coding: utf-8 -*-
+from .alignment_core import AlignmentCore
 
-"""Top-level package for camera-alignment-core."""
+LOGGER_NAME = "camera_alignment_core"
 
 __author__ = "AICS Software"
 __email__ = "aditya.nath@alleninstitute.org"
@@ -11,3 +11,6 @@ __version__ = "0.1.0"
 
 def get_module_version():
     return __version__
+
+
+__all__ = ("AlignmentCore", "get_module_version", "LOGGER_NAME")

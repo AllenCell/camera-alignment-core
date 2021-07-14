@@ -39,9 +39,8 @@ dev_requirements = [
 ]
 
 requirements = [
-    "aicsimageio[czi] ~= 4.0",
+    "aicsimageio[czi] == 4.0.3",
     "numpy ~= 1.21",
-    "s3fs == 2021.4.0",  # Used by aicsimagio to directly read images out of S3
 ]
 
 extra_requirements = {
