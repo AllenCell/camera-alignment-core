@@ -4,11 +4,10 @@ from aicsimageio import AICSImage
 import numpy.typing
 import numpy
 
-from .alignment_utils import \
-    segment_argolight_rings as segment, \
-    get_center_z, \
-    crop_argolight_rings_img as crop, \
-    estimate_alignment
+from .alignment_utils.segment_argolight_rings import SegmentRings
+from .alignment_utils.get_center_z import GetCenterZ
+from .alignment_utils.crop_argolight_rings_img import CropRings
+from .alignment_utils.estimate_alignment import RingAlignment
 from .alignment_utils.alignment_info import AlignmentInfo
 
 
@@ -29,17 +28,17 @@ class AlignmentCore:
             optical_control_image = optical_control_image[0, ...]
 
         # detect center z-slice on reference channel
-        ref_center_z, _ = get_center_z.Executor(
+        ref_center_z, _ = GetCenterZ(
             img_stack = optical_control_image[reference_channel, :, :, :]
-        ).execute()
+        ).run()
 
         # Crop with all available rings
-        ref_crop, crop_dims, _, _, _, _ = crop.Executor(
+        ref_crop, crop_dims, _, _, _, _ = CropRings(
             img=optical_control_image[reference_channel, ref_center_z, :, :],
             pixel_size=px_size_xy,
             magnification=magnification,
             filter_px_size=50
-        ).execute()
+        ).run()
 
         mov_crop = optical_control_image[
                 shift_channel,
@@ -48,21 +47,21 @@ class AlignmentCore:
                 ]
 
         # segment rings on reference image
-        ref_seg_rings, ref_seg_rings_label, ref_props_df, ref_cross_label = segment.Executor(
+        ref_seg_rings, ref_seg_rings_label, ref_props_df, ref_cross_label = SegmentRings(
             ref_crop, px_size_xy, magnification, debug_mode=True
-        ).execute()
+        ).run()
 
         # segment rings on moving image
-        mov_seg_rings, mov_seg_rings_label, mov_props_df, mov_cross_label = segment.Executor(
+        mov_seg_rings, mov_seg_rings_label, mov_props_df, mov_cross_label = SegmentRings(
             mov_crop, px_size_xy, magnification, debug_mode=True
-        ).execute()
+        ).run()
 
         # estimate alignment from segmentation
-        tform, _, align_info, _ = estimate_alignment.Executor(
+        tform, _, align_info, _ = RingAlignment(
             ref_seg_rings, ref_seg_rings_label, ref_props_df, ref_cross_label,
             mov_seg_rings, mov_seg_rings_label, mov_props_df, mov_cross_label,
             'alignV2'
-        ).execute()
+        ).run()
 
         return tform, align_info
 

@@ -8,7 +8,7 @@ from scipy.optimize import linear_sum_assignment
 from .alignment_info import AlignmentInfo
 
 
-class Executor(object):
+class RingAlignment(object):
     def __init__(self, ref_seg_rings, ref_label_rings, ref_rings_props, ref_cross_label, mov_seg_rings,
                  mov_label_rings, mov_rings_props, mov_cross_label, alignment_method
                  ):
@@ -144,14 +144,14 @@ class Executor(object):
         return align_info
 
 
-    def execute(self):
-        ref_centroid_dict = Executor.rings_coor_dict(self, self.ref_rings_props, self.ref_cross_label)
-        mov_centroid_dict = Executor.rings_coor_dict(self, self.mov_rings_props, self.mov_cross_label)
+    def run(self):
+        ref_centroid_dict = self.rings_coor_dict(self, self.ref_rings_props, self.ref_cross_label)
+        mov_centroid_dict = self.rings_coor_dict(self, self.mov_rings_props, self.mov_cross_label)
 
-        bead_centroid_dict, ref_mov_num_dict, ref_mov_coor_dict = Executor.assign_ref_to_mov(self, ref_centroid_dict,
+        bead_centroid_dict, ref_mov_num_dict, ref_mov_coor_dict = self.assign_ref_to_mov(self, ref_centroid_dict,
                                                                                              mov_centroid_dict)
 
-        rev_coor_dict = Executor.change_coor_system(self, ref_mov_coor_dict)
+        rev_coor_dict = self.change_coor_system(self, ref_mov_coor_dict)
         print(rev_coor_dict)
 
         if self.alignment_method == 'alignV2':
@@ -170,8 +170,8 @@ class Executor(object):
             )
             outliers = inliers == False
 
-        align_info = Executor.report_similarity_matrix_parameters(self, tform)
-        num_beads_for_estimation = Executor.report_number_beads(self, bead_centroid_dict)
+        align_info = self.report_similarity_matrix_parameters(self, tform)
+        num_beads_for_estimation = self.report_number_beads(self, bead_centroid_dict)
 
         return tform, rev_coor_dict, align_info, num_beads_for_estimation
 
