@@ -1,11 +1,11 @@
 import math
 import numpy as np
-from . import segment_argolight_rings
+from .segment_argolight_rings import SegmentRings
 from skimage import measure
 import pandas as pd
 
 
-class Executor(object):
+class CropRings(object):
     def __init__(self, img, pixel_size, magnification, filter_px_size=50):
         self.img = img
         self.bead_dist_px = 15 / (pixel_size / 10 ** -6)
@@ -74,8 +74,8 @@ class Executor(object):
 
         return grid
 
-    def execute(self):
-        seg_cross, props = segment_argolight_rings.Executor.segment_cross(
+    def run(self):
+        seg_cross, props = SegmentRings.segment_cross(
             self, self.img, input_mult_factor=2.5
         )
 
@@ -83,7 +83,7 @@ class Executor(object):
                            props.loc[props['area'] == props['area'].max(), 'centroid-1'].values.tolist()[0]
 
         if self.magnification < 63:
-            crop_top, crop_bottom, crop_left, crop_right = Executor.get_crop_dimensions(
+            crop_top, crop_bottom, crop_left, crop_right = self.get_crop_dimensions(
                 self, self.img, int(cross_y), int(cross_x), self.bead_dist_px
             )
         else:
@@ -99,7 +99,7 @@ class Executor(object):
         updated_cross_y = cross_y - crop_bottom
         updated_cross_x = cross_x - crop_left
 
-        grid = Executor.make_grid(self, img_out, int(updated_cross_y), int(updated_cross_x), self.bead_dist_px)
+        grid = self.make_grid(self, img_out, int(updated_cross_y), int(updated_cross_x), self.bead_dist_px)
 
         labelled_grid = measure.label(grid)
         props = measure.regionprops_table(labelled_grid, properties=['label', 'area', 'centroid'])

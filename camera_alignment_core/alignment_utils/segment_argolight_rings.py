@@ -7,7 +7,7 @@ from skimage.morphology import remove_small_objects
 import pandas as pd
 
 
-class Executor(object):
+class SegmentRings(object):
     def __init__(
             self, img, pixel_size, magnification,
             thresh=None, show_final_seg=None, show_intermediate_seg=None, debug_mode=False
@@ -78,18 +78,18 @@ class Executor(object):
         props: dataframe describing the centroid location and size of the segmented cross
         """
         if input_mult_factor is not None:
-            seg_for_cross, label_for_cross = Executor.segment_rings_intensity_threshold(
+            seg_for_cross, label_for_cross = self.segment_rings_intensity_threshold(
                 self, img, mult_factor=input_mult_factor, show_seg=self.show_seg
             )
         else:
             for mult_factor in np.linspace(mult_factor_range[1], mult_factor_range[0], 50):
-                seg_for_cross, label_for_cross = Executor.segment_rings_intensity_threshold(
+                seg_for_cross, label_for_cross = self.segment_rings_intensity_threshold(
                     self, img, mult_factor=mult_factor, show_seg=self.show_seg
                 )
                 if (np.max(label_for_cross) >= 1) & (np.sum(label_for_cross) > self.cross_size_px):
                     break
 
-        filtered_label, props, cross_label = Executor.filter_center_cross(self, label_for_cross, show_img=False)
+        filtered_label, props, cross_label = self.filter_center_cross(self, label_for_cross, show_img=False)
         seg_cross = label_for_cross == cross_label
 
         return seg_cross, props
@@ -116,7 +116,7 @@ class Executor(object):
 
         labelled_seg = measure.label(seg)
 
-        filtered_seg, filtered_label = Executor.remove_small_objects_from_label(self, labelled_seg, filter_px_size=filter_px_size)
+        filtered_seg, filtered_label = self.remove_small_objects_from_label(self, labelled_seg, filter_px_size=filter_px_size)
         if show_seg:
             plt.figure()
             plt.imshow(filtered_seg)
@@ -218,7 +218,7 @@ class Executor(object):
         num_beads: number of beads after estimation
         """
         # update cross info
-        seg_cross, props = Executor.segment_cross(self, img, input_mult_factor=mult_factor)
+        seg_cross, props = self.segment_cross(self, img, input_mult_factor=mult_factor)
 
 
         # get number of beads from the location of center of cross
@@ -231,24 +231,24 @@ class Executor(object):
         return num_beads
 
 
-    def execute(self):
+    def run(self):
 
-        img_preprocessed = Executor.preprocess_img(self)
+        img_preprocessed = self.preprocess_img(self)
 
-        num_beads = Executor.get_number_rings(self, img=img_preprocessed, mult_factor=5)
+        num_beads = self.get_number_rings(self, img=img_preprocessed, mult_factor=5)
         print(num_beads)
         minArea = self.ring_size_px * 0.8
 
         if self.magnification in [40, 63, 100]:
-            seg_rings, label_rings = Executor.segment_rings_intensity_threshold(self, img=img_preprocessed)
+            seg_rings, label_rings = self.segment_rings_intensity_threshold(self, img=img_preprocessed)
         else:
-            seg_cross, props = Executor.segment_cross(self, img=img_preprocessed)
+            seg_cross, props = self.segment_cross(self, img=img_preprocessed)
 
-            seg_rings, label_rings, thresh = Executor.segment_rings_dot_filter(
+            seg_rings, label_rings, thresh = self.segment_rings_dot_filter(
                 self, img_2d=img_preprocessed, seg_cross=seg_cross, num_beads=num_beads, minArea=minArea
             )
 
-        filtered_ring_label, props_df, cross_label = Executor.filter_center_cross(self, label_rings, show_img=False)
+        filtered_ring_label, props_df, cross_label = self.filter_center_cross(self, label_rings, show_img=False)
 
         if self.debug_mode:
             print(num_beads)

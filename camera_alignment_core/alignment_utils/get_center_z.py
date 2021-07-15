@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-class Executor(object):
+class GetCenterZ(object):
     def __init__(self, img_stack, thresh=(0.2, 99.8), plot_contrast=False):
         self.img_stack = img_stack
         self.thresh = thresh
@@ -37,6 +37,6 @@ class Executor(object):
 
         return center_z, max_contrast
 
-    def execute(self):
-        center_z, max_contrast = Executor.get_center_z(self)
+    def run(self):
+        center_z, max_contrast = self.get_center_z(self)
         return center_z, max_contrast
