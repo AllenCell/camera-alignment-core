@@ -1,10 +1,10 @@
 import logging
 from typing import Dict, List, Tuple
 
-
 from aicsimageio import AICSImage
 import numpy
 import numpy.typing
+from skimage import transform
 
 from .alignment_utils import (
     AlignmentInfo,
@@ -14,6 +14,8 @@ from .alignment_utils import (
     get_center_z,
 )
 from .constants import LOGGER_NAME
+
+from .exception import IncompatibleImageException
 
 log = logging.getLogger(LOGGER_NAME)
 
@@ -95,44 +97,45 @@ class AlignmentCore:
 
         return tform, align_info
 
+
     def similarity_matrix_transform(
         self,
-        alignment_matrix: numpy.typing.ArrayLike,
-        slice: numpy.typing.ArrayLike,
-    ) -> numpy.typing.ArrayLike:
-        after_transform: numpy.ndarray = None
+        alignment_matrix: numpy.ndarray,
+        slice: numpy.ndarray,
+    ) -> numpy.ndarray:
         if len(slice.shape) == 2:
-            after_transform = transform.warp(img, inverse_map=alignment_matrix, order=3)
+            after_transform = transform.warp(
+                slice, inverse_map=alignment_matrix, order=3
+            )
         elif len(slice.shape) == 3:
             after_transform = numpy.zeros(slice.shape)
             for z in range(0, after_transform.shape[0]):
-                after_transform[z, :, :] = transform.warp(img[z, :, :], inverse_map=matrix, order=3)
+                after_transform[z, :, :] = transform.warp(
+                    slice[z, :, :], inverse_map=alignment_matrix, order=3
+                )
         else:
             raise IncompatibleImageException(
                 f"Cannot perform similarity matrix transform: invalid image dimensions. \
-                Image must be 2D or 3D but detected {len(img.shape)} dimensions")
+                Image must be 2D or 3D but detected {len(slice.shape)} dimensions"
+            )
 
-        if after_transform is not None:
-            after_transform = (after_transform * 65535).astype(numpy.uint16)
-
-        return after_transform
+        return (after_transform * 65535).astype(numpy.uint16)
 
     def align_image(
         self,
-        alignment_matrix: numpy.typing.ArrayLike,
-        image: numpy.typing.ArrayLike,
-        channels_to_align: typing.Dict[str, int],
-    ) -> numpy.typing.ArrayLike:
+        alignment_matrix: numpy.ndarray,
+        image: numpy.ndarray,
+        channels_to_align: Dict[str, int],
+    ) -> numpy.ndarray:
 
         aligned_image = numpy.zeros(image.shape)
-        for channel, index in channels_to_align:
-            if channel in ('Raw brightfield', 'Raw 638nm'):
+        for channel, index in channels_to_align.items():
+            if channel in ("Raw brightfield", "Raw 638nm"):
                 aligned_slice = self.similarity_matrix_transform(
-                    alignment_matrix,
-                    image[index]
+                    alignment_matrix, image[index]
                 )
                 aligned_image[index] = aligned_slice
-            elif channel in ('Raw 488nm', 'Raw 405nm', 'Raw 561nm'):
+            elif channel in ("Raw 488nm", "Raw 405nm", "Raw 561nm"):
                 aligned_image[index] = image[index]
 
         return aligned_image.astype(numpy.uint16)
