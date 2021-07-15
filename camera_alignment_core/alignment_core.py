@@ -66,8 +66,6 @@ class AlignmentCore:
 
         return tform, align_info
 
-        raise NotImplementedError("generate_alignment_matrix")
-
 
 
     def align_image(
