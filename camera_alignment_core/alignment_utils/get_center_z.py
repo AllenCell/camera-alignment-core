@@ -1,5 +1,6 @@
-import numpy as np
 import matplotlib.pyplot as plt
+import numpy as np
+
 
 class GetCenterZ(object):
     def __init__(self, img_stack, thresh=(0.2, 99.8), plot_contrast=False):
@@ -23,8 +24,10 @@ class GetCenterZ(object):
         max_contrast = 0
         all_contrast = []
         for z in range(0, self.img_stack.shape[0]):
-            contrast = (np.percentile(self.img_stack[z, :, :], self.thresh[1]) - np.percentile(self.img_stack[z, :, :], self.thresh[0])) / (
-                np.max(self.img_stack[z, :, :]))
+            contrast = (
+                np.percentile(self.img_stack[z, :, :], self.thresh[1])
+                - np.percentile(self.img_stack[z, :, :], self.thresh[0])
+            ) / (np.max(self.img_stack[z, :, :]))
             all_contrast.append(contrast)
             if contrast > max_contrast:
                 center_z = z

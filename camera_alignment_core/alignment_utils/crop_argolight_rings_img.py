@@ -1,8 +1,10 @@
 import math
+
 import numpy as np
-from .segment_argolight_rings import SegmentRings
-from skimage import measure
 import pandas as pd
+from skimage import measure
+
+from .segment_argolight_rings import SegmentRings
 
 
 class CropRings(object):
@@ -36,26 +38,48 @@ class CropRings(object):
         if cross_y % bead_dist_px > (bead_dist_px * crop_param):
             crop_top = 0
         else:
-            crop_top = round(cross_y - (math.floor(cross_y / bead_dist_px) - (1 - crop_param)) * bead_dist_px)
+            crop_top = round(
+                cross_y
+                - (math.floor(cross_y / bead_dist_px) - (1 - crop_param)) * bead_dist_px
+            )
 
         if (img.shape[0] - cross_y) % bead_dist_px > (bead_dist_px * crop_param):
             crop_bottom = img.shape[0]
         else:
-            crop_bottom = img.shape[0] - \
-                          round(img.shape[0] - (cross_y + (
-                                  math.floor((img.shape[0] - cross_y) / bead_dist_px) - (1 - crop_param)) * bead_dist_px))
+            crop_bottom = img.shape[0] - round(
+                img.shape[0]
+                - (
+                    cross_y
+                    + (
+                        math.floor((img.shape[0] - cross_y) / bead_dist_px)
+                        - (1 - crop_param)
+                    )
+                    * bead_dist_px
+                )
+            )
 
         if cross_x % bead_dist_px > (bead_dist_px * crop_param):
             crop_left = 0
         else:
-            crop_left = round(cross_x - (math.floor(cross_x / bead_dist_px) - (1 - crop_param)) * bead_dist_px)
+            crop_left = round(
+                cross_x
+                - (math.floor(cross_x / bead_dist_px) - (1 - crop_param)) * bead_dist_px
+            )
 
         if (img.shape[1] - cross_x) % bead_dist_px > (bead_dist_px * crop_param):
             crop_right = img.shape[1]
         else:
             crop_right = img.shape[1] - round(
-                img.shape[1] - (
-                        cross_x + (math.floor((img.shape[1] - cross_x) / bead_dist_px) - (1 - crop_param)) * bead_dist_px))
+                img.shape[1]
+                - (
+                    cross_x
+                    + (
+                        math.floor((img.shape[1] - cross_x) / bead_dist_px)
+                        - (1 - crop_param)
+                    )
+                    * bead_dist_px
+                )
+            )
 
         return crop_top, crop_bottom, crop_left, crop_right
 
@@ -79,8 +103,14 @@ class CropRings(object):
             self, self.img, input_mult_factor=2.5
         )
 
-        cross_y, cross_x = props.loc[props['area'] == props['area'].max(), 'centroid-0'].values.tolist()[0], \
-                           props.loc[props['area'] == props['area'].max(), 'centroid-1'].values.tolist()[0]
+        cross_y, cross_x = (
+            props.loc[
+                props["area"] == props["area"].max(), "centroid-0"
+            ].values.tolist()[0],
+            props.loc[
+                props["area"] == props["area"].max(), "centroid-1"
+            ].values.tolist()[0],
+        )
 
         if self.magnification < 63:
             crop_top, crop_bottom, crop_left, crop_right = self.get_crop_dimensions(
@@ -99,13 +129,24 @@ class CropRings(object):
         updated_cross_y = cross_y - crop_bottom
         updated_cross_x = cross_x - crop_left
 
-        grid = self.make_grid(self, img_out, int(updated_cross_y), int(updated_cross_x), self.bead_dist_px)
+        grid = self.make_grid(
+            self, img_out, int(updated_cross_y), int(updated_cross_x), self.bead_dist_px
+        )
 
         labelled_grid = measure.label(grid)
-        props = measure.regionprops_table(labelled_grid, properties=['label', 'area', 'centroid'])
+        props = measure.regionprops_table(
+            labelled_grid, properties=["label", "area", "centroid"]
+        )
         props_grid = pd.DataFrame(props)
         center_cross_label = labelled_grid[int(updated_cross_y), int(updated_cross_x)]
 
         number_of_rings = len(props)
 
-        return img_out, crop_dimensions, labelled_grid, props_grid, center_cross_label, number_of_rings
+        return (
+            img_out,
+            crop_dimensions,
+            labelled_grid,
+            props_grid,
+            center_cross_label,
+            number_of_rings,
+        )

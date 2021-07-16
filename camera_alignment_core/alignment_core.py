@@ -1,14 +1,24 @@
 import typing
 
 from aicsimageio import AICSImage
-import numpy.typing
 import numpy
+import numpy.typing
 
-from .alignment_utils.segment_argolight_rings import SegmentRings
-from .alignment_utils.get_center_z import GetCenterZ
-from .alignment_utils.crop_argolight_rings_img import CropRings
-from .alignment_utils.estimate_alignment import RingAlignment
-from .alignment_utils.alignment_info import AlignmentInfo
+from .alignment_utils.alignment_info import (
+    AlignmentInfo,
+)
+from .alignment_utils.crop_argolight_rings_img import (
+    CropRings,
+)
+from .alignment_utils.estimate_alignment import (
+    RingAlignment,
+)
+from .alignment_utils.get_center_z import (
+    GetCenterZ,
+)
+from .alignment_utils.segment_argolight_rings import (
+    SegmentRings,
+)
 
 
 class AlignmentCore:
@@ -16,20 +26,20 @@ class AlignmentCore:
 
     def generate_alignment_matrix(
         self,
-        optical_control_image: numpy.typing.ArrayLike,
+        optical_control_image: numpy.typing.NDArray[numpy.uint16],
         reference_channel: int,
         shift_channel: int,
         magnification: int,
         px_size_xy: float,
-    ) -> typing.Tuple[numpy.typing.ArrayLike, AlignmentInfo]:
+    ) -> typing.Tuple[numpy.typing.NDArray[numpy.uint16], AlignmentInfo]:
 
-        #if more than 4 dimensions, trip extra dims from beginning
+        # if more than 4 dimensions, trip extra dims from beginning
         while optical_control_image.ndim > 4:
             optical_control_image = optical_control_image[0, ...]
 
         # detect center z-slice on reference channel
         ref_center_z, _ = GetCenterZ(
-            img_stack = optical_control_image[reference_channel, :, :, :]
+            img_stack=optical_control_image[reference_channel, :, :, :]
         ).run()
 
         # Crop with all available rings
@@ -37,42 +47,53 @@ class AlignmentCore:
             img=optical_control_image[reference_channel, ref_center_z, :, :],
             pixel_size=px_size_xy,
             magnification=magnification,
-            filter_px_size=50
+            filter_px_size=50,
         ).run()
 
         mov_crop = optical_control_image[
-                shift_channel,
-                ref_center_z,
-                crop_dims[0]:crop_dims[1], crop_dims[2]:crop_dims[3]
-                ]
+            shift_channel,
+            ref_center_z,
+            crop_dims[0] : crop_dims[1],
+            crop_dims[2] : crop_dims[3],
+        ]
 
         # segment rings on reference image
-        ref_seg_rings, ref_seg_rings_label, ref_props_df, ref_cross_label = SegmentRings(
-            ref_crop, px_size_xy, magnification, debug_mode=True
-        ).run()
+        (
+            ref_seg_rings,
+            ref_seg_rings_label,
+            ref_props_df,
+            ref_cross_label,
+        ) = SegmentRings(ref_crop, px_size_xy, magnification, debug_mode=True).run()
 
         # segment rings on moving image
-        mov_seg_rings, mov_seg_rings_label, mov_props_df, mov_cross_label = SegmentRings(
-            mov_crop, px_size_xy, magnification, debug_mode=True
-        ).run()
+        (
+            mov_seg_rings,
+            mov_seg_rings_label,
+            mov_props_df,
+            mov_cross_label,
+        ) = SegmentRings(mov_crop, px_size_xy, magnification, debug_mode=True).run()
 
         # estimate alignment from segmentation
         tform, _, align_info, _ = RingAlignment(
-            ref_seg_rings, ref_seg_rings_label, ref_props_df, ref_cross_label,
-            mov_seg_rings, mov_seg_rings_label, mov_props_df, mov_cross_label,
-            'alignV2'
+            ref_seg_rings,
+            ref_seg_rings_label,
+            ref_props_df,
+            ref_cross_label,
+            mov_seg_rings,
+            mov_seg_rings_label,
+            mov_props_df,
+            mov_cross_label,
+            "alignV2",
         ).run()
 
         return tform, align_info
 
-
-
     def align_image(
         self,
-        alignment_matrix: numpy.typing.ArrayLike,
-        image: numpy.typing.ArrayLike,
+        alignment_matrix: numpy.typing.NDArray[numpy.float16],
+        image: numpy.typing.NDArray[numpy.uint16],
         channels_to_align: typing.List[int],
-    ) -> numpy.typing.ArrayLike:
+    ) -> numpy.typing.NDArray[numpy.uint16]:
         raise NotImplementedError("align_image")
 
     def get_channel_name_to_index_map(self, image: AICSImage) -> typing.Dict[str, int]:
