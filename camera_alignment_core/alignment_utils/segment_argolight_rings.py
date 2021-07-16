@@ -1,16 +1,27 @@
 import math
+from typing import List
+
 import matplotlib.pyplot as plt
 import numpy as np
-from aicssegmentation.core.seg_dot import dot_2d_slice_by_slice_wrapper
-from skimage import transform as tf, exposure as exp, filters, measure, morphology, feature, io, segmentation, metrics
-from skimage.morphology import remove_small_objects
 import pandas as pd
+from scipy import ndimage as ndi
+from skimage import exposure as exp
+from skimage import filters, measure, morphology
+from skimage.morphology import (
+    remove_small_objects,
+)
 
 
 class SegmentRings(object):
     def __init__(
-            self, img, pixel_size, magnification,
-            thresh=None, show_final_seg=None, show_intermediate_seg=None, debug_mode=False
+        self,
+        img,
+        pixel_size,
+        magnification,
+        thresh=None,
+        show_final_seg=None,
+        show_intermediate_seg=None,
+        debug_mode=False,
     ):
         self.img = img
         self.pixel_size = pixel_size
@@ -39,6 +50,39 @@ class SegmentRings(object):
 
         self.debug_mode = debug_mode
 
+    def dot_2d_slice_by_smlice_wrapper(self, struct_img: np.ndarray, s2_param: List):
+        """
+        https://github.com/AllenCell/aics-segmentation/blob/main/aicssegmentation/core/seg_dot.py
+        wrapper for 2D spot filter on 3D image slice by slice
+        Parameters:
+        ------------
+        struct_img: np.ndarray
+            a 3d numpy array, usually the image after smoothing
+        s2_param: List
+            [[scale_1, cutoff_1], [scale_2, cutoff_2], ....], e.g. [[1, 0.1]]
+            or [[1, 0.12], [3,0.1]]: scale_x is set based on the estimated radius
+            of your target dots. For example, if visually the diameter of the
+            dots is usually 3~4 pixels, then you may want to set scale_x as 1
+            or something near 1 (like 1.25). Multiple scales can be used, if
+            you have dots of very different sizes. cutoff_x is a threshold
+            applied on the actual filter reponse to get the binary result.
+            Smaller cutoff_x may yielf more dots and fatter segmentation,
+            while larger cutoff_x could be less permisive and yield less
+            dots and slimmer segmentation.
+        """
+        bw = np.zeros(struct_img.shape, dtype=bool)
+        for fid in range(len(s2_param)):
+            log_sigma = s2_param[fid][0]
+            responce = np.zeros_like(struct_img)
+            for zz in range(struct_img.shape[0]):
+                responce[zz, :, :] = (
+                    -1
+                    * (log_sigma ** 2)
+                    * ndi.filters.gaussian_laplace(struct_img[zz, :, :], log_sigma)
+                )
+            bw = np.logical_or(bw, responce > s2_param[fid][1])
+        return bw
+
     def preprocess_img(self):
         """
         Pre-process image with raw-intensity with rescaling and smoothing using pre-defined parameters from image
@@ -47,15 +91,20 @@ class SegmentRings(object):
         -------
         smooth: smooth image
         """
-        rescale = exp.rescale_intensity(self.img, in_range=(np.percentile(self.img, self.thresh[0]),
-                                                       np.percentile(self.img, self.thresh[1])))
+        rescale = exp.rescale_intensity(
+            self.img,
+            in_range=(
+                np.percentile(self.img, self.thresh[0]),
+                np.percentile(self.img, self.thresh[1]),
+            ),
+        )
         smooth = filters.gaussian(rescale, sigma=1, preserve_range=False)
 
         return smooth
 
     def remove_small_objects_from_label(self, label_img, filter_px_size=100):
         filtered_seg = np.zeros(label_img.shape)
-        for obj in range(1, np.max(label_img)+1):
+        for obj in range(1, np.max(label_img) + 1):
             obj_size = np.sum(label_img == obj)
             if obj_size > filter_px_size:
                 filtered_seg[label_img == obj] = True
@@ -82,19 +131,27 @@ class SegmentRings(object):
                 self, img, mult_factor=input_mult_factor, show_seg=self.show_seg
             )
         else:
-            for mult_factor in np.linspace(mult_factor_range[1], mult_factor_range[0], 50):
+            for mult_factor in np.linspace(
+                mult_factor_range[1], mult_factor_range[0], 50
+            ):
                 seg_for_cross, label_for_cross = self.segment_rings_intensity_threshold(
                     self, img, mult_factor=mult_factor, show_seg=self.show_seg
                 )
-                if (np.max(label_for_cross) >= 1) & (np.sum(label_for_cross) > self.cross_size_px):
+                if (np.max(label_for_cross) >= 1) & (
+                    np.sum(label_for_cross) > self.cross_size_px
+                ):
                     break
 
-        filtered_label, props, cross_label = self.filter_center_cross(self, label_for_cross, show_img=False)
+        filtered_label, props, cross_label = self.filter_center_cross(
+            self, label_for_cross, show_img=False
+        )
         seg_cross = label_for_cross == cross_label
 
         return seg_cross, props
 
-    def segment_rings_intensity_threshold(self, img, filter_px_size=50, mult_factor=2.5, show_seg=False):
+    def segment_rings_intensity_threshold(
+        self, img, filter_px_size=50, mult_factor=2.5, show_seg=False
+    ):
         """
         Segments rings using intensity-thresholded method
         Parameters
@@ -116,15 +173,25 @@ class SegmentRings(object):
 
         labelled_seg = measure.label(seg)
 
-        filtered_seg, filtered_label = self.remove_small_objects_from_label(self, labelled_seg, filter_px_size=filter_px_size)
+        filtered_seg, filtered_label = self.remove_small_objects_from_label(
+            self, labelled_seg, filter_px_size=filter_px_size
+        )
         if show_seg:
             plt.figure()
             plt.imshow(filtered_seg)
             plt.show()
         return filtered_seg, filtered_label
 
-
-    def segment_rings_dot_filter(self, img_2d, seg_cross, num_beads, minArea, search_range=(0, 0.75), size_param=2.5, show_seg=False):
+    def segment_rings_dot_filter(
+        self,
+        img_2d,
+        seg_cross,
+        num_beads,
+        minArea,
+        search_range=(0, 0.75),
+        size_param=2.5,
+        show_seg=False,
+    ):
         """
         Segments rings using 2D dot filter from aics-segmenter. The method loops through a possible range of parameters
         and automatically detects the optimal filter parameter when it segments the number of expected rings objects
@@ -151,9 +218,11 @@ class SegmentRings(object):
         thresh = None
         for seg_param in np.linspace(search_range[1], search_range[0], 500):
             s2_param = [[size_param, seg_param]]
-            seg = dot_2d_slice_by_slice_wrapper(img, s2_param)[0, :, :]
+            seg = self.dot_2d_slice_by_slice_wrapper(img, s2_param)[0, :, :]
 
-            remove_small = remove_small_objects(seg > 0, min_size=minArea, connectivity=1, in_place=False)
+            remove_small = remove_small_objects(
+                seg > 0, min_size=minArea, connectivity=1, in_place=False
+            )
 
             dilate = morphology.binary_dilation(remove_small, selem=morphology.disk(2))
             seg_rings = morphology.binary_erosion(dilate, selem=morphology.disk(2))
@@ -189,9 +258,13 @@ class SegmentRings(object):
 
         """
 
-        props = measure.regionprops_table(label_seg, properties=['label', 'area', 'centroid'])
+        props = measure.regionprops_table(
+            label_seg, properties=["label", "area", "centroid"]
+        )
         props_df = pd.DataFrame(props)
-        cross_label = props_df.loc[(props_df['area'] == props_df['area'].max()), 'label'].values.tolist()[0]
+        cross_label = props_df.loc[
+            (props_df["area"] == props_df["area"].max()), "label"
+        ].values.tolist()[0]
 
         filter_label = label_seg.copy()
         filter_label[label_seg == cross_label] = 0
@@ -202,7 +275,6 @@ class SegmentRings(object):
             plt.show()
 
         return filter_label, props_df, cross_label
-
 
     def get_number_rings(self, img, mult_factor=5):
         """
@@ -220,16 +292,27 @@ class SegmentRings(object):
         # update cross info
         seg_cross, props = self.segment_cross(self, img, input_mult_factor=mult_factor)
 
-
         # get number of beads from the location of center of cross
-        cross_y, cross_x = props.loc[props['area'] == props['area'].max(), 'centroid-0'].values.tolist()[0], \
-                           props.loc[props['area'] == props['area'].max(), 'centroid-1'].values.tolist()[0]
+        cross_y, cross_x = (
+            props.loc[
+                props["area"] == props["area"].max(), "centroid-0"
+            ].values.tolist()[0],
+            props.loc[
+                props["area"] == props["area"].max(), "centroid-1"
+            ].values.tolist()[0],
+        )
 
-        num_beads = (math.floor(cross_y / self.bead_dist_px) + math.floor((img.shape[0] - cross_y) / self.bead_dist_px) + 1) * \
-                    (math.floor(cross_x / self.bead_dist_px) + math.floor((img.shape[1] - cross_x) / self.bead_dist_px) + 1)
+        num_beads = (
+            math.floor(cross_y / self.bead_dist_px)
+            + math.floor((img.shape[0] - cross_y) / self.bead_dist_px)
+            + 1
+        ) * (
+            math.floor(cross_x / self.bead_dist_px)
+            + math.floor((img.shape[1] - cross_x) / self.bead_dist_px)
+            + 1
+        )
 
         return num_beads
-
 
     def run(self):
 
@@ -240,15 +323,23 @@ class SegmentRings(object):
         minArea = self.ring_size_px * 0.8
 
         if self.magnification in [40, 63, 100]:
-            seg_rings, label_rings = self.segment_rings_intensity_threshold(self, img=img_preprocessed)
+            seg_rings, label_rings = self.segment_rings_intensity_threshold(
+                self, img=img_preprocessed
+            )
         else:
             seg_cross, props = self.segment_cross(self, img=img_preprocessed)
 
             seg_rings, label_rings, thresh = self.segment_rings_dot_filter(
-                self, img_2d=img_preprocessed, seg_cross=seg_cross, num_beads=num_beads, minArea=minArea
+                self,
+                img_2d=img_preprocessed,
+                seg_cross=seg_cross,
+                num_beads=num_beads,
+                minArea=minArea,
             )
 
-        filtered_ring_label, props_df, cross_label = self.filter_center_cross(self, label_rings, show_img=False)
+        filtered_ring_label, props_df, cross_label = self.filter_center_cross(
+            self, label_rings, show_img=False
+        )
 
         if self.debug_mode:
             print(num_beads)
@@ -259,7 +350,4 @@ class SegmentRings(object):
             plt.imshow(seg_rings)
             plt.show()
 
-
-
         return seg_rings, label_rings, props_df, cross_label
-
