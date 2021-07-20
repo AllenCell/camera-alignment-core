@@ -97,41 +97,17 @@ class AlignmentCore:
 
         return tform, align_info
 
-
-    def similarity_matrix_transform(
-        self,
-        alignment_matrix: numpy.ndarray,
-        slice: numpy.ndarray,
-    ) -> numpy.ndarray:
-        if len(slice.shape) == 2:
-            after_transform = transform.warp(
-                slice, inverse_map=alignment_matrix, order=3
-            )
-        elif len(slice.shape) == 3:
-            after_transform = numpy.zeros(slice.shape)
-            for z in range(0, after_transform.shape[0]):
-                after_transform[z, :, :] = transform.warp(
-                    slice[z, :, :], inverse_map=alignment_matrix, order=3
-                )
-        else:
-            raise IncompatibleImageException(
-                f"Cannot perform similarity matrix transform: invalid image dimensions. \
-                Image must be 2D or 3D but detected {len(slice.shape)} dimensions"
-            )
-
-        return (after_transform * 65535).astype(numpy.uint16)
-
     def align_image(
         self,
-        alignment_matrix: numpy.ndarray,
-        image: numpy.ndarray,
+        alignment_matrix: numpy.typing.NDArray[numpy.float16],
+        image: numpy.typing.NDArray[numpy.uint16],
         channels_to_align: Dict[str, int],
-    ) -> numpy.ndarray:
+    ) -> numpy.typing.NDArray[numpy.uint16]:
 
         aligned_image = numpy.zeros(image.shape)
         for channel, index in channels_to_align.items():
             if channel in ("Raw brightfield", "Raw 638nm"):
-                aligned_slice = self.similarity_matrix_transform(
+                aligned_slice = self._similarity_matrix_transform(
                     alignment_matrix, image[index]
                 )
                 aligned_image[index] = aligned_slice
@@ -163,3 +139,26 @@ class AlignmentCore:
 
     def crop(self):
         raise NotImplementedError("align_image")
+
+    def _similarity_matrix_transform(
+        self,
+        alignment_matrix: numpy.typing.NDArray[numpy.float16],
+        slice: numpy.typing.NDArray[numpy.uint16],
+    ) -> numpy.typing.NDArray[numpy.uint16]:
+        if len(slice.shape) == 2:
+            after_transform = transform.warp(
+                slice, inverse_map=alignment_matrix, order=3
+            )
+        elif len(slice.shape) == 3:
+            after_transform = numpy.zeros(slice.shape)
+            for z in range(0, after_transform.shape[0]):
+                after_transform[z, :, :] = transform.warp(
+                    slice[z, :, :], inverse_map=alignment_matrix, order=3
+                )
+        else:
+            raise IncompatibleImageException(
+                f"Cannot perform similarity matrix transform: invalid image dimensions. \
+                Image must be 2D or 3D but detected {len(slice.shape)} dimensions"
+            )
+
+        return (after_transform * 65535).astype(numpy.uint16)

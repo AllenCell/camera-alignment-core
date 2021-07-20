@@ -193,3 +193,27 @@ class TestAlignmentCore:
 
         # Assert
         assert result == expectation
+
+    def test_align_image(
+        self,
+        image_path,
+        alignment_matrix,
+        channels_to_align,
+        expectation,
+        get_image: typing.Callable[[str], AICSImage],
+        caplog: pytest.LogCaptureFixture,
+    ):
+
+        # Arrange
+        caplog.set_level(logging.DEBUG, logger=LOGGER_NAME)
+        image = get_image(image_path)
+
+        # Act
+        result = self.alignment_core.align_image(
+            alignment_matrix,
+            image,
+            channels_to_align,
+        )
+
+        # Assert
+        assert result == expectation
