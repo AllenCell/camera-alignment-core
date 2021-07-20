@@ -41,5 +41,5 @@ class GetCenterZ(object):
         return center_z, max_contrast
 
     def run(self):
-        center_z, max_contrast = self.get_center_z(self)
+        center_z, max_contrast = self.get_center_z()
         return center_z, max_contrast

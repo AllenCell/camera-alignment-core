@@ -2,12 +2,17 @@ import logging
 import typing
 
 from aicsimageio import AICSImage
+from matplotlib.pyplot import imsave
 import numpy
 import pytest
+from skimage.transform import (
+    SimilarityTransform,
+    warp,
+)
 
-from camera_alignment_core import (
+from camera_alignment_core import AlignmentCore
+from camera_alignment_core.constants import (
     LOGGER_NAME,
-    AlignmentCore,
 )
 
 log = logging.getLogger(LOGGER_NAME)
@@ -27,7 +32,7 @@ class TestAlignmentCore:
         """You can use this to setup before each test"""
         self.alignment_core = AlignmentCore()
 
-    @pytest.mark.skip("AlignmentCore::generate_alignment_matrix not yet implemented")
+    # @pytest.mark.skip("AlignmentCore::generate_alignment_matrix not yet implemented")
     def test_generate_alignment_matrix(
         self,
         get_image: typing.Callable[[str], AICSImage],
@@ -39,9 +44,10 @@ class TestAlignmentCore:
         optical_control_image_data = zsd_100x_optical_control_image.get_image_data(
             "CZYX"
         )
-        reference_channel = 0
-        shift_channel = 1
+        reference_channel = 1
+        shift_channel = 2
         magnification = 100
+        pixel_size_xy = 0.108
 
         # This is the output of the old alignment code for the optical control saved at
         # /allen/aics/microscopy/PRODUCTION/OpticalControl/ArgoLight/Argo_QC_Daily/ZSD1/ZSD1_argo_100X_SLF-015_20210624
@@ -61,17 +67,40 @@ class TestAlignmentCore:
             ]
         )
 
+        expected_transform = SimilarityTransform(matrix=expected_matrix)
+
+        for z in range(optical_control_image_data.shape[1]):
+            optical_control_image_data[2, z, ...] = warp(
+                optical_control_image_data[1, z, ...],
+                expected_transform,
+                preserve_range=True,
+            )
+
         # Act
         (
             actual_alignment_matrix,
             actual_alignment_info,
         ) = self.alignment_core.generate_alignment_matrix(
-            optical_control_image_data, reference_channel, shift_channel, magnification
+            optical_control_image_data,
+            reference_channel,
+            shift_channel,
+            magnification,
+            pixel_size_xy,
         )
 
         # Assert
-        assert actual_alignment_matrix == expected_matrix
-        assert actual_alignment_info.shift_y == 2
+        log.debug("Expected Matrix")
+        log.debug(expected_matrix)
+        log.debug("Estimated Matrix")
+        log.debug(numpy.array(actual_alignment_matrix.params))
+
+        matDet = numpy.linalg.det(
+            numpy.matmul(numpy.array(actual_alignment_matrix.params).T, expected_matrix)
+        )
+        log.debug("Determinant (should be 1)")
+        log.debug(matDet)
+
+        assert abs(matDet - 1) < 0.0005
 
     @pytest.mark.parametrize(
         ["image_path", "expectation"],

@@ -174,19 +174,19 @@ class RingAlignment(object):
 
     def run(self):
         ref_centroid_dict = self.rings_coor_dict(
-            self, self.ref_rings_props, self.ref_cross_label
+            self.ref_rings_props, self.ref_cross_label
         )
         mov_centroid_dict = self.rings_coor_dict(
-            self, self.mov_rings_props, self.mov_cross_label
+            self.mov_rings_props, self.mov_cross_label
         )
 
         (
             bead_centroid_dict,
             ref_mov_num_dict,
             ref_mov_coor_dict,
-        ) = self.assign_ref_to_mov(self, ref_centroid_dict, mov_centroid_dict)
+        ) = self.assign_ref_to_mov(ref_centroid_dict, mov_centroid_dict)
 
-        rev_coor_dict = self.change_coor_system(self, ref_mov_coor_dict)
+        rev_coor_dict = self.change_coor_system(ref_mov_coor_dict)
         print(rev_coor_dict)
 
         if self.alignment_method == "alignV2":
@@ -212,7 +212,7 @@ class RingAlignment(object):
                 max_trials=100,
             )
 
-        align_info = self.report_similarity_matrix_parameters(self, tform)
-        num_beads_for_estimation = self.report_number_beads(self, bead_centroid_dict)
+        align_info = self.report_similarity_matrix_parameters(tform)
+        num_beads_for_estimation = self.report_number_beads(bead_centroid_dict)
 
         return tform, rev_coor_dict, align_info, num_beads_for_estimation

@@ -1,8 +1,13 @@
+import logging
 import math
 
 import numpy as np
 import pandas as pd
 from skimage import measure
+
+from camera_alignment_core.constants import (
+    LOGGER_NAME,
+)
 
 from .segment_argolight_rings import SegmentRings
 
@@ -10,9 +15,11 @@ from .segment_argolight_rings import SegmentRings
 class CropRings(object):
     def __init__(self, img, pixel_size, magnification, filter_px_size=50):
         self.img = img
-        self.bead_dist_px = 15 / (pixel_size / 10 ** -6)
+        # self.bead_dist_px = 15 / (pixel_size / 10 ** -6)
+        self.bead_dist_px = 15 / pixel_size
         self.filter_px_size = filter_px_size
         self.magnification = magnification
+        self.log = logging.getLogger(LOGGER_NAME)
 
         self.show_seg = False
 
@@ -85,11 +92,13 @@ class CropRings(object):
 
     def make_grid(self, img, cross_y, cross_x, bead_dist_px):
         grid = np.zeros(img.shape)
+
         for y in np.arange(cross_y, 0, -bead_dist_px):
             for x in np.arange(cross_x, 0, -bead_dist_px):
                 grid[int(y), int(x)] = True
             for x in np.arange(cross_x, img.shape[1], bead_dist_px):
                 grid[int(y), int(x)] = True
+
         for y in np.arange(cross_y, img.shape[0], bead_dist_px):
             for x in np.arange(cross_x, 0, -bead_dist_px):
                 grid[int(y), int(x)] = True
@@ -99,9 +108,11 @@ class CropRings(object):
         return grid
 
     def run(self):
-        seg_cross, props = SegmentRings.segment_cross(
-            self, self.img, input_mult_factor=2.5
-        )
+        self.log.debug("segment rings")
+
+        seg_cross, props = SegmentRings(
+            self.img, self.filter_px_size, self.magnification
+        ).segment_cross(img=self.img, input_mult_factor=2.5)
 
         cross_y, cross_x = (
             props.loc[
@@ -113,8 +124,9 @@ class CropRings(object):
         )
 
         if self.magnification < 63:
+            self.log.debug("get crop dimensions")
             crop_top, crop_bottom, crop_left, crop_right = self.get_crop_dimensions(
-                self, self.img, int(cross_y), int(cross_x), self.bead_dist_px
+                self.img, int(cross_y), int(cross_x), self.bead_dist_px
             )
         else:
             crop_top = 0
@@ -124,15 +136,20 @@ class CropRings(object):
 
         crop_dimensions = (crop_top, crop_bottom, crop_left, crop_right)
 
+        self.log.debug(f"crop dimensions {crop_dimensions}")
         img_out = self.img[crop_top:crop_bottom, crop_left:crop_right]
 
         updated_cross_y = cross_y - crop_bottom
         updated_cross_x = cross_x - crop_left
 
+        self.log.debug(f"cross_y {updated_cross_y}")
+        self.log.debug(f"cross_x {updated_cross_x}")
+        self.log.debug("making grid")
         grid = self.make_grid(
-            self, img_out, int(updated_cross_y), int(updated_cross_x), self.bead_dist_px
+            img_out, int(updated_cross_y), int(updated_cross_x), self.bead_dist_px
         )
 
+        self.log.debug("label image")
         labelled_grid = measure.label(grid)
         props = measure.regionprops_table(
             labelled_grid, properties=["label", "area", "centroid"]

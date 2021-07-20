@@ -1,3 +1,4 @@
+import logging
 import typing
 
 from aicsimageio import AICSImage
@@ -19,6 +20,7 @@ from .alignment_utils.get_center_z import (
 from .alignment_utils.segment_argolight_rings import (
     SegmentRings,
 )
+from .constants import LOGGER_NAME
 
 
 class AlignmentCore:
@@ -33,16 +35,24 @@ class AlignmentCore:
         px_size_xy: float,
     ) -> typing.Tuple[numpy.typing.NDArray[numpy.uint16], AlignmentInfo]:
 
+        log = logging.getLogger(LOGGER_NAME)
+
         # if more than 4 dimensions, trip extra dims from beginning
+        ndim = optical_control_image.ndim
+        log.debug(f"image has shape {ndim}")
         while optical_control_image.ndim > 4:
             optical_control_image = optical_control_image[0, ...]
+            ndim = optical_control_image.ndim
+            log.debug(f"image has shape {ndim}")
 
         # detect center z-slice on reference channel
+        log.debug("detecing center z in ref")
         ref_center_z, _ = GetCenterZ(
             img_stack=optical_control_image[reference_channel, :, :, :]
         ).run()
 
         # Crop with all available rings
+        log.debug("crop rings")
         ref_crop, crop_dims, _, _, _, _ = CropRings(
             img=optical_control_image[reference_channel, ref_center_z, :, :],
             pixel_size=px_size_xy,
@@ -58,22 +68,25 @@ class AlignmentCore:
         ]
 
         # segment rings on reference image
+        log.debug("segment rings in ref")
         (
             ref_seg_rings,
             ref_seg_rings_label,
             ref_props_df,
             ref_cross_label,
-        ) = SegmentRings(ref_crop, px_size_xy, magnification, debug_mode=True).run()
+        ) = SegmentRings(ref_crop, px_size_xy, magnification, debug_mode=False).run()
 
         # segment rings on moving image
+        log.debug("segment rings in moving")
         (
             mov_seg_rings,
             mov_seg_rings_label,
             mov_props_df,
             mov_cross_label,
-        ) = SegmentRings(mov_crop, px_size_xy, magnification, debug_mode=True).run()
+        ) = SegmentRings(mov_crop, px_size_xy, magnification, debug_mode=False).run()
 
         # estimate alignment from segmentation
+        log.debug("estimating alignment matrix")
         tform, _, align_info, _ = RingAlignment(
             ref_seg_rings,
             ref_seg_rings_label,
