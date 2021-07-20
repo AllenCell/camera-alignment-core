@@ -1,0 +1,2 @@
+class IncompatibleImageException(BaseException):
+    pass
