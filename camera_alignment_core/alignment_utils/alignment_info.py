@@ -1,6 +1,7 @@
 import dataclasses
 
 import numpy.typing
+from skimage.transform import SimilarityTransform
 
 
 @dataclasses.dataclass
@@ -23,4 +24,4 @@ class AlignmentInfo:
     scaling: float
 
     # The best documentation ...
-    tform: numpy.typing.NDArray
+    tform: SimilarityTransform

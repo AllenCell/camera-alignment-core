@@ -107,3 +107,6 @@ ENV/
 
 # VSCode
 .vscode
+
+# test files
+camera_alignment_core/tests/tmp_results
