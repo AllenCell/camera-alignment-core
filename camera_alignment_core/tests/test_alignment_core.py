@@ -2,7 +2,6 @@ import logging
 import typing
 
 from aicsimageio import AICSImage
-from matplotlib.pyplot import imsave
 import numpy
 import pytest
 from skimage.transform import (

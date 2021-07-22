@@ -3,12 +3,17 @@ import numpy as np
 
 
 class GetCenterZ(object):
-    def __init__(self, img_stack, thresh=(0.2, 99.8), plot_contrast=False):
+    def __init__(
+        self,
+        img_stack: np.typing.NDArray[np.uint16],
+        thresh=(0.2, 99.8),
+        plot_contrast=False,
+    ):
         self.img_stack = img_stack
         self.thresh = thresh
         self.plot_contrast = plot_contrast
 
-    def get_center_z(self):
+    def get_center_z(self) -> tuple[int, float]:
         """
         Getx index of center z slice by finding the slice with max. contrast value
         Parameters
@@ -40,6 +45,6 @@ class GetCenterZ(object):
 
         return center_z, max_contrast
 
-    def run(self):
+    def run(self) -> tuple[int, float]:
         center_z, max_contrast = self.get_center_z()
         return center_z, max_contrast

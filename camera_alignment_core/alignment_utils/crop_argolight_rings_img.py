@@ -1,7 +1,9 @@
 import logging
 import math
+from typing import Tuple
 
 import numpy as np
+from numpy.typing import NDArray
 import pandas as pd
 from skimage import measure
 
@@ -13,7 +15,14 @@ from .segment_argolight_rings import SegmentRings
 
 
 class CropRings(object):
-    def __init__(self, img, pixel_size, magnification, filter_px_size=50):
+    def __init__(
+        self,
+        img: NDArray[np.uint16],
+        pixel_size: float,
+        magnification: int,
+        filter_px_size: int = 50,
+    ):
+
         self.img = img
         # self.bead_dist_px = 15 / (pixel_size / 10 ** -6)
         self.bead_dist_px = 15 / pixel_size
@@ -23,7 +32,14 @@ class CropRings(object):
 
         self.show_seg = False
 
-    def get_crop_dimensions(self, img, cross_y, cross_x, bead_dist_px, crop_param=0.5):
+    def get_crop_dimensions(
+        self,
+        img: NDArray[np.uint16],
+        cross_y: int,
+        cross_x: int,
+        bead_dist_px: float,
+        crop_param: float = 0.5,
+    ) -> Tuple[int, int, int, int]:
         """
         Calculates the crop dimension from the location of the cross to capture complete rings in the image
         Parameters
@@ -90,7 +106,9 @@ class CropRings(object):
 
         return crop_top, crop_bottom, crop_left, crop_right
 
-    def make_grid(self, img, cross_y, cross_x, bead_dist_px):
+    def make_grid(
+        self, img: NDArray[np.uint16], cross_y: int, cross_x: int, bead_dist_px: float
+    ) -> NDArray[np.bool_]:
         grid = np.zeros(img.shape)
 
         for y in np.arange(cross_y, 0, -bead_dist_px):
@@ -107,7 +125,16 @@ class CropRings(object):
 
         return grid
 
-    def run(self):
+    def run(
+        self,
+    ) -> tuple[
+        NDArray[np.uint16],
+        tuple[int, int, int, int],
+        NDArray[np.bool_],
+        pd.DataFrame,
+        int,
+        int,
+    ]:
         self.log.debug("segment rings")
 
         seg_cross, props = SegmentRings(

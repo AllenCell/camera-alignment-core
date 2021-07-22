@@ -1,6 +1,9 @@
 from collections import OrderedDict
+from typing import Dict
 
 import numpy as np
+from numpy.typing import NDArray
+import pandas as pd
 from scipy.optimize import linear_sum_assignment
 from scipy.spatial import distance
 from skimage import transform as tf
@@ -12,15 +15,15 @@ from .alignment_info import AlignmentInfo
 class RingAlignment(object):
     def __init__(
         self,
-        ref_seg_rings,
-        ref_label_rings,
-        ref_rings_props,
-        ref_cross_label,
-        mov_seg_rings,
-        mov_label_rings,
-        mov_rings_props,
-        mov_cross_label,
-        alignment_method,
+        ref_seg_rings: NDArray[np.uint16],
+        ref_label_rings: NDArray[np.uint16],
+        ref_rings_props: pd.DataFrame,
+        ref_cross_label: int,
+        mov_seg_rings: NDArray[np.uint16],
+        mov_label_rings: NDArray[np.uint16],
+        mov_rings_props: pd.DataFrame,
+        mov_cross_label: int,
+        alignment_method: str,
     ):
         self.ref_seg_rings = ref_seg_rings
         self.mov_label_rings = ref_label_rings
@@ -32,7 +35,11 @@ class RingAlignment(object):
         self.mov_cross_label = mov_cross_label
         self.alignment_method = alignment_method
 
-    def assign_ref_to_mov(self, updated_ref_peak_dict, updated_mov_peak_dict):
+    def assign_ref_to_mov(
+        self,
+        updated_ref_peak_dict: Dict[int, tuple[int, int]],
+        updated_mov_peak_dict: Dict[int, tuple[int, int]],
+    ) -> tuple[Dict[int, int], Dict[int, int], Dict[tuple[int, int], tuple[int, int]]]:
         """
         Assigns beads from moving image to reference image using
         linear_sum_assignment to reduce the distance between the same bead on
@@ -53,14 +60,11 @@ class RingAlignment(object):
         updated_ref_peak = list(OrderedDict(updated_ref_peak_dict).items())
         updated_mov_peak = list(OrderedDict(updated_mov_peak_dict).items())
 
-        dist_tx = []
-        for bead_ref, coor_ref in updated_ref_peak:
-            row = []
-            for bead_mov, coor_mov in updated_mov_peak:
-                row.append(distance.euclidean(coor_ref, coor_mov))
-            dist_tx.append(row)
+        dist_tx = np.zeros((len(updated_ref_peak), len(updated_mov_peak)))
+        for i, (bead_ref, coor_ref) in enumerate(updated_ref_peak):
+            for j, (bead_mov, coor_mov) in enumerate(updated_mov_peak):
+                dist_tx[i, j] = distance.euclidean(coor_ref, coor_mov)
 
-        dist_tx = np.asarray(dist_tx)
         ref_ind, mov_ind = linear_sum_assignment(dist_tx)
 
         bead_peak_intensity_dict = {}
@@ -91,7 +95,9 @@ class RingAlignment(object):
 
         return bead_peak_intensity_dict, ref_mov_num_dict, ref_mov_coor_dict
 
-    def rings_coor_dict(self, props, cross_label):
+    def rings_coor_dict(
+        self, props: pd.DataFrame, cross_label: int
+    ) -> Dict[int, tuple[int, int]]:
         """
         Generate a dictionary from regionprops_table in the form of {label: (coor_y, coor_x)} for rings image
         :param props: a dataframe containing regionprops_table output
@@ -106,7 +112,9 @@ class RingAlignment(object):
 
         return img_dict
 
-    def change_coor_system(self, coor_dict):
+    def change_coor_system(
+        self, coor_dict: Dict[tuple[int, int], tuple[int, int]]
+    ) -> Dict[tuple[int, int], tuple[int, int]]:
         """
         Changes coordinates in a dictionary from {(y1, x1):(y2, x2)} to {(x1, y1): (x2, y2)}
         :param coor_dict: A dictionary of coordinates in the form of {(y1, x1):(y2, x2)}
@@ -120,7 +128,9 @@ class RingAlignment(object):
             )
         return rev_yx_to_xy
 
-    def report_number_beads(self, bead_dict, method_logging=True):
+    def report_number_beads(
+        self, bead_dict: Dict[int, int], method_logging=True
+    ) -> tuple[bool, int]:
         """
         Reports the number of beads used to estimate transform
         :param bead_dict: A dictionary that each key is a bead
@@ -137,7 +147,9 @@ class RingAlignment(object):
             print("number of beads used to estimate transform: " + str(num_beads))
         return bead_num_qc, num_beads
 
-    def report_similarity_matrix_parameters(self, tform, method_logging=True):
+    def report_similarity_matrix_parameters(
+        self, tform: tf.SimilarityTransform, method_logging=True
+    ) -> AlignmentInfo:
         """
         Reports similarity matrix and its parameters
         :param tform: A transform generated from skimage.transform.estimate_transform
@@ -172,7 +184,14 @@ class RingAlignment(object):
 
         return align_info
 
-    def run(self):
+    def run(
+        self,
+    ) -> tuple[
+        tf.SimilarityTransform,
+        Dict[tuple[int, int], tuple[int, int]],
+        AlignmentInfo,
+        tuple[bool, int],
+    ]:
         ref_centroid_dict = self.rings_coor_dict(
             self.ref_rings_props, self.ref_cross_label
         )
