@@ -23,7 +23,7 @@ class SegmentRings(object):
         img: np.typing.NDArray[np.uint16],
         pixel_size: float,
         magnification: int,
-        thresh: tuple[float, float] = None,
+        thresh: tuple[float, float],
         show_final_seg=False,
         show_intermediate_seg=False,
         debug_mode=False,
