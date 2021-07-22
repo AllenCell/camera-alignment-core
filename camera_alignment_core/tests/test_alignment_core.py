@@ -40,7 +40,7 @@ class TestAlignmentCore:
         self,
         get_image: typing.Callable[[str], AICSImage],
         caplog: pytest.LogCaptureFixture,
-        output: bool = True,
+        output: bool = False,
     ):
         # Arrange
         caplog.set_level(logging.DEBUG, logger=LOGGER_NAME)
