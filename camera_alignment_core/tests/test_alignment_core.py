@@ -22,7 +22,6 @@ log = logging.getLogger(LOGGER_NAME)
 
 ZSD_100x_OPTICAL_CONTROL_IMAGE_URL = "https://s3.us-west-2.amazonaws.com/public-dev-objects.allencell.org/camera-alignment-core/optical-controls/argo_20210419_100X_ZSD1.czi"
 
-
 # FMS ID: 0023c446cd384dc3947c90dc7a76f794; 303.38 MB
 GENERIC_OME_TIFF_URL = "https://s3.us-west-2.amazonaws.com/public-dev-objects.allencell.org/camera-alignment-core/images/3500003897_100X_20200306_1r-Scene-30-P89-G11.ome.tiff"  # noqa E501
 

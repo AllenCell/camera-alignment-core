@@ -74,7 +74,9 @@ class AlignmentCore:
             ref_seg_rings_label,
             ref_props_df,
             ref_cross_label,
-        ) = SegmentRings(ref_crop, px_size_xy, magnification, debug_mode=False).run()
+        ) = SegmentRings(
+            ref_crop, px_size_xy, magnification, thresh=None, debug_mode=False
+        ).run()
 
         # segment rings on moving image
         log.debug("segment rings in moving")
@@ -83,7 +85,9 @@ class AlignmentCore:
             mov_seg_rings_label,
             mov_props_df,
             mov_cross_label,
-        ) = SegmentRings(mov_crop, px_size_xy, magnification, debug_mode=False).run()
+        ) = SegmentRings(
+            mov_crop, px_size_xy, magnification, thresh=None, debug_mode=False
+        ).run()
 
         # estimate alignment from segmentation
         log.debug("estimating alignment matrix")

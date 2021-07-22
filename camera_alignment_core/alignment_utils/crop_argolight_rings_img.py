@@ -138,7 +138,7 @@ class CropRings(object):
         self.log.debug("segment rings")
 
         seg_cross, props = SegmentRings(
-            self.img, self.filter_px_size, self.magnification
+            self.img, self.filter_px_size, self.magnification, thresh=None
         ).segment_cross(img=self.img, input_mult_factor=2.5)
 
         cross_y, cross_x = (
