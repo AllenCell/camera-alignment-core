@@ -1,3 +1,5 @@
+from typing import Tuple
+
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -13,7 +15,7 @@ class GetCenterZ(object):
         self.thresh = thresh
         self.plot_contrast = plot_contrast
 
-    def get_center_z(self) -> tuple[int, float]:
+    def get_center_z(self) -> Tuple[int, float]:
         """
         Getx index of center z slice by finding the slice with max. contrast value
         Parameters
@@ -45,6 +47,6 @@ class GetCenterZ(object):
 
         return center_z, max_contrast
 
-    def run(self) -> tuple[int, float]:
+    def run(self) -> Tuple[int, float]:
         center_z, max_contrast = self.get_center_z()
         return center_z, max_contrast

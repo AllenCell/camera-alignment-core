@@ -1,5 +1,5 @@
 from collections import OrderedDict
-from typing import Dict
+from typing import Dict, Tuple
 
 import numpy as np
 from numpy.typing import NDArray
@@ -37,9 +37,9 @@ class RingAlignment(object):
 
     def assign_ref_to_mov(
         self,
-        updated_ref_peak_dict: Dict[int, tuple[int, int]],
-        updated_mov_peak_dict: Dict[int, tuple[int, int]],
-    ) -> tuple[Dict[int, int], Dict[int, int], Dict[tuple[int, int], tuple[int, int]]]:
+        updated_ref_peak_dict: Dict[int, Tuple[int, int]],
+        updated_mov_peak_dict: Dict[int, Tuple[int, int]],
+    ) -> Tuple[Dict[int, int], Dict[int, int], Dict[Tuple[int, int], Tuple[int, int]]]:
         """
         Assigns beads from moving image to reference image using
         linear_sum_assignment to reduce the distance between the same bead on
@@ -97,7 +97,7 @@ class RingAlignment(object):
 
     def rings_coor_dict(
         self, props: pd.DataFrame, cross_label: int
-    ) -> Dict[int, tuple[int, int]]:
+    ) -> Dict[int, Tuple[int, int]]:
         """
         Generate a dictionary from regionprops_table in the form of {label: (coor_y, coor_x)} for rings image
         :param props: a dataframe containing regionprops_table output
@@ -113,8 +113,8 @@ class RingAlignment(object):
         return img_dict
 
     def change_coor_system(
-        self, coor_dict: Dict[tuple[int, int], tuple[int, int]]
-    ) -> Dict[tuple[int, int], tuple[int, int]]:
+        self, coor_dict: Dict[Tuple[int, int], Tuple[int, int]]
+    ) -> Dict[Tuple[int, int], Tuple[int, int]]:
         """
         Changes coordinates in a dictionary from {(y1, x1):(y2, x2)} to {(x1, y1): (x2, y2)}
         :param coor_dict: A dictionary of coordinates in the form of {(y1, x1):(y2, x2)}
@@ -130,7 +130,7 @@ class RingAlignment(object):
 
     def report_number_beads(
         self, bead_dict: Dict[int, int], method_logging=True
-    ) -> tuple[bool, int]:
+    ) -> Tuple[bool, int]:
         """
         Reports the number of beads used to estimate transform
         :param bead_dict: A dictionary that each key is a bead
@@ -186,11 +186,11 @@ class RingAlignment(object):
 
     def run(
         self,
-    ) -> tuple[
+    ) -> Tuple[
         tf.SimilarityTransform,
-        Dict[tuple[int, int], tuple[int, int]],
+        Dict[Tuple[int, int], Tuple[int, int]],
         AlignmentInfo,
-        tuple[bool, int],
+        Tuple[bool, int],
     ]:
         ref_centroid_dict = self.rings_coor_dict(
             self.ref_rings_props, self.ref_cross_label

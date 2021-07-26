@@ -1,5 +1,5 @@
 import logging
-import typing
+from typing import Dict, List, Tuple
 
 from aicsimageio import AICSImage
 import numpy
@@ -33,7 +33,7 @@ class AlignmentCore:
         shift_channel: int,
         magnification: int,
         px_size_xy: float,
-    ) -> typing.Tuple[numpy.typing.NDArray[numpy.uint16], AlignmentInfo]:
+    ) -> Tuple[numpy.typing.NDArray[numpy.uint16], AlignmentInfo]:
 
         log = logging.getLogger(LOGGER_NAME)
 
@@ -109,11 +109,11 @@ class AlignmentCore:
         self,
         alignment_matrix: numpy.typing.NDArray[numpy.float16],
         image: numpy.typing.NDArray[numpy.uint16],
-        channels_to_align: typing.List[int],
+        channels_to_align: List[int],
     ) -> numpy.typing.NDArray[numpy.uint16]:
         raise NotImplementedError("align_image")
 
-    def get_channel_name_to_index_map(self, image: AICSImage) -> typing.Dict[str, int]:
+    def get_channel_name_to_index_map(self, image: AICSImage) -> Dict[str, int]:
         """
         Maps all channels in a split image to an index of where the channel is in the image
         Format is {"Raw channel_name" : Channel index}

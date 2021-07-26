@@ -1,6 +1,6 @@
 import logging
 import math
-from typing import List, Union
+from typing import List, Tuple, Union
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -23,7 +23,7 @@ class SegmentRings(object):
         img: np.typing.NDArray[np.uint16],
         pixel_size: float,
         magnification: int,
-        thresh: tuple[float, float],
+        thresh: Union[Tuple[float, float], None] = None,
         show_final_seg=False,
         show_intermediate_seg=False,
         debug_mode=False,
@@ -111,7 +111,7 @@ class SegmentRings(object):
 
     def remove_small_objects_from_label(
         self, label_img: np.typing.NDArray[np.uint16], filter_px_size: int = 100
-    ) -> tuple[np.typing.NDArray[np.uint16], np.typing.NDArray[np.uint16]]:
+    ) -> Tuple[np.typing.NDArray[np.uint16], np.typing.NDArray[np.uint16]]:
         filtered_seg = np.zeros(label_img.shape)
         for obj in range(1, np.max(label_img) + 1):
             obj_size = np.sum(label_img == obj)
@@ -124,9 +124,9 @@ class SegmentRings(object):
     def segment_cross(
         self,
         img: np.typing.NDArray[np.uint16],
-        mult_factor_range: tuple[int, int] = (1, 5),
+        mult_factor_range: Tuple[int, int] = (1, 5),
         input_mult_factor: float = None,
-    ) -> tuple[np.typing.NDArray[np.bool_], pd.DataFrame]:
+    ) -> Tuple[np.typing.NDArray[np.bool_], pd.DataFrame]:
         """
         Segments the center cross in the image through iterating the intensity-threshold parameter until one object
         greater than the expected cross size (in pixel) is segmented
@@ -142,23 +142,21 @@ class SegmentRings(object):
         """
         if input_mult_factor is not None:
             seg_for_cross, label_for_cross = self.segment_rings_intensity_threshold(
-                img, mult_factor=input_mult_factor, show_seg=self.show_seg
+                img, mult_factor=input_mult_factor
             )
         else:
             for mult_factor in np.linspace(
                 mult_factor_range[1], mult_factor_range[0], 50
             ):
                 seg_for_cross, label_for_cross = self.segment_rings_intensity_threshold(
-                    img, mult_factor=mult_factor, show_seg=self.show_seg
+                    img, mult_factor=mult_factor
                 )
                 if (np.max(label_for_cross) >= 1) & (
                     np.sum(label_for_cross) > self.cross_size_px
                 ):
                     break
 
-        filtered_label, props, cross_label = self.filter_center_cross(
-            label_for_cross, show_img=False
-        )
+        filtered_label, props, cross_label = self.filter_center_cross(label_for_cross)
         seg_cross = label_for_cross == cross_label
 
         return seg_cross, props
@@ -168,8 +166,7 @@ class SegmentRings(object):
         img: np.typing.NDArray[np.uint16],
         filter_px_size=50,
         mult_factor=2.5,
-        show_seg=False,
-    ) -> tuple[np.typing.NDArray[np.uint16], np.typing.NDArray[np.uint16]]:
+    ) -> Tuple[np.typing.NDArray[np.uint16], np.typing.NDArray[np.uint16]]:
         """
         Segments rings using intensity-thresholded method
         Parameters
@@ -193,7 +190,7 @@ class SegmentRings(object):
         filtered_seg, filtered_label = self.remove_small_objects_from_label(
             labelled_seg, filter_px_size=filter_px_size
         )
-        if show_seg:
+        if self.show_seg:
             plt.figure()
             plt.imshow(filtered_seg)
             plt.show()
@@ -205,10 +202,9 @@ class SegmentRings(object):
         seg_cross: np.typing.NDArray[np.bool_],
         num_beads: int,
         minArea: int,
-        search_range: tuple[float, float] = (0, 0.75),
+        search_range: Tuple[float, float] = (0, 0.75),
         size_param: float = 2.5,
-        show_seg=False,
-    ) -> tuple[
+    ) -> Tuple[
         np.typing.NDArray[np.uint16], np.typing.NDArray[np.uint16], Union[None, float]
     ]:
         """
@@ -222,7 +218,6 @@ class SegmentRings(object):
         minArea: minimum area of rings, any segmented object below this size will be filtered out
         search_range: initial search range of filter parameter
         size_param: size parameter of dot filter
-        show_seg: boolean to show segmentation
 
         Returns
         -------
@@ -253,7 +248,7 @@ class SegmentRings(object):
                 thresh = float(seg_param)
                 break
 
-            if show_seg:
+            if self.show_seg:
                 plt.figure()
                 plt.imshow(seg)
                 plt.show()
@@ -261,15 +256,14 @@ class SegmentRings(object):
         return seg, label, thresh
 
     def filter_center_cross(
-        self, label_seg: np.typing.NDArray[np.uint16], show_img: bool = False
-    ) -> tuple[np.typing.NDArray[np.uint16], pd.DataFrame, int]:
+        self, label_seg: np.typing.NDArray[np.uint16]
+    ) -> Tuple[np.typing.NDArray[np.uint16], pd.DataFrame, int]:
         """
         filters out where the center cross (the biggest segmented object) is in a labelled rings image
 
         Parameters
         ----------
         label_seg: A labelled image
-        show_img: A boolean to indicate if the user would like to show the peaks on the image
 
         Returns
         -------
@@ -290,7 +284,7 @@ class SegmentRings(object):
         filter_label = label_seg.copy()
         filter_label[label_seg == cross_label] = 0
 
-        if show_img:
+        if self.show_seg:
             plt.figure()
             plt.imshow(filter_label)
             plt.show()
@@ -339,7 +333,7 @@ class SegmentRings(object):
 
     def run(
         self,
-    ) -> tuple[
+    ) -> Tuple[
         np.typing.NDArray[np.uint16], np.typing.NDArray[np.uint16], pd.DataFrame, int
     ]:
 
@@ -367,7 +361,7 @@ class SegmentRings(object):
             )
 
         filtered_ring_label, props_df, cross_label = self.filter_center_cross(
-            label_rings, show_img=False
+            label_rings
         )
 
         if self.debug_mode:

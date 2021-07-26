@@ -127,7 +127,7 @@ class CropRings(object):
 
     def run(
         self,
-    ) -> tuple[
+    ) -> Tuple[
         NDArray[np.uint16],
         tuple[int, int, int, int],
         NDArray[np.bool_],
