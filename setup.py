@@ -41,8 +41,7 @@ dev_requirements = [
 requirements = [
     "aicsimageio[czi] == 4.0.3",
     "numpy ~= 1.21",
-    "scikit-image ~= 0.18",
-    "nptyping ~= 1.4.2"
+    "scikit-image ~= 0.18"
 ]
 
 extra_requirements = {
