@@ -1,16 +1,10 @@
 import logging
-from os import mkdir
-from os.path import exists
 import typing
 
 from aicsimageio import AICSImage
 import numpy
+import numpy.testing
 import pytest
-from skimage.io import imsave
-from skimage.transform import (
-    SimilarityTransform,
-    warp,
-)
 
 from camera_alignment_core import AlignmentCore
 from camera_alignment_core.constants import (
@@ -20,7 +14,7 @@ from camera_alignment_core.constants import (
 log = logging.getLogger(LOGGER_NAME)
 
 
-ZSD_100x_OPTICAL_CONTROL_IMAGE_URL = "https://s3.us-west-2.amazonaws.com/public-dev-objects.allencell.org/camera-alignment-core/optical-controls/argo_20210419_100X_ZSD1.czi"
+ZSD_100x_OPTICAL_CONTROL_IMAGE_URL = "https://s3.us-west-2.amazonaws.com/public-dev-objects.allencell.org/camera-alignment-core/optical-controls/argo_ZSD1_100X_SLF-015_20210624.czi"
 
 # FMS ID: 0023c446cd384dc3947c90dc7a76f794; 303.38 MB
 GENERIC_OME_TIFF_URL = "https://s3.us-west-2.amazonaws.com/public-dev-objects.allencell.org/camera-alignment-core/images/3500003897_100X_20200306_1r-Scene-30-P89-G11.ome.tiff"  # noqa E501
@@ -28,13 +22,17 @@ GENERIC_OME_TIFF_URL = "https://s3.us-west-2.amazonaws.com/public-dev-objects.al
 # FMS ID: 439c852ea76e46d4b9a9f8813f331b4d; 264.43 MB
 GENERIC_CZI_URL = "https://s3.us-west-2.amazonaws.com/public-dev-objects.allencell.org/camera-alignment-core/images/20200701_N04_001.czi"  # noqa E501
 
+UNALIGNED_ZSD1_IMAGE_URL = "https://s3.us-west-2.amazonaws.com/public-dev-objects.allencell.org/camera-alignment-core/images/3500004473_100X_20210430_1c-Scene-24-P96-G06.ome.tiff"
+ALIGNED_ZSD1_IMAGE_URL = "https://s3.us-west-2.amazonaws.com/public-dev-objects.allencell.org/camera-alignment-core/images/3500004473_100X_20210430_1c-alignV2-Scene-24-P96-G06.ome.tiff"
+ARGOLIGHT_OPTICAL_CONTROL_IMAGE_URL = "https://s3.us-west-2.amazonaws.com/public-dev-objects.allencell.org/camera-alignment-core/optical-controls/argo_100X_20210430_fieldofrings.czi"
+ARGOLIGHT_ALIGNED_IMAGE_URL = "https://s3.us-west-2.amazonaws.com/public-dev-objects.allencell.org/camera-alignment-core/optical-controls/argo_100X_20210430_fieldofrings_aligned.tif"
+
 
 class TestAlignmentCore:
     def setup_method(self):
         """You can use this to setup before each test"""
         self.alignment_core = AlignmentCore()
 
-    # @pytest.mark.skip("AlignmentCore::generate_alignment_matrix not yet implemented")
     def test_generate_alignment_matrix(
         self,
         get_image: typing.Callable[[str], AICSImage],
@@ -58,14 +56,14 @@ class TestAlignmentCore:
         expected_matrix = numpy.array(
             [
                 [
-                    1.001096985136178619e00,
-                    -4.788795753668498474e-03,
-                    1.095225124053740728e00,
+                    1.001828593258253797e00,
+                    -5.167305751106508228e-03,
+                    -5.272046139691610733e-02,
                 ],
                 [
-                    4.788795753668498474e-03,
-                    1.001096985136178619e00,
-                    -2.276265920899447792e00,
+                    5.167305751106508228e-03,
+                    1.001828593258254241e00,
+                    -3.061419473755620402e00,
                 ],
                 [
                     0.000000000000000000e00,
@@ -87,31 +85,6 @@ class TestAlignmentCore:
             pixel_size_xy,
         )
 
-        if output:
-            mov_tf = numpy.zeros_like(optical_control_image_data[shift_channel])
-            for z in range(mov_tf.shape[0]):
-                mov_tf[z, ...] = warp(
-                    optical_control_image_data[shift_channel, z, ...],
-                    actual_alignment_info.tform,
-                    preserve_range=True,
-                )
-
-            path = "./camera_alignment_core/tests/tmp_results"
-            if not exists(path):
-                mkdir(path)
-            imsave(
-                path + "/test_ref.tiff",
-                optical_control_image_data[reference_channel],
-            )
-            imsave(
-                path + "/test_mov.tiff",
-                optical_control_image_data[shift_channel],
-            )
-            imsave(
-                path + "/test_mov_tf.tiff",
-                mov_tf,
-            )
-
         # Assert
         log.debug("Expected Matrix")
         log.debug(expected_matrix)
@@ -124,7 +97,7 @@ class TestAlignmentCore:
         log.debug("Determinant (should be 1)")
         log.debug(matDet)
 
-        assert abs(matDet - 1) < 0.002
+        numpy.testing.assert_array_equal(expected_matrix, actual_alignment_matrix)
 
     @pytest.mark.parametrize(
         ["image_path", "expectation"],

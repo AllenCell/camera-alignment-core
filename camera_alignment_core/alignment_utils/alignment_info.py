@@ -1,6 +1,5 @@
 import dataclasses
 
-import numpy.typing
 from skimage.transform import SimilarityTransform
 
 
