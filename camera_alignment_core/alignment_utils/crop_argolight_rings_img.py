@@ -4,7 +4,6 @@ from typing import Tuple
 
 import numpy as np
 from numpy.typing import NDArray
-import pandas as pd
 from skimage import measure
 
 from ..constants import LOGGER_NAME
@@ -123,17 +122,39 @@ class CropRings(object):
 
         return grid
 
+    def generate_slide_grid(
+        self,
+        img: NDArray[np.uint16],
+        centroid_cross_y: int,
+        centroid_cross_x: int,
+    ) -> Tuple[NDArray[np.bool_], dict[str, list], int]:
+        """
+        Given an image of the argolight rings, create a binary representation of the image,
+        label it's regions, and return that labelled representation and related info.
+
+        This is primarily useful/used in development.
+        """
+        grid = self.make_grid(
+            img, centroid_cross_y, centroid_cross_x, self.bead_dist_px
+        )
+
+        log.debug("label image")
+        labelled_grid = measure.label(grid)
+        props = measure.regionprops_table(
+            labelled_grid, properties=["label", "area", "centroid"]
+        )
+        center_cross_label = labelled_grid[centroid_cross_y, centroid_cross_x]
+
+        return (
+            labelled_grid,
+            props,
+            center_cross_label,
+        )
+
     def run(
         self,
         min_no_crop_magnification: int = MIN_NO_CROP_MAGNIFICATION,
-    ) -> Tuple[
-        NDArray[np.uint16],
-        tuple[int, int, int, int],
-        NDArray[np.bool_],
-        pd.DataFrame,
-        int,
-        int,
-    ]:
+    ) -> Tuple[NDArray[np.uint16], tuple[int, int, int, int]]:
         """
         min_no_crop_magnification: int
             Minimum magnification at which we do not need to crop the bead image (e.g., because it's zoomed enough)
@@ -169,31 +190,7 @@ class CropRings(object):
         log.debug(f"crop dimensions {crop_dimensions}")
         img_out = self.img[crop_top:crop_bottom, crop_left:crop_right]
 
-        updated_cross_y = cross_y - crop_bottom
-        updated_cross_x = cross_x - crop_left
-
-        log.debug(f"cross_y {updated_cross_y}")
-        log.debug(f"cross_x {updated_cross_x}")
-        log.debug("making grid")
-        grid = self.make_grid(
-            img_out, int(updated_cross_y), int(updated_cross_x), self.bead_dist_px
-        )
-
-        log.debug("label image")
-        labelled_grid = measure.label(grid)
-        props = measure.regionprops_table(
-            labelled_grid, properties=["label", "area", "centroid"]
-        )
-        props_grid = pd.DataFrame(props)
-        center_cross_label = labelled_grid[int(updated_cross_y), int(updated_cross_x)]
-
-        number_of_rings = len(props)
-
         return (
             img_out,
             crop_dimensions,
-            labelled_grid,
-            props_grid,
-            center_cross_label,
-            number_of_rings,
         )
