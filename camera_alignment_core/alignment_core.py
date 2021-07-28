@@ -83,9 +83,9 @@ class AlignmentCore:
             mov_cross_label,
         ) = SegmentRings(mov_crop, px_size_xy, magnification, thresh=None).run()
 
-        # estimate alignment from segmentation
-        log.debug("estimating alignment matrix")
-        tform, _, align_info, _ = RingAlignment(
+        # Create alignment from segmentation
+        log.debug("Creating alignment matrix")
+        tform, align_info = RingAlignment(
             ref_seg_rings,
             ref_seg_rings_label,
             ref_props_df,
@@ -94,7 +94,6 @@ class AlignmentCore:
             mov_seg_rings_label,
             mov_props_df,
             mov_cross_label,
-            "alignV2",
         ).run()
 
         return tform, align_info
