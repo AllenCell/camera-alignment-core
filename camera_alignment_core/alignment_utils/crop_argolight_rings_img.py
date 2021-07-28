@@ -12,6 +12,7 @@ from .segment_argolight_rings import SegmentRings
 log = logging.getLogger(LOGGER_NAME)
 
 MIN_NO_CROP_MAGNIFICATION = 63
+SEGMENTATION_MULT_FACTOR = 2.5
 
 
 class CropRings(object):
@@ -154,16 +155,19 @@ class CropRings(object):
     def run(
         self,
         min_no_crop_magnification: int = MIN_NO_CROP_MAGNIFICATION,
+        segmentation_mult_factor: float = SEGMENTATION_MULT_FACTOR,
     ) -> Tuple[NDArray[np.uint16], tuple[int, int, int, int]]:
         """
         min_no_crop_magnification: int
             Minimum magnification at which we do not need to crop the bead image (e.g., because it's zoomed enough)
+        segmentation_mult_factor: float
+            Value passed directly to SegmentRings::segment_cross as `input_mult_factor`
         """
         log.debug("segment rings")
 
         _, props = SegmentRings(
             self.img, self.filter_px_size, self.magnification, thresh=None
-        ).segment_cross(img=self.img, input_mult_factor=2.5)
+        ).segment_cross(img=self.img, input_mult_factor=segmentation_mult_factor)
 
         cross_y, cross_x = (
             props.loc[
