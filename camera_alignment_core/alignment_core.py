@@ -5,6 +5,7 @@ from aicsimageio import AICSImage
 import numpy
 import numpy.typing
 
+from .alignment_utils import get_center_z
 from .alignment_utils.alignment_info import (
     AlignmentInfo,
 )
@@ -13,9 +14,6 @@ from .alignment_utils.crop_argolight_rings_img import (
 )
 from .alignment_utils.estimate_alignment import (
     RingAlignment,
-)
-from .alignment_utils.get_center_z import (
-    GetCenterZ,
 )
 from .alignment_utils.segment_argolight_rings import (
     SegmentRings,
@@ -47,9 +45,9 @@ class AlignmentCore:
 
         # detect center z-slice on reference channel
         log.debug("detecing center z in ref")
-        ref_center_z, _ = GetCenterZ(
+        ref_center_z = get_center_z(
             img_stack=optical_control_image[reference_channel, :, :, :]
-        ).run()
+        )
 
         # Crop with all available rings
         log.debug("crop rings")
