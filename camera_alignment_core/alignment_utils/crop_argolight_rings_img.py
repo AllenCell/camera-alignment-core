@@ -7,11 +7,12 @@ from numpy.typing import NDArray
 import pandas as pd
 from skimage import measure
 
-from camera_alignment_core.constants import (
-    LOGGER_NAME,
-)
-
+from ..constants import LOGGER_NAME
 from .segment_argolight_rings import SegmentRings
+
+log = logging.getLogger(LOGGER_NAME)
+
+MIN_NO_CROP_MAGNIFICATION = 63
 
 
 class CropRings(object):
@@ -22,13 +23,10 @@ class CropRings(object):
         magnification: int,
         filter_px_size: int = 50,
     ):
-
         self.img = img
-        # self.bead_dist_px = 15 / (pixel_size / 10 ** -6)
         self.bead_dist_px = 15 / pixel_size
         self.filter_px_size = filter_px_size
         self.magnification = magnification
-        self.log = logging.getLogger(LOGGER_NAME)
 
         self.show_seg = False
 
@@ -127,6 +125,7 @@ class CropRings(object):
 
     def run(
         self,
+        min_no_crop_magnification: int = MIN_NO_CROP_MAGNIFICATION,
     ) -> Tuple[
         NDArray[np.uint16],
         tuple[int, int, int, int],
@@ -135,9 +134,13 @@ class CropRings(object):
         int,
         int,
     ]:
-        self.log.debug("segment rings")
+        """
+        min_no_crop_magnification: int
+            Minimum magnification at which we do not need to crop the bead image (e.g., because it's zoomed enough)
+        """
+        log.debug("segment rings")
 
-        seg_cross, props = SegmentRings(
+        _, props = SegmentRings(
             self.img, self.filter_px_size, self.magnification, thresh=None
         ).segment_cross(img=self.img, input_mult_factor=2.5)
 
@@ -150,8 +153,8 @@ class CropRings(object):
             ].values.tolist()[0],
         )
 
-        if self.magnification < 63:
-            self.log.debug("get crop dimensions")
+        if self.magnification < min_no_crop_magnification:
+            log.debug("get crop dimensions")
             crop_top, crop_bottom, crop_left, crop_right = self.get_crop_dimensions(
                 self.img, int(cross_y), int(cross_x), self.bead_dist_px
             )
@@ -163,20 +166,20 @@ class CropRings(object):
 
         crop_dimensions = (crop_top, crop_bottom, crop_left, crop_right)
 
-        self.log.debug(f"crop dimensions {crop_dimensions}")
+        log.debug(f"crop dimensions {crop_dimensions}")
         img_out = self.img[crop_top:crop_bottom, crop_left:crop_right]
 
         updated_cross_y = cross_y - crop_bottom
         updated_cross_x = cross_x - crop_left
 
-        self.log.debug(f"cross_y {updated_cross_y}")
-        self.log.debug(f"cross_x {updated_cross_x}")
-        self.log.debug("making grid")
+        log.debug(f"cross_y {updated_cross_y}")
+        log.debug(f"cross_x {updated_cross_x}")
+        log.debug("making grid")
         grid = self.make_grid(
             img_out, int(updated_cross_y), int(updated_cross_x), self.bead_dist_px
         )
 
-        self.log.debug("label image")
+        log.debug("label image")
         labelled_grid = measure.label(grid)
         props = measure.regionprops_table(
             labelled_grid, properties=["label", "area", "centroid"]
