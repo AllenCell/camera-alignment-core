@@ -22,6 +22,8 @@ from .alignment_utils.segment_argolight_rings import (
 )
 from .constants import LOGGER_NAME
 
+log = logging.getLogger(LOGGER_NAME)
+
 
 class AlignmentCore:
     """Wrapper for core of camera alignment algorithm"""
@@ -34,8 +36,6 @@ class AlignmentCore:
         magnification: int,
         px_size_xy: float,
     ) -> Tuple[numpy.typing.NDArray[numpy.uint16], AlignmentInfo]:
-
-        log = logging.getLogger(LOGGER_NAME)
 
         # if more than 4 dimensions, trip extra dims from beginning
         ndim = optical_control_image.ndim
