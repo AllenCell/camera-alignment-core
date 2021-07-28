@@ -13,6 +13,7 @@ log = logging.getLogger(LOGGER_NAME)
 
 MIN_NO_CROP_MAGNIFICATION = 63
 SEGMENTATION_MULT_FACTOR = 2.5
+BEAD_DISTANCE_UM = 15
 
 
 class CropRings(object):
@@ -22,9 +23,10 @@ class CropRings(object):
         pixel_size: float,
         magnification: int,
         filter_px_size: int = 50,
+        bead_distance: int = BEAD_DISTANCE_UM,
     ):
         self.img = img
-        self.bead_dist_px = 15 / pixel_size
+        self.bead_dist_px = bead_distance / pixel_size
         self.filter_px_size = filter_px_size
         self.magnification = magnification
 
