@@ -11,7 +11,7 @@ from skimage import transform as tf
 from .alignment_info import AlignmentInfo
 
 
-class RingAlignment(object):
+class RingAlignment:
     def __init__(
         self,
         ref_seg_rings: NDArray[np.uint16],
