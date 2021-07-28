@@ -30,8 +30,6 @@ class CropRings(object):
         self.filter_px_size = filter_px_size
         self.magnification = magnification
 
-        self.show_seg = False
-
     def get_crop_dimensions(
         self,
         img: NDArray[np.uint16],
