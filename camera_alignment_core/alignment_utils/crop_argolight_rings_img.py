@@ -16,7 +16,7 @@ SEGMENTATION_MULT_FACTOR = 2.5
 BEAD_DISTANCE_UM = 15
 
 
-class CropRings(object):
+class CropRings:
     def __init__(
         self,
         img: NDArray[np.uint16],
