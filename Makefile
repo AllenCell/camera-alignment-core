@@ -49,6 +49,10 @@ test:
 > $(PYTHON) -m pytest camera_alignment_core/tests/
 .PHONY: test
 
+test-exclude-slow:
+> $(PYTHON) -m pytest -m "not slow"
+.PHONY: test-exclude-slow
+
 clean:  ## clean all generated files
 > git clean -Xfd
 .PHONY: clean

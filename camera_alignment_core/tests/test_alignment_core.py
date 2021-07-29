@@ -33,6 +33,7 @@ class TestAlignmentCore:
         """You can use this to setup before each test"""
         self.alignment_core = AlignmentCore()
 
+    @pytest.mark.slow
     def test_generate_alignment_matrix(
         self,
         get_image: typing.Callable[[str], AICSImage],
@@ -114,6 +115,7 @@ class TestAlignmentCore:
             (GENERIC_CZI_URL, {"Raw 561nm": 1}),
         ],
     )
+    @pytest.mark.slow
     def test_get_channel_name_to_index_map(
         self,
         image_path,

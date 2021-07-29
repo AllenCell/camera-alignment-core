@@ -7,7 +7,7 @@ from numpy.typing import NDArray
 from skimage import measure
 
 from ..constants import LOGGER_NAME
-from .segment_argolight_rings import SegmentRings
+from .segment_rings import SegmentRings
 
 log = logging.getLogger(LOGGER_NAME)
 
@@ -30,9 +30,10 @@ class CropRings:
         self.filter_px_size = filter_px_size
         self.magnification = magnification
 
+    @staticmethod
     def get_crop_dimensions(
-        self,
-        img: NDArray[np.uint16],
+        img_height: int,
+        img_width: int,
         cross_y: int,
         cross_x: int,
         bead_dist_px: float,
@@ -64,15 +65,15 @@ class CropRings:
                 - (math.floor(cross_y / bead_dist_px) - (1 - crop_param)) * bead_dist_px
             )
 
-        if (img.shape[0] - cross_y) % bead_dist_px > (bead_dist_px * crop_param):
-            crop_bottom = img.shape[0]
+        if (img_height - cross_y) % bead_dist_px > (bead_dist_px * crop_param):
+            crop_bottom = img_height
         else:
-            crop_bottom = img.shape[0] - round(
-                img.shape[0]
+            crop_bottom = img_height - round(
+                img_height
                 - (
                     cross_y
                     + (
-                        math.floor((img.shape[0] - cross_y) / bead_dist_px)
+                        math.floor((img_height - cross_y) / bead_dist_px)
                         - (1 - crop_param)
                     )
                     * bead_dist_px
@@ -87,15 +88,15 @@ class CropRings:
                 - (math.floor(cross_x / bead_dist_px) - (1 - crop_param)) * bead_dist_px
             )
 
-        if (img.shape[1] - cross_x) % bead_dist_px > (bead_dist_px * crop_param):
-            crop_right = img.shape[1]
+        if (img_width - cross_x) % bead_dist_px > (bead_dist_px * crop_param):
+            crop_right = img_width
         else:
-            crop_right = img.shape[1] - round(
-                img.shape[1]
+            crop_right = img_width - round(
+                img_width
                 - (
                     cross_x
                     + (
-                        math.floor((img.shape[1] - cross_x) / bead_dist_px)
+                        math.floor((img_width - cross_x) / bead_dist_px)
                         - (1 - crop_param)
                     )
                     * bead_dist_px
@@ -181,7 +182,11 @@ class CropRings:
         if self.magnification < min_no_crop_magnification:
             log.debug("get crop dimensions")
             crop_top, crop_bottom, crop_left, crop_right = self.get_crop_dimensions(
-                self.img, int(cross_y), int(cross_x), self.bead_dist_px
+                self.img.shape[0],
+                self.img.shape[1],
+                int(cross_y),
+                int(cross_x),
+                self.bead_dist_px,
             )
         else:
             crop_top = 0
