@@ -1,6 +1,8 @@
 import typing
 
+import numpy
 import pytest
+from skimage.morphology import ball
 
 from camera_alignment_core.alignment_utils import (
     CropRings,
@@ -81,11 +83,3 @@ class TestCropRings:
         assert crop_bottom == expected.crop_bottom
         assert crop_left == expected.crop_left
         assert crop_right == expected.crop_right
-
-    def test_run(self):
-        # Arrange
-
-        # Act
-
-        # Assert
-        assert False  # TODO

@@ -98,7 +98,59 @@ class TestAlignmentCore:
         log.debug("Determinant (should be 1)")
         log.debug(matDet)
 
-        numpy.testing.assert_array_equal(expected_matrix, actual_alignment_matrix)
+        assert abs(1 - matDet) < 0.01
+
+    @pytest.mark.slow
+    def test_generate_alignment_matrix_reproducability(
+        self,
+        get_image: typing.Callable[[str], AICSImage],
+        caplog: pytest.LogCaptureFixture,
+        output: bool = False,
+    ):
+        # Arrange
+        caplog.set_level(logging.DEBUG, logger=LOGGER_NAME)
+        zsd_100x_optical_control_image = get_image(ZSD_100x_OPTICAL_CONTROL_IMAGE_URL)
+        optical_control_image_data = zsd_100x_optical_control_image.get_image_data(
+            "CZYX"
+        )
+        reference_channel = 1
+        shift_channel = 2
+        magnification = 100
+        pixel_size_xy = 0.108
+
+        # Act
+        (alignment_matrix_1, _,) = self.alignment_core.generate_alignment_matrix(
+            optical_control_image_data,
+            reference_channel,
+            shift_channel,
+            magnification,
+            pixel_size_xy,
+        )
+        (alignment_matrix_2, _,) = self.alignment_core.generate_alignment_matrix(
+            optical_control_image_data,
+            reference_channel,
+            shift_channel,
+            magnification,
+            pixel_size_xy,
+        )
+
+        mat1 = numpy.array(alignment_matrix_1.params)
+        mat1 = numpy.array([[round(val, 10) for val in row] for row in mat1])
+        mat2 = numpy.array(alignment_matrix_1.params)
+        mat2 = numpy.array([[round(val, 10) for val in row] for row in mat2])
+
+        # Assert
+        log.debug("First Estimated Matrix")
+        log.debug(mat1)
+
+        log.debug("Second Estimated Matrix")
+        log.debug(mat2)
+
+        matDet = numpy.linalg.det(numpy.matmul(mat1.T, mat2))
+        log.debug("Determinant (should be 1)")
+        log.debug(matDet)
+
+        assert abs(1 - matDet) < 0.01
 
     @pytest.mark.parametrize(
         ["image_path", "expectation"],
