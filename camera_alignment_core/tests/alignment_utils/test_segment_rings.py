@@ -1,13 +1,14 @@
-import typing
+import math
 
 import numpy
 from numpy.core.fromnumeric import mean
-import pytest
+import pandas
+from skimage.measure import label, regionprops
 from skimage.morphology import ball
 
 from camera_alignment_core.alignment_utils import (
+    RingAlignment,
     SegmentRings,
-    segment_rings,
 )
 
 
@@ -44,28 +45,44 @@ class TestSegmentRings:
             img=numpy.max(synthetic_image, axis=0),
             pixel_size=1,
             magnification=1,
-            thresh=None,
+            thresh=(50, 99),
             bead_distance_um=10,
             cross_size_um=numpy.sum(numpy.max(cross, axis=0).flatten()),
             ring_radius_um=3,
         ).run()
 
-        intersection = numpy.sum(
-            numpy.logical_and(
-                numpy.max(synthetic_image, axis=0) > 0,
-                seg_rings > 0,
-            )
-        )
-        union = numpy.sum(
-            numpy.logical_or(
-                numpy.max(synthetic_image, axis=0) > 0,
-                seg_rings > 0,
-            )
-        )
+        GT_props = regionprops(label(numpy.max(synthetic_GT, axis=0)))
+        seg_props = regionprops(label(seg_rings))
 
-        iou = intersection / union
+        GT_centroids = {}
+        seg_centroids = {}
 
-        print(f"iou: {iou}")
+        for i, obj in enumerate(GT_props):
+            GT_centroids[i] = obj.centroid
+        for i, obj in enumerate(seg_props):
+            seg_centroids[i] = obj.centroid
+
+        coor_dict = RingAlignment(
+            numpy.zeros((1)),
+            numpy.zeros((1)),
+            pandas.DataFrame(),
+            0,
+            numpy.zeros((1)),
+            numpy.zeros((1)),
+            pandas.DataFrame(),
+            0,
+        ).assign_ref_to_mov(GT_centroids, seg_centroids)
+
+        square_error = []
+        for GT_coor, seg_coor in coor_dict.items():
+
+            square_error.append(
+                math.sqrt(
+                    (GT_coor[0] - seg_coor[0]) ** 2 + (GT_coor[1] - seg_coor[1]) ** 2
+                )
+            )
+
+        mean_square_error = mean(square_error)
 
         # Assert
-        assert iou < 0.1
+        assert mean_square_error < 1

@@ -1,8 +1,6 @@
 import typing
 
-import numpy
 import pytest
-from skimage.morphology import ball
 
 from camera_alignment_core.alignment_utils import (
     CropRings,

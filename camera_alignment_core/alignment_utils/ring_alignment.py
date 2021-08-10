@@ -145,7 +145,7 @@ class RingAlignment:
 
     def run(
         self,
-    ) -> Tuple[tf.SimilarityTransform, AlignmentInfo,]:
+    ) -> Tuple[tf.SimilarityTransform, AlignmentInfo]:
         ref_centroid_dict = self.rings_coor_dict(
             self.ref_rings_props, self.ref_cross_label
         )

@@ -99,18 +99,6 @@ class SegmentRings:
         smooth = filters.gaussian(rescale, sigma=1, preserve_range=False)
         return smooth
 
-    def remove_small_objects_from_label(
-        self, label_img: np.typing.NDArray[np.uint16], filter_px_size: int = 100
-    ) -> Tuple[np.typing.NDArray[np.uint16], np.typing.NDArray[np.uint16]]:
-        filtered_seg = np.zeros(label_img.shape)
-        for obj in range(1, np.max(label_img) + 1):
-            obj_size = np.sum(label_img == obj)
-            if obj_size > filter_px_size:
-                filtered_seg[label_img == obj] = True
-        filtered_label = measure.label(filtered_seg)
-
-        return filtered_seg, filtered_label
-
     def segment_cross(
         self,
         img: np.typing.NDArray[np.uint16],
@@ -174,12 +162,10 @@ class SegmentRings:
         seg = np.zeros(img.shape)
         seg[img >= thresh] = True
 
+        seg = remove_small_objects(seg, filter_px_size)
         labelled_seg = measure.label(seg)
 
-        filtered_seg, filtered_label = self.remove_small_objects_from_label(
-            labelled_seg, filter_px_size=filter_px_size
-        )
-        return filtered_seg, filtered_label
+        return seg, labelled_seg
 
     def segment_rings_dot_filter(
         self,

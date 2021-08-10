@@ -4,7 +4,6 @@ from typing import Tuple
 
 import numpy as np
 from numpy.typing import NDArray
-from skimage import measure
 
 from ..constants import LOGGER_NAME
 from .segment_rings import SegmentRings
@@ -104,54 +103,6 @@ class CropRings:
             )
 
         return crop_top, crop_bottom, crop_left, crop_right
-
-    def make_grid(
-        self, img: NDArray[np.uint16], cross_y: int, cross_x: int, bead_dist_px: float
-    ) -> NDArray[np.bool_]:
-        grid = np.zeros(img.shape)
-
-        for y in np.arange(cross_y, 0, -bead_dist_px):
-            for x in np.arange(cross_x, 0, -bead_dist_px):
-                grid[int(y), int(x)] = True
-            for x in np.arange(cross_x, img.shape[1], bead_dist_px):
-                grid[int(y), int(x)] = True
-
-        for y in np.arange(cross_y, img.shape[0], bead_dist_px):
-            for x in np.arange(cross_x, 0, -bead_dist_px):
-                grid[int(y), int(x)] = True
-            for x in np.arange(cross_x, img.shape[1], bead_dist_px):
-                grid[int(y), int(x)] = True
-
-        return grid
-
-    def generate_slide_grid(
-        self,
-        img: NDArray[np.uint16],
-        centroid_cross_y: int,
-        centroid_cross_x: int,
-    ) -> Tuple[NDArray[np.bool_], dict[str, list], int]:
-        """
-        Given an image of the argolight rings, create a binary representation of the image,
-        label it's regions, and return that labelled representation and related info.
-
-        This is primarily useful/used in development.
-        """
-        grid = self.make_grid(
-            img, centroid_cross_y, centroid_cross_x, self.bead_dist_px
-        )
-
-        log.debug("label image")
-        labelled_grid = measure.label(grid)
-        props = measure.regionprops_table(
-            labelled_grid, properties=["label", "area", "centroid"]
-        )
-        center_cross_label = labelled_grid[centroid_cross_y, centroid_cross_x]
-
-        return (
-            labelled_grid,
-            props,
-            center_cross_label,
-        )
 
     def run(
         self,
