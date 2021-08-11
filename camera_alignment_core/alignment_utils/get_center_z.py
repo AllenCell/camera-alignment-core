@@ -1,4 +1,10 @@
+import logging
+
 import numpy as np
+
+from ..constants import LOGGER_NAME
+
+log = logging.getLogger(LOGGER_NAME)
 
 
 def get_center_z(
@@ -15,6 +21,7 @@ def get_center_z(
     -------
     center_z        index of center z-slice
     """
+    log.debug("finding center z")
     center_z = 0
     max_contrast = 0
     all_contrast = []
@@ -28,4 +35,6 @@ def get_center_z(
             center_z = z
             max_contrast = contrast
 
+    log.debug(f"center z: {center_z}")
+    log.debug(f"max contrast: {max_contrast}")
     return center_z

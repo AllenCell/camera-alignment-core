@@ -56,6 +56,7 @@ class CropRings:
         crop_left: left pixels to keep
         crop_right: right pixels to keep
         """
+        # get crop for top of image
         if cross_y % bead_dist_px > (bead_dist_px * crop_param):
             crop_top = 0
         else:
@@ -64,6 +65,7 @@ class CropRings:
                 - (math.floor(cross_y / bead_dist_px) - (1 - crop_param)) * bead_dist_px
             )
 
+        # get crop for bottom of image
         if (img_height - cross_y) % bead_dist_px > (bead_dist_px * crop_param):
             crop_bottom = img_height
         else:
@@ -79,6 +81,7 @@ class CropRings:
                 )
             )
 
+        # get crop for left side of image
         if cross_x % bead_dist_px > (bead_dist_px * crop_param):
             crop_left = 0
         else:
@@ -87,6 +90,7 @@ class CropRings:
                 - (math.floor(cross_x / bead_dist_px) - (1 - crop_param)) * bead_dist_px
             )
 
+        # get crop for right side of image
         if (img_width - cross_x) % bead_dist_px > (bead_dist_px * crop_param):
             crop_right = img_width
         else:
@@ -110,17 +114,19 @@ class CropRings:
         segmentation_mult_factor: float = SEGMENTATION_MULT_FACTOR,
     ) -> Tuple[NDArray[np.uint16], tuple[int, int, int, int]]:
         """
-        min_no_crop_magnification: int
+        Crop image closer to ring grid
+        :min_no_crop_magnification: int
             Minimum magnification at which we do not need to crop the bead image (e.g., because it's zoomed enough)
-        segmentation_mult_factor: float
+        :segmentation_mult_factor: float
             Value passed directly to SegmentRings::segment_cross as `input_mult_factor`
         """
         log.debug("segment rings")
-
+        # segment rings in image
         _, props = SegmentRings(
             self.img, self.filter_px_size, self.magnification, thresh=None
         ).segment_cross(img=self.img, input_mult_factor=segmentation_mult_factor)
 
+        # find centroid of cross (assumed to be largest object)
         cross_y, cross_x = (
             props.loc[
                 props["area"] == props["area"].max(), "centroid-0"
@@ -130,8 +136,9 @@ class CropRings:
             ].values.tolist()[0],
         )
 
+        # crop if image is below minimum maginification
         if self.magnification < min_no_crop_magnification:
-            log.debug("get crop dimensions")
+            log.debug("getting crop dimensions")
             crop_top, crop_bottom, crop_left, crop_right = self.get_crop_dimensions(
                 self.img.shape[0],
                 self.img.shape[1],
@@ -147,6 +154,7 @@ class CropRings:
 
         crop_dimensions = (crop_top, crop_bottom, crop_left, crop_right)
 
+        # crop image
         log.debug(f"crop dimensions {crop_dimensions}")
         img_out = self.img[crop_top:crop_bottom, crop_left:crop_right]
 

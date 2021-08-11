@@ -1,4 +1,5 @@
 from collections import OrderedDict
+import logging
 from typing import Dict, Tuple
 
 import numpy as np
@@ -8,7 +9,10 @@ from scipy.optimize import linear_sum_assignment
 from scipy.spatial import distance
 from skimage import transform as tf
 
+from ..constants import LOGGER_NAME
 from .alignment_info import AlignmentInfo
+
+log = logging.getLogger(LOGGER_NAME)
 
 
 class RingAlignment:
@@ -128,6 +132,8 @@ class RingAlignment:
             "rotate_angle": tform.rotation,
         }
 
+        log.debug(f"Estimated transform parameters: {tform_dict}")
+
         if method_logging:
             for param, value in tform_dict.items():
                 print(param + ": " + str(value))
@@ -146,6 +152,7 @@ class RingAlignment:
     def run(
         self,
     ) -> Tuple[tf.SimilarityTransform, AlignmentInfo]:
+        # get coordinate dictionaries
         ref_centroid_dict = self.rings_coor_dict(
             self.ref_rings_props, self.ref_cross_label
         )
@@ -153,16 +160,20 @@ class RingAlignment:
             self.mov_rings_props, self.mov_cross_label
         )
 
+        # match reference and moving beads
         ref_mov_coor_dict = self.assign_ref_to_mov(ref_centroid_dict, mov_centroid_dict)
 
+        # yx to xy coordinates
         rev_coor_dict = self.change_coor_system(ref_mov_coor_dict)
 
+        # estimate similarity transform
         tform = tf.estimate_transform(
             "similarity",
             np.asarray(list(rev_coor_dict.keys())),
             np.asarray(list(rev_coor_dict.values())),
         )
 
+        # create alignment info
         align_info = self.report_similarity_matrix_parameters(tform)
 
         return tform, align_info
