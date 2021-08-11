@@ -112,7 +112,7 @@ class CropRings:
         self,
         min_no_crop_magnification: int = MIN_NO_CROP_MAGNIFICATION,
         segmentation_mult_factor: float = SEGMENTATION_MULT_FACTOR,
-    ) -> Tuple[NDArray[np.uint16], tuple[int, int, int, int]]:
+    ) -> Tuple[NDArray[np.uint16], Tuple[int, int, int, int]]:
         """
         Crop image closer to ring grid
         :min_no_crop_magnification: int
