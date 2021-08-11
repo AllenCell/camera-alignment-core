@@ -162,7 +162,7 @@ class SegmentRings:
         seg = np.zeros(img.shape)
         seg[img >= thresh] = True
 
-        seg = remove_small_objects(seg, filter_px_size)
+        seg = remove_small_objects(seg > 0, int(filter_px_size))
         labelled_seg = measure.label(seg)
 
         return seg, labelled_seg
