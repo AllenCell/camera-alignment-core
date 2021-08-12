@@ -54,22 +54,43 @@ class TestAlignmentCore:
         # This is the output of the old alignment code for the optical control saved at
         # /allen/aics/microscopy/PRODUCTION/OpticalControl/ArgoLight/Argo_QC_Daily/ZSD1/ZSD1_argo_100X_SLF-015_20210624
 
+        # Original Matrix
+        # expected_matrix = numpy.array(
+        #     [
+        #         [
+        #             1.001828593258253797e00,
+        #             -5.167305751106508228e-03,
+        #             -5.272046139691610733e-02,
+        #         ],
+        #         [
+        #             5.167305751106508228e-03,
+        #             1.001828593258254241e00,
+        #             -3.061419473755620402e00,
+        #         ],
+        #         [
+        #             0.000000000000000000e00,
+        #             0.000000000000000000e00,
+        #             1.000000000000000000e00,
+        #         ],
+        #     ]
+        # )
+
         expected_matrix = numpy.array(
             [
                 [
-                    1.001828593258253797e00,
-                    -5.167305751106508228e-03,
-                    -5.272046139691610733e-02,
+                    1.00022523e00,
+                    8.68926296e-05,
+                    -2.10827503e-01,
                 ],
                 [
-                    5.167305751106508228e-03,
-                    1.001828593258254241e00,
-                    -3.061419473755620402e00,
+                    -8.68926296e-05,
+                    1.00022523e00,
+                    2.84065985e-02,
                 ],
                 [
-                    0.000000000000000000e00,
-                    0.000000000000000000e00,
-                    1.000000000000000000e00,
+                    0.00000000e00,
+                    0.00000000e00,
+                    1.00000000e00,
                 ],
             ]
         )
@@ -98,7 +119,7 @@ class TestAlignmentCore:
         log.debug("Determinant (should be 1)")
         log.debug(matDet)
 
-        assert abs(1 - matDet) < 0.01
+        assert abs(1 - matDet) < 0.001
 
     @pytest.mark.slow
     def test_generate_alignment_matrix_reproducability(
@@ -135,9 +156,7 @@ class TestAlignmentCore:
         )
 
         mat1 = numpy.array(alignment_matrix_1.params)
-        mat1 = numpy.array([[round(val, 10) for val in row] for row in mat1])
         mat2 = numpy.array(alignment_matrix_1.params)
-        mat2 = numpy.array([[round(val, 10) for val in row] for row in mat2])
 
         # Assert
         log.debug("First Estimated Matrix")
@@ -150,7 +169,7 @@ class TestAlignmentCore:
         log.debug("Determinant (should be 1)")
         log.debug(matDet)
 
-        assert abs(1 - matDet) < 0.01
+        assert abs(1 - matDet) < 0.001
 
     @pytest.mark.parametrize(
         ["image_path", "expectation"],
