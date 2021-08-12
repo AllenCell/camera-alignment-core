@@ -100,6 +100,7 @@ class AlignmentCore:
 
         return tform, align_info
 
+    # Input a CZYX image ndarray to the alignment function
     def align_image(
         self,
         alignment_matrix: numpy.typing.NDArray[numpy.float16],
@@ -111,6 +112,7 @@ class AlignmentCore:
         aligned_image = numpy.zeros(image.shape)
         for channel, index in channels_to_align.items():
             if channel in ("Raw brightfield", "Raw 638nm"):
+                # aligned_slice is just one channel of the aligned image (ZYX dims)
                 aligned_slice = self._similarity_matrix_transform(
                     alignment_matrix, image[index]
                 )
@@ -143,6 +145,7 @@ class AlignmentCore:
 
         return channel_info_dict
 
+    # Crops a CZYX image based on the magnification used to generate the image
     def _crop(
         self, image: numpy.typing.NDArray[numpy.uint16], magnification: int
     ) -> numpy.typing.NDArray[numpy.uint16]:
@@ -164,7 +167,7 @@ class AlignmentCore:
         half_diff_x = (image.shape[-1] - out_x) // 2
         half_diff_y = (image.shape[-2] - out_y) // 2
         cropped_image = image[
-            :, half_diff_y : half_diff_y + out_y, half_diff_x : half_diff_x + out_x
+            :, :, half_diff_y : half_diff_y + out_y, half_diff_x : half_diff_x + out_x
         ]
         if numpy.any(cropped_image < 50):
             # double check if there is any black pixels, 50 is a relaxed cutoff value
@@ -173,8 +176,6 @@ class AlignmentCore:
             half_diff_x = (cropped_image.shape[-1] - out_x) // 2
             half_diff_y = (cropped_image.shape[-2] - out_y) // 2
             cropped_image = cropped_image[
-                0,
-                :,
                 :,
                 :,
                 half_diff_y : half_diff_y + out_y,

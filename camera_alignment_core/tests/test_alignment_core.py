@@ -239,3 +239,29 @@ class TestAlignmentCore:
 
         # Assert
         assert result == expectation
+
+    # TODO: Add 63x and 20x images to test
+    @pytest.mark.parametrize(
+        ["image_path", "magnification", "expected_shape"],
+        [
+            (
+                UNALIGNED_ZSD1_IMAGE_URL,
+                100,
+                (4, 75, 600, 900),
+            ),
+        ],
+    )
+    def test_crop(
+        self,
+        image_path,
+        magnification,
+        expected_shape,
+        get_image: typing.Callable[[str], AICSImage],
+        caplog: pytest.LogCaptureFixture,
+    ):
+        caplog.set_level(logging.DEBUG, logger=LOGGER_NAME)
+        image = get_image(image_path).get_image_dask_data()[0]
+
+        result = self.alignment_core._crop(image, magnification)
+
+        assert result.shape == expected_shape
