@@ -15,7 +15,10 @@ from .alignment_utils import (
 )
 from .constants import LOGGER_NAME
 
-from .exception import IncompatibleImageException
+from .exception import (
+    IncompatibleImageException,
+    UnsupportedMagnification,
+)
 
 log = logging.getLogger(LOGGER_NAME)
 
@@ -102,6 +105,7 @@ class AlignmentCore:
         alignment_matrix: numpy.typing.NDArray[numpy.float16],
         image: numpy.typing.NDArray[numpy.uint16],
         channels_to_align: Dict[str, int],
+        magnification: int,
     ) -> numpy.typing.NDArray[numpy.uint16]:
 
         aligned_image = numpy.zeros(image.shape)
@@ -114,7 +118,9 @@ class AlignmentCore:
             elif channel in ("Raw 488nm", "Raw 405nm", "Raw 561nm"):
                 aligned_image[index] = image[index]
 
-        return aligned_image.astype(numpy.uint16)
+        aligned_cropped_image = self._crop(aligned_image, magnification)
+
+        return aligned_cropped_image
 
     def get_channel_name_to_index_map(self, image: AICSImage) -> Dict[str, int]:
         """
@@ -137,14 +143,58 @@ class AlignmentCore:
 
         return channel_info_dict
 
-    def crop(self):
-        raise NotImplementedError("align_image")
+    def _crop(
+        self, image: numpy.typing.NDArray[numpy.uint16], magnification: int
+    ) -> numpy.typing.NDArray[numpy.uint16]:
+        if magnification == 100:
+            out_x = 900
+            out_y = 600
+        elif magnification == 63:
+            out_x = 1200
+            out_y = 900
+        elif magnification == 20:
+            out_x = 1600
+            out_y = 1200
+        else:
+            raise UnsupportedMagnification(
+                f"Cannot perform image alignment at {str(magnification)} invalid image dimensions."
+            )
+
+        image = image.astype(numpy.uint16)
+        half_diff_x = (image.shape[-1] - out_x) // 2
+        half_diff_y = (image.shape[-2] - out_y) // 2
+        cropped_image = image[
+            :, half_diff_y : half_diff_y + out_y, half_diff_x : half_diff_x + out_x
+        ]
+        if numpy.any(cropped_image < 50):
+            # double check if there is any black pixels, 50 is a relaxed cutoff value
+            out_x = out_x - 20
+            out_y = out_y - 20
+            half_diff_x = (cropped_image.shape[-1] - out_x) // 2
+            half_diff_y = (cropped_image.shape[-2] - out_y) // 2
+            cropped_image = cropped_image[
+                0,
+                :,
+                :,
+                :,
+                half_diff_y : half_diff_y + out_y,
+                half_diff_x : half_diff_x + out_x,
+            ]
+        assert not numpy.any(
+            cropped_image < 50
+        ), "Black pixels are detected, either from original image or due to alignment"
+
+        return cropped_image
 
     def _similarity_matrix_transform(
         self,
         alignment_matrix: numpy.typing.NDArray[numpy.float16],
         slice: numpy.typing.NDArray[numpy.uint16],
     ) -> numpy.typing.NDArray[numpy.uint16]:
+        """
+        Applies an affine transformation matrix to a 3D (ZYX)
+        slice of a multi-channel image
+        """
         if len(slice.shape) == 2:
             after_transform = transform.warp(
                 slice, inverse_map=alignment_matrix, order=3
