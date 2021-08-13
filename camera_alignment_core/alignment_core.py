@@ -1,9 +1,20 @@
-import typing
+import logging
+from typing import Dict, List, Tuple
 
 from aicsimageio import AICSImage
+import numpy
 import numpy.typing
 
-from .alignment_info import AlignmentInfo
+from .alignment_utils import (
+    AlignmentInfo,
+    CropRings,
+    RingAlignment,
+    SegmentRings,
+    get_center_z,
+)
+from .constants import LOGGER_NAME
+
+log = logging.getLogger(LOGGER_NAME)
 
 
 class AlignmentCore:
@@ -11,22 +22,85 @@ class AlignmentCore:
 
     def generate_alignment_matrix(
         self,
-        optical_control_image: numpy.typing.ArrayLike,
+        optical_control_image: numpy.typing.NDArray[numpy.uint16],
         reference_channel: int,
         shift_channel: int,
         magnification: int,
-    ) -> typing.Tuple[numpy.typing.ArrayLike, AlignmentInfo]:
-        raise NotImplementedError("generate_alignment_matrix")
+        px_size_xy: float,
+    ) -> Tuple[numpy.typing.NDArray[numpy.uint16], AlignmentInfo]:
+
+        # if more than 4 dimensions, trip extra dims from beginning
+        ndim = optical_control_image.ndim
+        log.debug(f"image has shape {ndim}")
+        while optical_control_image.ndim > 4:
+            optical_control_image = optical_control_image[0, ...]
+            ndim = optical_control_image.ndim
+            log.debug(f"image has shape {ndim}")
+
+        # detect center z-slice on reference channel
+        log.debug("detecing center z in ref")
+        ref_center_z = get_center_z(
+            img_stack=optical_control_image[reference_channel, :, :, :]
+        )
+
+        # Crop with all available rings
+        log.debug("crop rings")
+        ref_crop, crop_dims = CropRings(
+            img=optical_control_image[reference_channel, ref_center_z, :, :],
+            pixel_size=px_size_xy,
+            magnification=magnification,
+            filter_px_size=50,
+        ).run()
+
+        mov_crop = optical_control_image[
+            shift_channel,
+            ref_center_z,
+            crop_dims[0] : crop_dims[1],
+            crop_dims[2] : crop_dims[3],
+        ]
+
+        # segment rings on reference image
+        log.debug("segment rings in ref")
+        (
+            ref_seg_rings,
+            ref_seg_rings_label,
+            ref_props_df,
+            ref_cross_label,
+        ) = SegmentRings(ref_crop, px_size_xy, magnification, thresh=None).run()
+
+        # segment rings on moving image
+        log.debug("segment rings in moving")
+        (
+            mov_seg_rings,
+            mov_seg_rings_label,
+            mov_props_df,
+            mov_cross_label,
+        ) = SegmentRings(mov_crop, px_size_xy, magnification, thresh=None).run()
+
+        # Create alignment from segmentation
+        log.debug("Creating alignment matrix")
+        tform, align_info = RingAlignment(
+            ref_seg_rings,
+            ref_seg_rings_label,
+            ref_props_df,
+            ref_cross_label,
+            mov_seg_rings,
+            mov_seg_rings_label,
+            mov_props_df,
+            mov_cross_label,
+        ).run()
+
+        return tform, align_info
 
     def align_image(
         self,
-        alignment_matrix: numpy.typing.ArrayLike,
-        image: numpy.typing.ArrayLike,
-        channels_to_align: typing.List[int],
-    ) -> numpy.typing.ArrayLike:
+        alignment_matrix: numpy.typing.NDArray[numpy.float16],
+        image: numpy.typing.NDArray[numpy.uint16],
+        channels_to_align: List[int],
+    ) -> numpy.typing.NDArray[numpy.uint16]:
         raise NotImplementedError("align_image")
 
-    def get_channel_name_to_index_map(self, image: AICSImage) -> typing.Dict[str, int]:
+    def get_channel_name_to_index_map(self, image: AICSImage) -> Dict[str, int]:
         """
         Maps all channels in a split image to an index of where the channel is in the image
         Format is {"Raw channel_name" : Channel index}

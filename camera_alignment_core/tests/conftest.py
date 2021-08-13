@@ -8,7 +8,9 @@ import urllib.request
 from aicsimageio import AICSImage
 import pytest
 
-from camera_alignment_core import LOGGER_NAME
+from camera_alignment_core.constants import (
+    LOGGER_NAME,
+)
 
 log = logging.getLogger(LOGGER_NAME)
 

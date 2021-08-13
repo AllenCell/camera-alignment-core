@@ -1,7 +1,5 @@
 from .alignment_core import AlignmentCore
 
-LOGGER_NAME = "camera_alignment_core"
-
 __author__ = "AICS Software"
 __email__ = "aditya.nath@alleninstitute.org"
 # Do not edit this string manually, always use bumpversion
@@ -13,4 +11,4 @@ def get_module_version():
     return __version__
 
 
-__all__ = ("AlignmentCore", "get_module_version", "LOGGER_NAME")
+__all__ = ("AlignmentCore", "get_module_version")
