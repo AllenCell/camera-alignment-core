@@ -1,0 +1,408 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>camera_alignment_core.alignment_utils.ring_alignment &mdash; camera-alignment-core 0.1.0 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+    
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home"> camera-alignment-core
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.1.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../index.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../installation.html">Installation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../installation.html#stable-release">Stable release</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../installation.html#from-sources">From sources</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules.html">Package modules</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../camera_alignment_core.html">camera_alignment_core package</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../camera_alignment_core.html#subpackages">Subpackages</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../camera_alignment_core.alignment_utils.html">camera_alignment_core.alignment_utils package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../camera_alignment_core.bin.html">camera_alignment_core.bin package</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../camera_alignment_core.html#submodules">Submodules</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../camera_alignment_core.html#module-camera_alignment_core.alignment_core">camera_alignment_core.alignment_core module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../camera_alignment_core.html#module-camera_alignment_core.constants">camera_alignment_core.constants module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../camera_alignment_core.html#module-camera_alignment_core">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../contributing.html">Contributing</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../contributing.html#get-started">Get Started!</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../contributing.html#deploying">Deploying</a></li>
+</ul>
+</li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">camera-alignment-core</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+          <li><a href="../../camera_alignment_core.html">camera_alignment_core</a> &raquo;</li>
+        
+      <li>camera_alignment_core.alignment_utils.ring_alignment</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for camera_alignment_core.alignment_utils.ring_alignment</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">OrderedDict</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Tuple</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">numpy.typing</span> <span class="kn">import</span> <span class="n">NDArray</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">from</span> <span class="nn">scipy.optimize</span> <span class="kn">import</span> <span class="n">linear_sum_assignment</span>
+<span class="kn">from</span> <span class="nn">scipy.spatial</span> <span class="kn">import</span> <span class="n">distance</span>
+<span class="kn">from</span> <span class="nn">skimage</span> <span class="kn">import</span> <span class="n">transform</span> <span class="k">as</span> <span class="n">tf</span>
+
+<span class="kn">from</span> <span class="nn">..constants</span> <span class="kn">import</span> <span class="n">LOGGER_NAME</span>
+<span class="kn">from</span> <span class="nn">.alignment_info</span> <span class="kn">import</span> <span class="n">AlignmentInfo</span>
+
+<span class="n">log</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">LOGGER_NAME</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="RingAlignment"><a class="viewcode-back" href="../../../camera_alignment_core.alignment_utils.html#camera_alignment_core.alignment_utils.ring_alignment.RingAlignment">[docs]</a><span class="k">class</span> <span class="nc">RingAlignment</span><span class="p">:</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">ref_seg_rings</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">uint16</span><span class="p">],</span>
+        <span class="n">ref_label_rings</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">uint16</span><span class="p">],</span>
+        <span class="n">ref_rings_props</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
+        <span class="n">ref_cross_label</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+        <span class="n">mov_seg_rings</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">uint16</span><span class="p">],</span>
+        <span class="n">mov_label_rings</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">uint16</span><span class="p">],</span>
+        <span class="n">mov_rings_props</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
+        <span class="n">mov_cross_label</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ref_seg_rings</span> <span class="o">=</span> <span class="n">ref_seg_rings</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mov_label_rings</span> <span class="o">=</span> <span class="n">ref_label_rings</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ref_rings_props</span> <span class="o">=</span> <span class="n">ref_rings_props</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ref_cross_label</span> <span class="o">=</span> <span class="n">ref_cross_label</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mov_seg_rings</span> <span class="o">=</span> <span class="n">mov_seg_rings</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mov_label_rings</span> <span class="o">=</span> <span class="n">mov_label_rings</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mov_rings_props</span> <span class="o">=</span> <span class="n">mov_rings_props</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mov_cross_label</span> <span class="o">=</span> <span class="n">mov_cross_label</span>
+
+<div class="viewcode-block" id="RingAlignment.assign_ref_to_mov"><a class="viewcode-back" href="../../../camera_alignment_core.alignment_utils.html#camera_alignment_core.alignment_utils.ring_alignment.RingAlignment.assign_ref_to_mov">[docs]</a>    <span class="k">def</span> <span class="nf">assign_ref_to_mov</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">updated_ref_peak_dict</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]],</span>
+        <span class="n">updated_mov_peak_dict</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]],</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">],</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]]:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Assigns beads from moving image to reference image using</span>
+<span class="sd">        linear_sum_assignment to reduce the distance between the same bead on</span>
+<span class="sd">        the separate channels. In case where there is more beads in one channel</span>
+<span class="sd">        than the other, this method will throw off the extra bead that cannot</span>
+<span class="sd">        be assigned to one, single bead on the other image.</span>
+
+<span class="sd">        :param updated_ref_peak_dict: A dictionary</span>
+<span class="sd">            ({bead_number: (coor_y, coor_x)}) from reference beads</span>
+<span class="sd">        :param updated_mov_peak_dict:  A dictionary</span>
+<span class="sd">            ({bead_number: (coor_y, coor_x)}) from moving beads</span>
+<span class="sd">        :return:</span>
+<span class="sd">            ref_mov_coor_dict: A dictionary mapping the reference bead coordinates and moving bead coordinates</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">updated_ref_peak</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">OrderedDict</span><span class="p">(</span><span class="n">updated_ref_peak_dict</span><span class="p">)</span><span class="o">.</span><span class="n">items</span><span class="p">())</span>
+        <span class="n">updated_mov_peak</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">OrderedDict</span><span class="p">(</span><span class="n">updated_mov_peak_dict</span><span class="p">)</span><span class="o">.</span><span class="n">items</span><span class="p">())</span>
+
+        <span class="n">dist_tx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">updated_ref_peak</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">updated_mov_peak</span><span class="p">)))</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="p">(</span><span class="n">bead_ref</span><span class="p">,</span> <span class="n">coor_ref</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">updated_ref_peak</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">j</span><span class="p">,</span> <span class="p">(</span><span class="n">bead_mov</span><span class="p">,</span> <span class="n">coor_mov</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">updated_mov_peak</span><span class="p">):</span>
+                <span class="n">dist_tx</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">distance</span><span class="o">.</span><span class="n">euclidean</span><span class="p">(</span><span class="n">coor_ref</span><span class="p">,</span> <span class="n">coor_mov</span><span class="p">)</span>
+
+        <span class="n">ref_ind</span><span class="p">,</span> <span class="n">mov_ind</span> <span class="o">=</span> <span class="n">linear_sum_assignment</span><span class="p">(</span><span class="n">dist_tx</span><span class="p">)</span>
+
+        <span class="n">ref_mov_coor_dict</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">num_bead</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">ref_ind</span><span class="p">)):</span>
+            <span class="n">ref_mov_coor_dict</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
+                <span class="p">{</span>
+                    <span class="n">updated_ref_peak</span><span class="p">[</span><span class="n">ref_ind</span><span class="p">[</span><span class="n">num_bead</span><span class="p">]][</span><span class="mi">1</span><span class="p">]:</span> <span class="n">updated_mov_peak</span><span class="p">[</span>
+                        <span class="n">mov_ind</span><span class="p">[</span><span class="n">num_bead</span><span class="p">]</span>
+                    <span class="p">][</span><span class="mi">1</span><span class="p">]</span>
+                <span class="p">}</span>
+            <span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">ref_mov_coor_dict</span></div>
+
+<div class="viewcode-block" id="RingAlignment.rings_coor_dict"><a class="viewcode-back" href="../../../camera_alignment_core.alignment_utils.html#camera_alignment_core.alignment_utils.ring_alignment.RingAlignment.rings_coor_dict">[docs]</a>    <span class="k">def</span> <span class="nf">rings_coor_dict</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">props</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">cross_label</span><span class="p">:</span> <span class="nb">int</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]]:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Generate a dictionary from regionprops_table in the form of {label: (coor_y, coor_x)} for rings image</span>
+<span class="sd">        :param props: a dataframe containing regionprops_table output</span>
+<span class="sd">        :param cross_label: Integer value representing where the center cross is in the rings image</span>
+<span class="sd">        :return:</span>
+<span class="sd">            img_dict: A dictionary of label to coordinates</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">img_dict</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">props</span><span class="o">.</span><span class="n">iterrows</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">row</span><span class="p">[</span><span class="s2">&quot;label&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">cross_label</span><span class="p">:</span>
+                <span class="n">img_dict</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">row</span><span class="p">[</span><span class="s2">&quot;label&quot;</span><span class="p">]:</span> <span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s2">&quot;centroid-0&quot;</span><span class="p">],</span> <span class="n">row</span><span class="p">[</span><span class="s2">&quot;centroid-1&quot;</span><span class="p">])})</span>
+
+        <span class="k">return</span> <span class="n">img_dict</span></div>
+
+<div class="viewcode-block" id="RingAlignment.change_coor_system"><a class="viewcode-back" href="../../../camera_alignment_core.alignment_utils.html#camera_alignment_core.alignment_utils.ring_alignment.RingAlignment.change_coor_system">[docs]</a>    <span class="k">def</span> <span class="nf">change_coor_system</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">coor_dict</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">],</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]]</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">],</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]]:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Changes coordinates in a dictionary from {(y1, x1):(y2, x2)} to {(x1, y1): (x2, y2)}</span>
+<span class="sd">        :param coor_dict: A dictionary of coordinates in the form of {(y1, x1):(y2, x2)}</span>
+<span class="sd">        :return:</span>
+<span class="sd">            An updated reversed coordinate dictionary that is {(x1, y1): (x2, y2)}</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">rev_yx_to_xy</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">coor_ref</span><span class="p">,</span> <span class="n">coor_mov</span> <span class="ow">in</span> <span class="n">coor_dict</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">rev_yx_to_xy</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
+                <span class="p">{(</span><span class="n">coor_ref</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">coor_ref</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span> <span class="p">(</span><span class="n">coor_mov</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">coor_mov</span><span class="p">[</span><span class="mi">0</span><span class="p">])}</span>
+            <span class="p">)</span>
+        <span class="k">return</span> <span class="n">rev_yx_to_xy</span></div>
+
+<div class="viewcode-block" id="RingAlignment.report_similarity_matrix_parameters"><a class="viewcode-back" href="../../../camera_alignment_core.alignment_utils.html#camera_alignment_core.alignment_utils.ring_alignment.RingAlignment.report_similarity_matrix_parameters">[docs]</a>    <span class="k">def</span> <span class="nf">report_similarity_matrix_parameters</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">tform</span><span class="p">:</span> <span class="n">tf</span><span class="o">.</span><span class="n">SimilarityTransform</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">AlignmentInfo</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Reports similarity matrix and its parameters</span>
+<span class="sd">        :param tform: A transform generated from skimage.transform.estimate_transform</span>
+<span class="sd">        :param method_logging: A boolean to indicate if printing/logging statements is selected</span>
+<span class="sd">        :return: A dictionary with the following keys and values:</span>
+<span class="sd">            transform: A transform to be applied to moving images</span>
+<span class="sd">            scaling: Uniform scaling parameter</span>
+<span class="sd">            shift_y: Shift in y</span>
+<span class="sd">            shift_x: Shift in x</span>
+<span class="sd">            rotate_angle: Rotation angle</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">tform_dict</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;transform&quot;</span><span class="p">:</span> <span class="n">tform</span><span class="p">,</span>
+            <span class="s2">&quot;scaling&quot;</span><span class="p">:</span> <span class="n">tform</span><span class="o">.</span><span class="n">scale</span><span class="p">,</span>
+            <span class="s2">&quot;shift_y&quot;</span><span class="p">:</span> <span class="n">tform</span><span class="o">.</span><span class="n">translation</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+            <span class="s2">&quot;shift_x&quot;</span><span class="p">:</span> <span class="n">tform</span><span class="o">.</span><span class="n">translation</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+            <span class="s2">&quot;rotate_angle&quot;</span><span class="p">:</span> <span class="n">tform</span><span class="o">.</span><span class="n">rotation</span><span class="p">,</span>
+        <span class="p">}</span>
+
+        <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">tform_dict</span><span class="p">)</span>
+
+        <span class="n">align_info</span> <span class="o">=</span> <span class="n">AlignmentInfo</span><span class="p">(</span>
+            <span class="n">tform</span><span class="o">=</span><span class="n">tform</span><span class="p">,</span>
+            <span class="n">rotation</span><span class="o">=</span><span class="n">tform</span><span class="o">.</span><span class="n">rotation</span><span class="p">,</span>
+            <span class="n">shift_x</span><span class="o">=</span><span class="n">tform</span><span class="o">.</span><span class="n">translation</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+            <span class="n">shift_y</span><span class="o">=</span><span class="n">tform</span><span class="o">.</span><span class="n">translation</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+            <span class="n">z_offset</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+            <span class="n">scaling</span><span class="o">=</span><span class="n">tform</span><span class="o">.</span><span class="n">scale</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">align_info</span></div>
+
+<div class="viewcode-block" id="RingAlignment.run"><a class="viewcode-back" href="../../../camera_alignment_core.alignment_utils.html#camera_alignment_core.alignment_utils.ring_alignment.RingAlignment.run">[docs]</a>    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">tf</span><span class="o">.</span><span class="n">SimilarityTransform</span><span class="p">,</span> <span class="n">AlignmentInfo</span><span class="p">]:</span>
+        <span class="c1"># get coordinate dictionaries</span>
+        <span class="n">ref_centroid_dict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">rings_coor_dict</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ref_rings_props</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">ref_cross_label</span>
+        <span class="p">)</span>
+        <span class="n">mov_centroid_dict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">rings_coor_dict</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">mov_rings_props</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">mov_cross_label</span>
+        <span class="p">)</span>
+
+        <span class="c1"># match reference and moving beads</span>
+        <span class="n">ref_mov_coor_dict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">assign_ref_to_mov</span><span class="p">(</span><span class="n">ref_centroid_dict</span><span class="p">,</span> <span class="n">mov_centroid_dict</span><span class="p">)</span>
+
+        <span class="c1"># yx to xy coordinates</span>
+        <span class="n">rev_coor_dict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">change_coor_system</span><span class="p">(</span><span class="n">ref_mov_coor_dict</span><span class="p">)</span>
+
+        <span class="c1"># estimate similarity transform</span>
+        <span class="n">tform</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">estimate_transform</span><span class="p">(</span>
+            <span class="s2">&quot;similarity&quot;</span><span class="p">,</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">rev_coor_dict</span><span class="o">.</span><span class="n">keys</span><span class="p">())),</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">rev_coor_dict</span><span class="o">.</span><span class="n">values</span><span class="p">())),</span>
+        <span class="p">)</span>
+
+        <span class="c1"># create alignment info</span>
+        <span class="n">align_info</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">report_similarity_matrix_parameters</span><span class="p">(</span><span class="n">tform</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">tform</span><span class="p">,</span> <span class="n">align_info</span></div></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2021, AICS Software.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

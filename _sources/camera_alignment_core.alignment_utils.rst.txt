@@ -1,0 +1,53 @@
+camera\_alignment\_core.alignment\_utils package
+================================================
+
+Submodules
+----------
+
+camera\_alignment\_core.alignment\_utils.alignment\_info module
+---------------------------------------------------------------
+
+.. automodule:: camera_alignment_core.alignment_utils.alignment_info
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+camera\_alignment\_core.alignment\_utils.crop\_rings module
+-----------------------------------------------------------
+
+.. automodule:: camera_alignment_core.alignment_utils.crop_rings
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+camera\_alignment\_core.alignment\_utils.get\_center\_z module
+--------------------------------------------------------------
+
+.. automodule:: camera_alignment_core.alignment_utils.get_center_z
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+camera\_alignment\_core.alignment\_utils.ring\_alignment module
+---------------------------------------------------------------
+
+.. automodule:: camera_alignment_core.alignment_utils.ring_alignment
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+camera\_alignment\_core.alignment\_utils.segment\_rings module
+--------------------------------------------------------------
+
+.. automodule:: camera_alignment_core.alignment_utils.segment_rings
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Module contents
+---------------
+
+.. automodule:: camera_alignment_core.alignment_utils
+   :members:
+   :undoc-members:
+   :show-inheritance:

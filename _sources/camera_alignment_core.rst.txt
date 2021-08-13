@@ -7,6 +7,7 @@ Subpackages
 .. toctree::
    :maxdepth: 4
 
+   camera_alignment_core.alignment_utils
    camera_alignment_core.bin
 
 Submodules
@@ -20,10 +21,10 @@ camera\_alignment\_core.alignment\_core module
    :undoc-members:
    :show-inheritance:
 
-camera\_alignment\_core.alignment\_info module
-----------------------------------------------
+camera\_alignment\_core.constants module
+----------------------------------------
 
-.. automodule:: camera_alignment_core.alignment_info
+.. automodule:: camera_alignment_core.constants
    :members:
    :undoc-members:
    :show-inheritance:
