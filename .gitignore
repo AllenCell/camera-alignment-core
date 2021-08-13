@@ -110,3 +110,4 @@ ENV/
 
 # test files
 camera_alignment_core/tests/tmp_results
+*.tiff

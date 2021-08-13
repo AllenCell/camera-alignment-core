@@ -119,6 +119,9 @@ class TestAlignmentCore:
         log.debug("Determinant (should be 1)")
         log.debug(matDet)
 
+        # These matrices appear identical, but for unknown reasons are never
+        # perfect matches in python. This test allows for them to be compared
+        # to within a degree that does not affect the final results of alignment
         assert abs(1 - matDet) < 0.001
 
     @pytest.mark.slow
@@ -169,6 +172,9 @@ class TestAlignmentCore:
         log.debug("Determinant (should be 1)")
         log.debug(matDet)
 
+        # These matrices appear identical, but for unknown reasons are never
+        # perfect matches in python. This test allows for them to be compared
+        # to within a degree that does not affect the final results of alignment
         assert abs(1 - matDet) < 0.001
 
     @pytest.mark.parametrize(

@@ -85,4 +85,7 @@ class TestSegmentRings:
         mean_square_error = mean(square_error)
 
         # Assert
+        # Due to inferent challenges in segmenting images, the ring alignment
+        # will never be pixel perfect, but this test asserts that the average
+        # deviation between ground truth and result is less than 1 pixel
         assert mean_square_error < 1

@@ -111,7 +111,7 @@ class RingAlignment:
         return rev_yx_to_xy
 
     def report_similarity_matrix_parameters(
-        self, tform: tf.SimilarityTransform, method_logging=True
+        self, tform: tf.SimilarityTransform
     ) -> AlignmentInfo:
         """
         Reports similarity matrix and its parameters
@@ -132,11 +132,7 @@ class RingAlignment:
             "rotate_angle": tform.rotation,
         }
 
-        log.debug(f"Estimated transform parameters: {tform_dict}")
-
-        if method_logging:
-            for param, value in tform_dict.items():
-                print(param + ": " + str(value))
+        log.debug("%s", tform_dict)
 
         align_info = AlignmentInfo(
             tform=tform,
