@@ -90,7 +90,7 @@ class TestRingAlign:
             numpy.zeros((1)),
             pandas.DataFrame(),
             0,
-        ).report_similarity_matrix_parameters(tform, False)
+        ).report_similarity_matrix_parameters(tform)
 
         assert tform.scale == alignInfo.scaling
         assert tform.translation[0] == alignInfo.shift_y
