@@ -39,6 +39,7 @@ dev_requirements = [
 ]
 
 requirements = [
+    "aicsfiles == 5.0.0.dev12",
     "aicsimageio[czi] == 4.0.3",
     "numpy ~= 1.21",
     "scikit-image ~= 0.18"
@@ -69,7 +70,7 @@ setup(
     description="Core algorithms for aligning two-camera microscopy imagery",
     entry_points={
         "console_scripts": [
-            "my_example=camera_alignment_core.bin.my_example:main"
+            "align=camera_alignment_core.bin.align_image:main"
         ],
     },
     install_requires=requirements,
