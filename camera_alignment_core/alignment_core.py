@@ -1,10 +1,9 @@
 import logging
-from typing import Dict, List, Tuple
+from typing import Dict, Tuple
 
 from aicsimageio import AICSImage
 import numpy
 import numpy.typing
-from skimage import transform
 
 from .alignment_utils import (
     AlignmentInfo,
@@ -14,7 +13,6 @@ from .alignment_utils import (
     get_center_z,
 )
 from .constants import LOGGER_NAME
-
 from .exception import (
     IncompatibleImageException,
     UnsupportedMagnification,

@@ -195,20 +195,28 @@ class TestAlignmentCore:
         assert result == expectation
 
     @pytest.mark.parametrize(
-        ["image_path", "alignment_image_path", "expectation_image_path"],
+        [
+            "image_path",
+            "alignment_image_path",
+            "expectation_image_path",
+            "magnification",
+        ],
         [
             (
                 UNALIGNED_ZSD1_IMAGE_URL,
                 ARGOLIGHT_OPTICAL_CONTROL_IMAGE_URL,
                 ALIGNED_ZSD1_IMAGE_URL,
+                100,
             ),
         ],
     )
+    @pytest.mark.slow
     def test_align_image(
         self,
         image_path,
         alignment_image_path,
         expectation_image_path,
+        magnification,
         get_image: typing.Callable[[str], AICSImage],
         caplog: pytest.LogCaptureFixture,
     ):
@@ -216,29 +224,31 @@ class TestAlignmentCore:
         # Arrange
         caplog.set_level(logging.DEBUG, logger=LOGGER_NAME)
         image = get_image(image_path)
-        optical_control_image = get_image(alignment_image_path)
+        optical_control_image = get_image(alignment_image_path).get_image_data()[0]
         channels_to_align = self.alignment_core.get_channel_name_to_index_map(image)
         (
             alignment_matrix,
             alignment_info,
         ) = self.alignment_core.generate_alignment_matrix(
             optical_control_image=optical_control_image,
-            shift_channel=channels_to_align.get("Raw 638nm"),
-            reference_channel=channels_to_align.get("Raw 405nm"),
-            magnification=100,
+            shift_channel=channels_to_align["Raw 638nm"],
+            reference_channel=channels_to_align["Raw 405nm"],
+            magnification=magnification,
             px_size_xy=image.physical_pixel_sizes[1],
         )
+
         expectation = get_image(expectation_image_path).get_image_dask_data()[0]
 
         # Act
         result = self.alignment_core.align_image(
-            alignment_matrix,
-            image,
-            channels_to_align,
+            alignment_matrix=alignment_matrix,
+            image=image.get_image_dask_data()[0],
+            channels_to_align=channels_to_align,
+            magnification=magnification,
         )
 
         # Assert
-        assert result == expectation
+        assert numpy.array_equal(result, expectation)
 
     # TODO: Add 63x and 20x images to test
     @pytest.mark.parametrize(
