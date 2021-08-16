@@ -113,16 +113,9 @@ class TestAlignmentCore:
         log.debug("Estimated Matrix")
         log.debug(numpy.array(actual_alignment_matrix.params))
 
-        matDet = numpy.linalg.det(
-            numpy.matmul(numpy.array(actual_alignment_matrix.params).T, expected_matrix)
+        assert numpy.allclose(
+            expected_matrix, numpy.array(actual_alignment_matrix.params)
         )
-        log.debug("Determinant (should be 1)")
-        log.debug(matDet)
-
-        # These matrices appear identical, but for unknown reasons are never
-        # perfect matches in python. This test allows for them to be compared
-        # to within a degree that does not affect the final results of alignment
-        assert abs(1 - matDet) < 0.001
 
     @pytest.mark.slow
     def test_generate_alignment_matrix_reproducability(
@@ -168,14 +161,7 @@ class TestAlignmentCore:
         log.debug("Second Estimated Matrix")
         log.debug(mat2)
 
-        matDet = numpy.linalg.det(numpy.matmul(mat1.T, mat2))
-        log.debug("Determinant (should be 1)")
-        log.debug(matDet)
-
-        # These matrices appear identical, but for unknown reasons are never
-        # perfect matches in python. This test allows for them to be compared
-        # to within a degree that does not affect the final results of alignment
-        assert abs(1 - matDet) < 0.001
+        assert numpy.allclose(mat1, mat2)
 
     @pytest.mark.parametrize(
         ["image_path", "expectation"],
