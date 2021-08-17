@@ -1,16 +1,25 @@
 import argparse
 from datetime import datetime
 import logging
-from pathlib import Path
+import pathlib
 import sys
+import tempfile
 import typing
 
 from aicsfiles import FileManagementSystem
 from aicsimageio import AICSImage
-from alignment_core import AlignmentCore
+from aicsimageio.writers import OmeTiffWriter
 import numpy.typing
 
-log = logging.getLogger(__name__)
+from camera_alignment_core import (
+    AlignmentCore,
+    __version__,
+)
+from camera_alignment_core.constants import (
+    LOGGER_NAME,
+)
+
+log = logging.getLogger(LOGGER_NAME)
 
 
 class Args(argparse.Namespace):
@@ -108,10 +117,6 @@ class Args(argparse.Namespace):
             log.info(f"{attr}: {getattr(self, attr)}")
         log.info("*" * 50)
 
-    def _ensure_parent_exists(self, path: Path) -> Path:
-        path.parent.mkdir(parents=True, exist_ok=True)
-        return path
-
 
 def main():
     args = Args().parse()
@@ -148,11 +153,17 @@ def main():
     control_image_channel_map = alignment_core.get_channel_name_to_index_map(
         control_image
     )
+
+    assert (
+        control_image.physical_pixel_sizes.X == control_image.physical_pixel_sizes.Y
+    ), "Physical pixel sizes in X and Y dimensions do not match in optical control image"
+
     alignment_matrix, _ = alignment_core.generate_alignment_matrix(
         control_image.get_image_data(),
         reference_channel=control_image_channel_map[args.ref_channel],
         channel_to_align=control_image_channel_map[args.alignment_channel],
         magnification=args.magnification,
+        px_size_xy=control_image.physical_pixel_sizes.X,
     )
 
     image = AICSImage(input_image_fms_record.path)
@@ -164,18 +175,48 @@ def main():
         # arrange some values for later use
         channel_name_to_index_map = alignment_core.get_channel_name_to_index_map(image)
 
-        # ... align each timepoint in the image
+        # align each timepoint in the image
         processed_timepoints: typing.List[numpy.typing.NDArray[numpy.uint16]] = list()
         for timepoint in range(0, image.dims.T):
             sub_selection = image.get_image_data(T=timepoint)
             processed = alignment_core.align_image(
-                alignment_matrix, sub_selection, channel_name_to_index_map
+                alignment_matrix,
+                sub_selection,
+                channel_name_to_index_map,
+                args.magnification,
             )
             processed_timepoints.append(processed)
 
-        # stack all timepoints into new image
+        # collect all newly aligned timepoints into one file and save to FMS
+        with tempfile.TemporaryDirectory() as tempdir:
+            temp_save_path = (
+                pathlib.Path(tempdir)
+                / f"{pathlib.Path(input_image_fms_record.name).stem}_{scene}_aligned.ome.tiff"
+            )
+            OmeTiffWriter.save(
+                data=processed_timepoints,
+                ome_xml=image.ome_metadata,
+                uri=temp_save_path,
+                dim_order="TCZYX",  # TODO
+            )
 
-        # save resulting file to FMS
+            # Save combined file to FMS
+            log.debug("Uploading %s to FMS", temp_save_path)
+            metadata = {
+                "provenance": {
+                    "input_files": [
+                        args.input_fms_file_id,
+                        args.optical_control_fms_file_id,
+                    ],
+                    "algorithm": f"camera_alignment_core v{__version__}",
+                }
+            }
+            uploaded_file = fms.upload_file(
+                temp_save_path, file_type="image", metadata=metadata
+            )
+            log.info(
+                "Uploaded aligned scene (%s) as FMS file_id %s", scene, uploaded_file.id
+            )
 
     end_time = datetime.now()
     log.info(f"Finished in {end_time - start_time}")
