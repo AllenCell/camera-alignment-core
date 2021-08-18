@@ -23,7 +23,7 @@ GENERIC_OME_TIFF_URL = "https://s3.us-west-2.amazonaws.com/public-dev-objects.al
 GENERIC_CZI_URL = "https://s3.us-west-2.amazonaws.com/public-dev-objects.allencell.org/camera-alignment-core/images/20200701_N04_001.czi"  # noqa E501
 
 UNALIGNED_ZSD1_IMAGE_URL = "https://s3.us-west-2.amazonaws.com/public-dev-objects.allencell.org/camera-alignment-core/images/3500004473_100X_20210430_1c-Scene-24-P96-G06.czi"
-ALIGNED_ZSD1_IMAGE_URL = "https://s3.us-west-2.amazonaws.com/public-dev-objects.allencell.org/camera-alignment-core/images/3500004473_100X_20210430_1c-alignV2-Scene-24-P96-G06.ome.tiff"
+ALIGNED_ZSD1_IMAGE_URL = "https://s3.us-west-2.amazonaws.com/public-dev-objects.allencell.org/camera-alignment-core/aligned-images/3500004473_100X_20210430_1c-Scene-24-P96-G06_aligned.ome.tiff"
 ARGOLIGHT_OPTICAL_CONTROL_IMAGE_URL = "https://s3.us-west-2.amazonaws.com/public-dev-objects.allencell.org/camera-alignment-core/optical-controls/argo_100X_20210430_fieldofrings.czi"
 ARGOLIGHT_ALIGNED_IMAGE_URL = "https://s3.us-west-2.amazonaws.com/public-dev-objects.allencell.org/camera-alignment-core/optical-controls/argo_100X_20210430_fieldofrings_aligned.tif"
 
@@ -224,20 +224,23 @@ class TestAlignmentCore:
         # Arrange
         caplog.set_level(logging.DEBUG, logger=LOGGER_NAME)
         image = get_image(image_path)
-        optical_control_image = get_image(alignment_image_path).get_image_data(
-            "CZYX", T=0
+        optical_control_image = get_image(alignment_image_path)
+        optical_control_image_data = optical_control_image.get_image_data("CZYX", T=0)
+        optical_control_channels_map = (
+            self.alignment_core.get_channel_name_to_index_map(optical_control_image)
         )
-        channels_to_align = self.alignment_core.get_channel_name_to_index_map(image)
         (
             alignment_matrix,
             alignment_info,
         ) = self.alignment_core.generate_alignment_matrix(
-            optical_control_image=optical_control_image,
-            shift_channel=channels_to_align["Raw 638nm"],
-            reference_channel=channels_to_align["Raw 405nm"],
+            optical_control_image=optical_control_image_data,
+            shift_channel=optical_control_channels_map["Raw 638nm"],
+            reference_channel=optical_control_channels_map["Raw 405nm"],
             magnification=magnification,
             px_size_xy=optical_control_image.physical_pixel_sizes.X,
         )
+
+        image_channels_maps = self.alignment_core.get_channel_name_to_index_map(image)
 
         expectation = get_image(expectation_image_path).get_image_data("CZYX", T=0)
 
@@ -245,7 +248,7 @@ class TestAlignmentCore:
         result = self.alignment_core.align_image(
             alignment_matrix=alignment_matrix,
             image=image.get_image_data("CZYX", T=0),
-            channels_to_align=channels_to_align,
+            channels_to_align=image_channels_maps,
             magnification=magnification,
         )
 
