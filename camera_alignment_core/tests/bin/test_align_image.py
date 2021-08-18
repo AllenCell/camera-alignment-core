@@ -1,6 +1,5 @@
 import contextlib
 import pathlib
-import typing
 from unittest.mock import create_autospec, patch
 
 from aicsfiles import FileManagementSystem
@@ -12,18 +11,22 @@ from camera_alignment_core.bin import align_image
 from .. import (
     ARGOLIGHT_OPTICAL_CONTROL_IMAGE_URL,
     UNALIGNED_ZSD1_IMAGE_URL,
+    get_test_image,
 )
 
 
 class TestAlignImageBinScript:
     def test_aligns_image(
         self,
-        get_image: typing.Callable[[str], typing.Tuple[AICSImage, pathlib.Path]],
         tmp_path: pathlib.Path,
     ) -> None:
         # Arrange
-        _, optical_control_image_path = get_image(ARGOLIGHT_OPTICAL_CONTROL_IMAGE_URL)
-        microscopy_image, microscopy_image_path = get_image(UNALIGNED_ZSD1_IMAGE_URL)
+        _, optical_control_image_path = get_test_image(
+            ARGOLIGHT_OPTICAL_CONTROL_IMAGE_URL
+        )
+        microscopy_image, microscopy_image_path = get_test_image(
+            UNALIGNED_ZSD1_IMAGE_URL
+        )
 
         expected_aligned_image_path = (
             tmp_path / f"{pathlib.Path(microscopy_image_path).stem}_aligned.ome.tiff"

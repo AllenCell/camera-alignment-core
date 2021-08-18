@@ -124,17 +124,8 @@ class RingAlignment:
             shift_x: Shift in x
             rotate_angle: Rotation angle
         """
-        tform_dict = {
-            "transform": tform,
-            "scaling": tform.scale,
-            "shift_y": tform.translation[0],
-            "shift_x": tform.translation[1],
-            "rotate_angle": tform.rotation,
-        }
 
-        log.debug("%s", tform_dict)
-
-        align_info = AlignmentInfo(
+        return AlignmentInfo(
             tform=tform,
             rotation=tform.rotation,
             shift_x=tform.translation[1],
@@ -142,8 +133,6 @@ class RingAlignment:
             z_offset=0,
             scaling=tform.scale,
         )
-
-        return align_info
 
     def run(
         self,

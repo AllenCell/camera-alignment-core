@@ -40,6 +40,14 @@ class AlignmentCore:
         px_size_xy: float,
     ) -> Tuple[numpy.typing.NDArray[numpy.float16], AlignmentInfo]:
 
+        log.debug(
+            "Params -- reference_channel: %s; shift_channel: %s; magnification: %s; px_size_xy: %s",
+            reference_channel,
+            shift_channel,
+            magnification,
+            px_size_xy,
+        )
+
         # if more than 4 dimensions, trip extra dims from beginning
         ndim = optical_control_image.ndim
         log.debug(f"image has shape {ndim}")
@@ -90,7 +98,7 @@ class AlignmentCore:
 
         # Create alignment from segmentation
         log.debug("Creating alignment matrix")
-        tform, align_info = RingAlignment(
+        similarity_transform, align_info = RingAlignment(
             ref_seg_rings,
             ref_seg_rings_label,
             ref_props_df,
@@ -101,7 +109,7 @@ class AlignmentCore:
             mov_cross_label,
         ).run()
 
-        return tform, align_info
+        return similarity_transform.params, align_info
 
     def align_image(
         self,
