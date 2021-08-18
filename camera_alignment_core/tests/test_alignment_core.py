@@ -224,7 +224,9 @@ class TestAlignmentCore:
         # Arrange
         caplog.set_level(logging.DEBUG, logger=LOGGER_NAME)
         image = get_image(image_path)
-        optical_control_image = get_image(alignment_image_path).get_image_data()[0]
+        optical_control_image = get_image(alignment_image_path).get_image_data(
+            "CZYX", T=0
+        )
         channels_to_align = self.alignment_core.get_channel_name_to_index_map(image)
         (
             alignment_matrix,
@@ -234,21 +236,21 @@ class TestAlignmentCore:
             shift_channel=channels_to_align["Raw 638nm"],
             reference_channel=channels_to_align["Raw 405nm"],
             magnification=magnification,
-            px_size_xy=image.physical_pixel_sizes[1],
+            px_size_xy=optical_control_image.physical_pixel_sizes.X,
         )
 
-        expectation = get_image(expectation_image_path).get_image_dask_data()[0]
+        expectation = get_image(expectation_image_path).get_image_data("CZYX", T=0)
 
         # Act
         result = self.alignment_core.align_image(
             alignment_matrix=alignment_matrix,
-            image=image.get_image_dask_data()[0],
+            image=image.get_image_data("CZYX", T=0),
             channels_to_align=channels_to_align,
             magnification=magnification,
         )
 
         # Assert
-        assert numpy.array_equal(result, expectation)
+        assert numpy.allclose(result, expectation)
 
     # TODO: Add 63x and 20x images to test
     @pytest.mark.parametrize(
