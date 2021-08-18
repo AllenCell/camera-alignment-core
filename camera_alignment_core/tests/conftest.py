@@ -18,7 +18,7 @@ log = logging.getLogger(LOGGER_NAME)
 
 
 def download_file(url: str, to_path: pathlib.Path) -> None:
-    log.debug(f"Downloading {url} to {to_path}")
+    log.debug("Downloading %s to %s", url, to_path)
     with urllib.request.urlopen(url) as src, to_path.open(mode="w+b") as dst:
         shutil.copyfileobj(src, dst)
 
