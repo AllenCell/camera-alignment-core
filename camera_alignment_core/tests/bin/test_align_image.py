@@ -25,7 +25,9 @@ class TestAlignImageBinScript:
         _, optical_control_image_path = get_image(ARGOLIGHT_OPTICAL_CONTROL_IMAGE_URL)
         microscopy_image, microscopy_image_path = get_image(UNALIGNED_ZSD1_IMAGE_URL)
 
-        expected_aligned_image_path = tmp_path / "aligned.ome.tiff"
+        expected_aligned_image_path = (
+            tmp_path / f"{pathlib.Path(microscopy_image_path).stem}_aligned.ome.tiff"
+        )
 
         with contextlib.ExitStack() as stack:
             # Ensure that when we query FMS for the record of microscopy image to align
