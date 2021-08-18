@@ -26,7 +26,9 @@ from . import (
     GENERIC_OME_TIFF_URL,
     UNALIGNED_ZSD1_IMAGE_URL,
     ZSD_100x_OPTICAL_CONTROL_IMAGE_URL,
+    ZSD_100x_OPTICAL_CONTROL_TRANSFORM_MATRIX_URL,
     get_test_image,
+    get_test_resource,
 )
 
 log = logging.getLogger(LOGGER_NAME)
@@ -70,13 +72,10 @@ class TestAlignmentCore:
         #     ],
         # ]
 
-        expected_matrix = numpy.array(
-            [
-                [1.00142517, -0.00520853, -0.05273507],
-                [0.00520853, 1.00142517, -3.17384935],
-                [0.0, 0.0, 1.0],
-            ]
+        expected_matrix_path = get_test_resource(
+            ZSD_100x_OPTICAL_CONTROL_TRANSFORM_MATRIX_URL
         )
+        expected_matrix = numpy.load(expected_matrix_path, allow_pickle=True)
 
         # Act
         (
@@ -92,7 +91,7 @@ class TestAlignmentCore:
 
         # Assert
         assert actual_alignment_matrix.shape == expected_matrix.shape
-        assert numpy.allclose(actual_alignment_matrix, expected_matrix), (
+        assert numpy.array_equal(actual_alignment_matrix, expected_matrix), (
             actual_alignment_matrix - expected_matrix
         )
 
