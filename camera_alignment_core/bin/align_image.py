@@ -8,10 +8,10 @@ import typing
 
 from aicsfiles import FileManagementSystem
 from aicsimageio import AICSImage
+from aicsimageio.types import PhysicalPixelSizes
 from aicsimageio.writers import OmeTiffWriter
 import numpy
 import numpy.typing
-from ome_types.model.pixels import DimensionOrder
 
 from camera_alignment_core import (
     AlignmentCore,
@@ -208,17 +208,21 @@ def main(cli_args: typing.List[str] = sys.argv[1:]):
 
             processed_image_data = numpy.stack(processed_timepoints)  # TCZYX
             (T, C, Z, Y, X) = processed_image_data.shape
-            ome_xml = image.ome_metadata
-            ome_xml.images[0].pixels.size_t = T
-            ome_xml.images[0].pixels.size_c = C
-            ome_xml.images[0].pixels.size_z = Z
-            ome_xml.images[0].pixels.size_y = Y
-            ome_xml.images[0].pixels.size_x = X
-            ome_xml.images[0].pixels.dimension_order = DimensionOrder.XYZCT
+            # TODO: Uncomment once https://github.com/AllenCellModeling/aicsimageio/pull/292 merges
+            # ome_xml = image.ome_metadata
+            # ome_xml.images[0].pixels.size_t = T
+            # ome_xml.images[0].pixels.size_c = C
+            # ome_xml.images[0].pixels.size_z = Z
+            # ome_xml.images[0].pixels.size_y = Y
+            # ome_xml.images[0].pixels.size_x = X
+            # ome_xml.images[0].pixels.dimension_order = DimensionOrder.XYZCT
             OmeTiffWriter.save(
                 data=processed_image_data,
-                ome_xml=ome_xml,
+                # TODO, same as above, uncomment once https://github.com/AllenCellModeling/aicsimageio/pull/292 merges
+                # ome_xml=ome_xml,
                 uri=temp_save_path,
+                channel_names=image.channel_names,
+                physical_pixel_sizes=PhysicalPixelSizes(Z=Z, Y=Y, X=X),
                 dim_order="TCZYX",
             )
 
