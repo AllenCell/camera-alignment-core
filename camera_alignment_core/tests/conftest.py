@@ -3,6 +3,8 @@ import functools
 import logging
 import pathlib
 import shutil
+import tempfile
+import typing
 import urllib.request
 
 from aicsimageio import AICSImage
@@ -21,26 +23,29 @@ def download_file(url: str, to_path: pathlib.Path) -> None:
         shutil.copyfileobj(src, dst)
 
 
-@pytest.fixture(scope="session")
-def get_image(tmp_path_factory: pytest.TempPathFactory) -> AICSImage:
-    """
-    Abstraction for returning an AICSImage object from an image path.
-    Handles the complication of
-    """
-    tmp_dir = tmp_path_factory.mktemp("data")
+@pytest.fixture
+def get_image() -> typing.Callable[[str], typing.Tuple[AICSImage, pathlib.Path]]:
+    """Abstraction for returning an AICSImage object from an image path."""
+    tmp_dir = (
+        pathlib.Path(tempfile.gettempdir()) / "camera-alignment-core-test-fixtures"
+    )
+    tmp_dir.mkdir(exist_ok=True)
 
     @functools.lru_cache
-    def _get_image(image: str):
-        log.debug("Constructing AICSImage instance for %s", image)
+    def _get_image(image_uri: str) -> typing.Tuple[AICSImage, pathlib.Path]:
+        log.debug("Constructing AICSImage instance for %s", image_uri)
 
         # Need to download the file if hosted on remote server
-        if image.startswith("http"):
-            path = pathlib.Path(image)
+        if image_uri.startswith("http"):
+            path = pathlib.Path(image_uri)
             target_path = tmp_dir / path.name
-            download_file(image, target_path)
-            return AICSImage(target_path)
+
+            if not target_path.exists():
+                download_file(image_uri, target_path)
+
+            return (AICSImage(target_path), target_path)
         else:
             # Assume file system path that is accessible
-            return AICSImage(image)
+            return (AICSImage(image_uri), pathlib.Path(image_uri))
 
     return _get_image

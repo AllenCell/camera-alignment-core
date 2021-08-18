@@ -1,5 +1,5 @@
 import argparse
-from datetime import datetime
+import datetime
 import logging
 import pathlib
 import sys
@@ -9,7 +9,9 @@ import typing
 from aicsfiles import FileManagementSystem
 from aicsimageio import AICSImage
 from aicsimageio.writers import OmeTiffWriter
+import numpy
 import numpy.typing
+from ome_types.model.pixels import DimensionOrder
 
 from camera_alignment_core import (
     AlignmentCore,
@@ -23,7 +25,7 @@ log = logging.getLogger(LOGGER_NAME)
 
 
 class Args(argparse.Namespace):
-    def parse(self, args=None):
+    def parse(self, parser_args: typing.List[str]):
         parser = argparse.ArgumentParser(
             description="Run given file through camera alignment, outputting single file per scene."
         )
@@ -71,7 +73,7 @@ class Args(argparse.Namespace):
             type=int,
             choices=[405, 488, 561, 638],
             default=405,
-            dest="ref_channel",
+            dest="reference_channel",
             help="Which channel of the optical control file to treat as the 'reference' for alignment.",
         )
 
@@ -102,10 +104,20 @@ class Args(argparse.Namespace):
             dest="debug",
         )
 
-        parser_args = args if args else sys.argv[1:]
         parser.parse_args(args=parser_args, namespace=self)
 
+        self.reference_channel: str = Args._convert_wavelength_to_channel_name(
+            self.reference_channel
+        )
+        self.alignment_channel: str = Args._convert_wavelength_to_channel_name(
+            self.alignment_channel
+        )
+
         return self
+
+    @staticmethod
+    def _convert_wavelength_to_channel_name(wavelength: typing.Any) -> str:
+        return f"Raw {wavelength}nm"
 
     def print_args(self):
         """Print arguments this script is running with"""
@@ -118,8 +130,8 @@ class Args(argparse.Namespace):
         log.info("*" * 50)
 
 
-def main():
-    args = Args().parse()
+def main(cli_args: typing.List[str] = sys.argv[1:]):
+    args = Args().parse(cli_args)
 
     logging.root.handlers = []
     logging.basicConfig(
@@ -132,7 +144,7 @@ def main():
 
     args.print_args()
 
-    start_time = datetime.now()
+    start_time = datetime.datetime.now()
 
     fms = FileManagementSystem(env=args.fms_env)
     input_image_fms_record = fms.find_one_by_id(args.input_fms_file_id)
@@ -160,8 +172,8 @@ def main():
 
     alignment_matrix, _ = alignment_core.generate_alignment_matrix(
         control_image.get_image_data(),
-        reference_channel=control_image_channel_map[args.ref_channel],
-        channel_to_align=control_image_channel_map[args.alignment_channel],
+        reference_channel=control_image_channel_map[args.reference_channel],
+        shift_channel=control_image_channel_map[args.alignment_channel],
         magnification=args.magnification,
         px_size_xy=control_image.physical_pixel_sizes.X,
     )
@@ -178,10 +190,10 @@ def main():
         # align each timepoint in the image
         processed_timepoints: typing.List[numpy.typing.NDArray[numpy.uint16]] = list()
         for timepoint in range(0, image.dims.T):
-            sub_selection = image.get_image_data(T=timepoint)
+            image_slice = image.get_image_data("CZYX", T=timepoint)
             processed = alignment_core.align_image(
                 alignment_matrix,
-                sub_selection,
+                image_slice,
                 channel_name_to_index_map,
                 args.magnification,
             )
@@ -193,11 +205,21 @@ def main():
                 pathlib.Path(tempdir)
                 / f"{pathlib.Path(input_image_fms_record.name).stem}_{scene}_aligned.ome.tiff"
             )
+
+            processed_image_data = numpy.stack(processed_timepoints)  # TCZYX
+            (T, C, Z, Y, X) = processed_image_data.shape
+            ome_xml = image.ome_metadata
+            ome_xml.images[0].pixels.size_t = T
+            ome_xml.images[0].pixels.size_c = C
+            ome_xml.images[0].pixels.size_z = Z
+            ome_xml.images[0].pixels.size_y = Y
+            ome_xml.images[0].pixels.size_x = X
+            ome_xml.images[0].pixels.dimension_order = DimensionOrder.XYZCT
             OmeTiffWriter.save(
-                data=processed_timepoints,
-                ome_xml=image.ome_metadata,
+                data=processed_image_data,
+                ome_xml=ome_xml,
                 uri=temp_save_path,
-                dim_order="TCZYX",  # TODO
+                dim_order="TCZYX",
             )
 
             # Save combined file to FMS
@@ -209,7 +231,7 @@ def main():
                         args.optical_control_fms_file_id,
                     ],
                     "algorithm": f"camera_alignment_core v{__version__}",
-                }
+                },
             }
             uploaded_file = fms.upload_file(
                 temp_save_path, file_type="image", metadata=metadata
@@ -218,7 +240,7 @@ def main():
                 "Uploaded aligned scene (%s) as FMS file_id %s", scene, uploaded_file.id
             )
 
-    end_time = datetime.now()
+    end_time = datetime.datetime.now()
     log.info(f"Finished in {end_time - start_time}")
 
 

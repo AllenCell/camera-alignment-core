@@ -38,7 +38,7 @@ class AlignmentCore:
         shift_channel: int,
         magnification: int,
         px_size_xy: float,
-    ) -> Tuple[numpy.typing.NDArray[numpy.uint16], AlignmentInfo]:
+    ) -> Tuple[numpy.typing.NDArray[numpy.float16], AlignmentInfo]:
 
         # if more than 4 dimensions, trip extra dims from beginning
         ndim = optical_control_image.ndim
