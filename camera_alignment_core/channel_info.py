@@ -7,6 +7,9 @@ class ChannelInfo:
     """Abstraction for working with channels within an image"""
 
     def __init__(self, channel_to_index_map: typing.Dict[Channel, int]) -> None:
+        if channel_to_index_map is None:
+            raise ValueError("channel_to_index_map cannot be None")
+
         self._channel_to_index_map = channel_to_index_map
 
     def channel_at_index(self, target_index: int) -> Channel:
