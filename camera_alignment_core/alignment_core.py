@@ -4,6 +4,7 @@ from typing import Dict, Tuple
 from aicsimageio import AICSImage
 import numpy
 import numpy.typing
+from skimage import transform
 
 from .alignment_utils import (
     AlignmentInfo,
@@ -19,8 +20,6 @@ from .exception import (
 )
 
 log = logging.getLogger(LOGGER_NAME)
-
-from skimage import transform
 
 
 class AlignmentCore:
@@ -192,26 +191,28 @@ class AlignmentCore:
     def _similarity_matrix_transform(
         self,
         alignment_matrix: numpy.typing.NDArray[numpy.float16],
-        slice: numpy.typing.NDArray[numpy.uint16],
+        image_slice: numpy.typing.NDArray[numpy.uint16],
     ) -> numpy.typing.NDArray[numpy.uint16]:
         """
         Applies an affine transformation matrix to a 3D (ZYX)
         slice of a multi-channel image
         """
-        if len(slice.shape) == 2:
+        if len(image_slice.shape) == 2:
             after_transform = transform.warp(
-                slice, inverse_map=alignment_matrix, order=3
+                image_slice, inverse_map=alignment_matrix, order=3
             )
-        elif len(slice.shape) == 3:
-            after_transform = numpy.zeros(slice.shape)
+        elif len(image_slice.shape) == 3:
+            after_transform = numpy.empty(image_slice.shape, dtype=numpy.double)
             for z in range(0, after_transform.shape[0]):
                 after_transform[z, :, :] = transform.warp(
-                    slice[z, :, :], inverse_map=alignment_matrix, order=3
+                    image_slice[z, :, :], inverse_map=alignment_matrix, order=3
                 )
         else:
             raise IncompatibleImageException(
                 f"Cannot perform similarity matrix transform: invalid image dimensions. \
-                Image must be 2D or 3D but detected {len(slice.shape)} dimensions"
+                Image must be 2D or 3D but detected {len(image_slice.shape)} dimensions"
             )
 
-        return (after_transform * 65535).astype(numpy.uint16)
+        # skimage.transform.warp outputs doubles, but we need uint16s. Scale appropriately.
+        DOUBLE_TO_INT_SCALE = 65535
+        return (after_transform * DOUBLE_TO_INT_SCALE).astype(numpy.uint16)
