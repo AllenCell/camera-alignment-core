@@ -111,7 +111,7 @@ class AlignmentCore:
                 f"Expected image to be 4 dimensional ('CZYX'). Got: {image.shape}"
             )
 
-        aligned_image = numpy.zeros(image.shape)
+        aligned_image = numpy.empty(image.shape, dtype=numpy.uint16)
         for channel, index in channels_to_align.items():
             if channel in ("Raw brightfield", "Raw 638nm"):
                 # aligned_slice is just one channel of the aligned image (ZYX dims)
