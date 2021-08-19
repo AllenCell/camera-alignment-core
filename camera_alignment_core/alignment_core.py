@@ -97,7 +97,6 @@ class AlignmentCore:
 
         return tform, align_info
 
-    # Input a CZYX image ndarray to the alignment function
     def align_image(
         self,
         alignment_matrix: numpy.typing.NDArray[numpy.float16],
@@ -105,8 +104,10 @@ class AlignmentCore:
         channels_to_align: Dict[str, int],
         magnification: int,
     ) -> numpy.typing.NDArray[numpy.uint16]:
+        """Input a CZYX image ndarray to the alignment function"""
+
         if not len(image.shape) == 4:
-            raise ValueError(
+            raise IncompatibleImageException(
                 f"Expected image to be 4 dimensional ('CZYX'). Got: {image.shape}"
             )
 
@@ -114,7 +115,7 @@ class AlignmentCore:
         for channel, index in channels_to_align.items():
             if channel in ("Raw brightfield", "Raw 638nm"):
                 # aligned_slice is just one channel of the aligned image (ZYX dims)
-                aligned_slice = self._similarity_matrix_transform(
+                aligned_slice = self._apply_alignment_matrix(
                     alignment_matrix, image[index]
                 )
                 aligned_image[index] = aligned_slice
@@ -146,17 +147,28 @@ class AlignmentCore:
 
         return channel_info_dict
 
-    # Crops a CZYX image based on the magnification used to generate the image
     def _crop(
-        self, image: numpy.typing.NDArray[numpy.uint16], magnification: int
+        self,
+        image: numpy.typing.NDArray[numpy.uint16],
+        magnification: int,
+        black_pixel_cutoff: int = 50,
     ) -> numpy.typing.NDArray[numpy.uint16]:
+        """Crops a CZYX image based on the magnification used to generate the image"""
+
+        if not len(image.shape) == 4:
+            raise IncompatibleImageException(
+                f"Expected image to be 4 dimensional ('CZYX'). Got: {image.shape}"
+            )
+
         if magnification == 100:
             out_x = 900
             out_y = 600
         elif magnification == 63:
+            # TODO: these are placeholders
             out_x = 1200
             out_y = 900
         elif magnification == 20:
+            # TODO: these are placeholders
             out_x = 1600
             out_y = 1200
         else:
@@ -164,14 +176,15 @@ class AlignmentCore:
                 f"Cannot perform image alignment at {str(magnification)} invalid image dimensions."
             )
 
-        image = image.astype(numpy.uint16)
         half_diff_x = (image.shape[-1] - out_x) // 2
         half_diff_y = (image.shape[-2] - out_y) // 2
         cropped_image = image[
             :, :, half_diff_y : half_diff_y + out_y, half_diff_x : half_diff_x + out_x
         ]
-        if numpy.any(cropped_image < 50):
-            # double check if there is any black pixels, 50 is a relaxed cutoff value
+
+        # Check if there are black pixels, if so, crop a little further
+        if numpy.any(cropped_image < black_pixel_cutoff):
+            log.warning("After cropping, detected pixels under %s", black_pixel_cutoff)
             out_x = out_x - 20
             out_y = out_y - 20
             half_diff_x = (cropped_image.shape[-1] - out_x) // 2
@@ -182,37 +195,35 @@ class AlignmentCore:
                 half_diff_y : half_diff_y + out_y,
                 half_diff_x : half_diff_x + out_x,
             ]
+
         assert not numpy.any(
-            cropped_image < 50
+            cropped_image < black_pixel_cutoff
         ), "Black pixels are detected, either from original image or due to alignment"
 
         return cropped_image
 
-    def _similarity_matrix_transform(
+    def _apply_alignment_matrix(
         self,
         alignment_matrix: numpy.typing.NDArray[numpy.float16],
         image_slice: numpy.typing.NDArray[numpy.uint16],
     ) -> numpy.typing.NDArray[numpy.uint16]:
         """
-        Applies an affine transformation matrix to a 3D (ZYX)
-        slice of a multi-channel image
+        Applies an affine transformation matrix to a 3D (ZYX) slice of a multi-channel image.
         """
-        if len(image_slice.shape) == 2:
-            after_transform = transform.warp(
-                image_slice, inverse_map=alignment_matrix, order=3
-            )
-        elif len(image_slice.shape) == 3:
-            after_transform = numpy.empty(image_slice.shape, dtype=numpy.double)
-            for z in range(0, after_transform.shape[0]):
-                after_transform[z, :, :] = transform.warp(
-                    image_slice[z, :, :], inverse_map=alignment_matrix, order=3
-                )
-        else:
+        if len(image_slice.shape) != 3:
             raise IncompatibleImageException(
                 f"Cannot perform similarity matrix transform: invalid image dimensions. \
-                Image must be 2D or 3D but detected {len(image_slice.shape)} dimensions"
+                Image must be 3D but detected {len(image_slice.shape)} dimensions"
             )
 
-        # skimage.transform.warp outputs doubles, but we need uint16s. Scale appropriately.
-        DOUBLE_TO_INT_SCALE = 65535
-        return (after_transform * DOUBLE_TO_INT_SCALE).astype(numpy.uint16)
+        after_transform = numpy.empty(image_slice.shape, dtype=numpy.double)
+        for z in range(0, after_transform.shape[0]):
+            after_transform[z, :, :] = transform.warp(
+                image_slice[z, :, :],
+                inverse_map=alignment_matrix,
+                order=3,
+                preserve_range=True,  # https://scikit-image.org/docs/dev/user_guide/data_types.html#input-types
+            )
+
+        # skimage.transform.warp outputs doubles, but we need uint16s.
+        return after_transform.astype(numpy.uint16)

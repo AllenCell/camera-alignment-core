@@ -10,6 +10,9 @@ from camera_alignment_core import AlignmentCore
 from camera_alignment_core.constants import (
     LOGGER_NAME,
 )
+from camera_alignment_core.exception import (
+    IncompatibleImageException,
+)
 
 log = logging.getLogger(LOGGER_NAME)
 
@@ -260,7 +263,7 @@ class TestAlignmentCore:
         image = numpy.random.rand(1, 1, 1, 1, 1)
 
         # Act / Assert
-        with pytest.raises(ValueError):
+        with pytest.raises(IncompatibleImageException):
             self.alignment_core.align_image(
                 numpy.eye(3, 3), image, {"Foo Channel": 0}, 100
             )
