@@ -255,6 +255,16 @@ class TestAlignmentCore:
         # Assert
         assert numpy.allclose(result, expectation)
 
+    def test_align_image_raises_if_given_image_of_wrong_dimensionality(self):
+        # Arrange
+        image = numpy.random.rand(1, 1, 1, 1, 1)
+
+        # Act / Assert
+        with pytest.raises(ValueError):
+            self.alignment_core.align_image(
+                numpy.eye(3, 3), image, {"Foo Channel": 0}, 100
+            )
+
     # TODO: Add 63x and 20x images to test
     @pytest.mark.parametrize(
         ["image_path", "magnification", "expected_shape"],

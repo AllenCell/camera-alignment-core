@@ -106,6 +106,10 @@ class AlignmentCore:
         channels_to_align: Dict[str, int],
         magnification: int,
     ) -> numpy.typing.NDArray[numpy.uint16]:
+        if not len(image.shape) == 4:
+            raise ValueError(
+                f"Expected image to be 4 dimensional ('CZYX'). Got: {image.shape}"
+            )
 
         aligned_image = numpy.zeros(image.shape)
         for channel, index in channels_to_align.items():
