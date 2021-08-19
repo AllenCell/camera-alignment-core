@@ -4,7 +4,8 @@ from typing import Dict, Tuple
 from aicsimageio import AICSImage
 import numpy
 import numpy.typing
-from skimage import transform
+import skimage
+import skimage.transform
 
 from .alignment_utils import (
     AlignmentInfo,
@@ -218,12 +219,11 @@ class AlignmentCore:
 
         after_transform = numpy.empty(image_slice.shape, dtype=numpy.double)
         for z in range(0, after_transform.shape[0]):
-            after_transform[z, :, :] = transform.warp(
+            after_transform[z, :, :] = skimage.transform.warp(
                 image_slice[z, :, :],
                 inverse_map=alignment_matrix,
                 order=3,
-                preserve_range=True,  # https://scikit-image.org/docs/dev/user_guide/data_types.html#input-types
             )
 
-        # skimage.transform.warp outputs doubles, but we need uint16s.
-        return after_transform.astype(numpy.uint16)
+        # skimage.transform.warp converts input image to the float range (0..1), so rescale to uint16
+        return (after_transform * numpy.iinfo(numpy.uint16).max).astype(numpy.uint16)
