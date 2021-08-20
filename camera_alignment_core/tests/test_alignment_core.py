@@ -4,6 +4,7 @@ import typing
 from aicsimageio import AICSImage
 import numpy
 import numpy.testing
+import numpy.typing
 import pytest
 
 from camera_alignment_core import AlignmentCore
@@ -219,13 +220,6 @@ class TestAlignmentCore:
                 ALIGNED_ZSD1_IMAGE_URL,
                 100,
             ),
-            pytest.param(
-                UNALIGNED_ZSD1_IMAGE_URL,
-                ARGOLIGHT_OPTICAL_CONTROL_IMAGE_URL,
-                ALIGNED_ZSD1_IMAGE_URL,
-                30,  # Unsupported magnification
-                marks=pytest.mark.xfail(raises=UnsupportedMagnification),
-            ),
         ],
     )
     @pytest.mark.slow
@@ -277,14 +271,64 @@ class TestAlignmentCore:
         # Assert
         assert numpy.allclose(result, expectation)
 
-    def test_align_image_raises_if_given_image_of_wrong_dimensionality(self):
-        # Arrange
-        image = numpy.random.rand(1, 1, 1, 1, 1)
-
+    @pytest.mark.parametrize(
+        [
+            "image",
+            "alignment_matrix",
+            "channel_info",
+            "magnification",
+            "expected_exception",
+        ],
+        [
+            (
+                numpy.random.rand(1, 1, 1, 1, 1),  # Wrong dimensions
+                numpy.eye(3, 3),
+                ChannelInfo({Channel.RAW_BRIGHTFIELD: 0}),
+                100,
+                IncompatibleImageException,
+            ),
+            (
+                numpy.random.rand(1, 1, 1, 1),
+                numpy.eye(3, 3),
+                ChannelInfo({}),  # Empty ChannelInfo
+                100,
+                ValueError,
+            ),
+            (
+                numpy.random.rand(1, 1, 1, 1),
+                numpy.eye(3, 3),
+                # No alignable channels
+                ChannelInfo(
+                    {
+                        Channel.RAW_405_NM: 0,
+                        Channel.RAW_488_NM: 1,
+                        Channel.RAW_561_NM: 2,
+                    }
+                ),
+                100,
+                IncompatibleImageException,
+            ),
+            (
+                numpy.random.rand(1, 1, 1, 1),
+                numpy.eye(3, 3),
+                ChannelInfo({Channel.RAW_BRIGHTFIELD: 0}),
+                33,  # Unsupported magnification
+                UnsupportedMagnification,
+            ),
+        ],
+    )
+    def test_align_image_guards_against_unsupported_parameters(
+        self,
+        image: numpy.typing.NDArray[numpy.uint16],
+        alignment_matrix: numpy.typing.NDArray[numpy.float16],
+        channel_info: ChannelInfo,
+        magnification: int,
+        expected_exception: typing.Type[Exception],
+    ):
         # Act / Assert
-        with pytest.raises(IncompatibleImageException):
+        with pytest.raises(expected_exception):
             self.alignment_core.align_image(
-                numpy.eye(3, 3), image, ChannelInfo({Channel.RAW_BRIGHTFIELD: 0}), 100
+                alignment_matrix, image, channel_info, magnification
             )
 
     # TODO: Add 63x and 20x images to test
