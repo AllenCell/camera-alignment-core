@@ -19,6 +19,7 @@ from camera_alignment_core import (
 )
 from camera_alignment_core.constants import (
     LOGGER_NAME,
+    Channel,
 )
 
 log = logging.getLogger(LOGGER_NAME)
@@ -106,18 +107,18 @@ class Args(argparse.Namespace):
 
         parser.parse_args(args=parser_args, namespace=self)
 
-        self.reference_channel: str = Args._convert_wavelength_to_channel_name(
+        self.reference_channel: Channel = Args._convert_wavelength_to_channel_name(
             self.reference_channel
         )
-        self.alignment_channel: str = Args._convert_wavelength_to_channel_name(
+        self.alignment_channel: Channel = Args._convert_wavelength_to_channel_name(
             self.alignment_channel
         )
 
         return self
 
     @staticmethod
-    def _convert_wavelength_to_channel_name(wavelength: typing.Any) -> str:
-        return f"Raw {wavelength}nm"
+    def _convert_wavelength_to_channel_name(wavelength: typing.Any) -> Channel:
+        return Channel(f"Raw {wavelength}nm")
 
     def print_args(self):
         """Print arguments this script is running with"""
@@ -162,9 +163,7 @@ def main(cli_args: typing.List[str] = sys.argv[1:]):
     alignment_core = AlignmentCore()
 
     control_image = AICSImage(control_image_fms_record.path)
-    control_image_channel_map = alignment_core.get_channel_name_to_index_map(
-        control_image
-    )
+    control_image_channel_info = alignment_core.get_channel_info(control_image)
 
     assert (
         control_image.physical_pixel_sizes.X == control_image.physical_pixel_sizes.Y
@@ -172,8 +171,12 @@ def main(cli_args: typing.List[str] = sys.argv[1:]):
 
     alignment_matrix, _ = alignment_core.generate_alignment_matrix(
         control_image.get_image_data(),
-        reference_channel=control_image_channel_map[args.reference_channel],
-        shift_channel=control_image_channel_map[args.alignment_channel],
+        reference_channel=control_image_channel_info.index_of_channel(
+            args.reference_channel
+        ),
+        shift_channel=control_image_channel_info.index_of_channel(
+            args.alignment_channel
+        ),
         magnification=args.magnification,
         px_size_xy=control_image.physical_pixel_sizes.X,
     )
@@ -185,7 +188,7 @@ def main(cli_args: typing.List[str] = sys.argv[1:]):
         image.set_scene(scene)
 
         # arrange some values for later use
-        channel_name_to_index_map = alignment_core.get_channel_name_to_index_map(image)
+        channel_info = alignment_core.get_channel_info(image)
 
         # align each timepoint in the image
         processed_timepoints: typing.List[numpy.typing.NDArray[numpy.uint16]] = list()
@@ -194,7 +197,7 @@ def main(cli_args: typing.List[str] = sys.argv[1:]):
             processed = alignment_core.align_image(
                 alignment_matrix,
                 image_slice,
-                channel_name_to_index_map,
+                channel_info,
                 args.magnification,
             )
             processed_timepoints.append(processed)

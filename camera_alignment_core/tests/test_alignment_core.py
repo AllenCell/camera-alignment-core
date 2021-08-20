@@ -1,4 +1,5 @@
 import logging
+import typing
 
 import numpy
 import numpy.testing
@@ -47,7 +48,7 @@ class TestAlignmentCore:
         # Arrange
         caplog.set_level(logging.DEBUG, logger=LOGGER_NAME)
         optical_control_image, _ = get_test_image(ZSD_100x_OPTICAL_CONTROL_IMAGE_URL)
-        control_image_channel_map = self.alignment_core.get_channel_name_to_index_map(
+        control_image_channel_info = self.alignment_core.get_channel_info(
             optical_control_image
         )
         optical_control_image_data = optical_control_image.get_image_data("CZYX", T=0)
@@ -83,8 +84,12 @@ class TestAlignmentCore:
             actual_alignment_info,
         ) = self.alignment_core.generate_alignment_matrix(
             optical_control_image_data,
-            reference_channel=control_image_channel_map["Raw 405nm"],
-            shift_channel=control_image_channel_map["Raw 638nm"],
+            reference_channel=control_image_channel_info.index_of_channel(
+                Channel.RAW_405_NM
+            ),
+            shift_channel=control_image_channel_info.index_of_channel(
+                Channel.RAW_638_NM
+            ),
             magnification=100,
             px_size_xy=optical_control_image.physical_pixel_sizes.X,
         )
@@ -104,11 +109,13 @@ class TestAlignmentCore:
         caplog.set_level(logging.DEBUG, logger=LOGGER_NAME)
         optical_control_image, _ = get_test_image(ZSD_100x_OPTICAL_CONTROL_IMAGE_URL)
         optical_control_image_data = optical_control_image.get_image_data("CZYX")
-        control_image_channel_map = self.alignment_core.get_channel_name_to_index_map(
+        control_image_channel_info = self.alignment_core.get_channel_info(
             optical_control_image
         )
-        reference_channel = control_image_channel_map["Raw 405nm"]
-        shift_channel = control_image_channel_map["Raw 638nm"]
+        reference_channel = control_image_channel_info.index_of_channel(
+            Channel.RAW_405_NM
+        )
+        shift_channel = control_image_channel_info.index_of_channel(Channel.RAW_638_NM)
         magnification = 100
         pixel_size_xy = optical_control_image.physical_pixel_sizes.X
 
