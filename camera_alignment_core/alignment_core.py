@@ -110,7 +110,11 @@ class AlignmentCore:
         channel_info: ChannelInfo,
         magnification: int,
     ) -> numpy.typing.NDArray[numpy.uint16]:
-        """Given a CZYX image and an alignment matrix,"""
+        """
+        Align a CZYX `image` using `alignment_matrix`.
+        Uses `channel_info` to know which channels within `image` to align.
+        Uses `magnification` to know how to crop the resulting aligned image.
+        """
         if not image.ndim == 4:
             raise IncompatibleImageException(
                 f"Expected image to be 4 dimensional ('CZYX'). Got: {image.shape}"
