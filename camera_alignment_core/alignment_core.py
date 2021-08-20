@@ -48,13 +48,10 @@ class AlignmentCore:
             px_size_xy,
         )
 
-        # if more than 4 dimensions, trip extra dims from beginning
-        ndim = optical_control_image.ndim
-        log.debug(f"image has shape {ndim}")
-        while optical_control_image.ndim > 4:
-            optical_control_image = optical_control_image[0, ...]
-            ndim = optical_control_image.ndim
-            log.debug(f"image has shape {ndim}")
+        if not optical_control_image.ndim == 4:
+            raise IncompatibleImageException(
+                f"Expected optical_control_image to be 4 dimensional ('CZYX'). Got: {optical_control_image.shape}"
+            )
 
         # detect center z-slice on reference channel
         log.debug("detecing center z in ref")

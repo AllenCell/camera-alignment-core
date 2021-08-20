@@ -186,7 +186,7 @@ def main(cli_args: typing.List[str] = sys.argv[1:]):
     ), "Physical pixel sizes in X and Y dimensions do not match in optical control image"
 
     alignment_matrix, _ = alignment_core.generate_alignment_matrix(
-        control_image.get_image_data(),
+        control_image.get_image_data("CZYX", T=0),
         reference_channel=control_image_channel_info.index_of_channel(
             args.reference_channel
         ),
