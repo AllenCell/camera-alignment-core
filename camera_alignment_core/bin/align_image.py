@@ -156,21 +156,29 @@ def main(cli_args: typing.List[str] = sys.argv[1:]):
     start_time = time.perf_counter()
 
     fms = FileManagementSystem(env=args.fms_env)
-    input_image_fms_record = fms.find_one_by_id(args.input_fms_file_id)
-    if not input_image_fms_record:
-        raise ValueError(
-            f"Could not find image in FMS with ID: {args.input_fms_file_id}"
-        )
 
-    control_image_fms_record = fms.find_one_by_id(args.optical_control_fms_file_id)
-    if not control_image_fms_record:
-        raise ValueError(
-            f"Could not find optical control image in FMS with ID: {args.optical_control_fms_file_id}"
-        )
+    # Check if args.image is a file path
+    if pathlib.Path(args.image).exists():
+        input_image_path = pathlib.Path(args.image)
+    else:
+        input_image_fms_record = fms.find_one_by_id(args.image)
+        if not input_image_fms_record:
+            raise ValueError(f"Could not find image in FMS with ID: {args.image}")
+        input_image_path = pathlib.Path(input_image_fms_record.path)
+
+    if pathlib.Path(args.optical_control).exists():
+        control_image_path = pathlib.Path(args.optical_control)
+    else:
+        control_image_fms_record = fms.find_one_by_id(args.optical_control)
+        if not control_image_fms_record:
+            raise ValueError(
+                f"Could not find optical control image in FMS with ID: {args.optical_control}"
+            )
+        control_image_path = pathlib.Path(control_image_fms_record.path)
 
     alignment_core = AlignmentCore()
 
-    control_image = AICSImage(control_image_fms_record.path)
+    control_image = AICSImage(control_image_path)
     control_image_channel_info = alignment_core.get_channel_info(control_image)
 
     assert (
@@ -189,7 +197,7 @@ def main(cli_args: typing.List[str] = sys.argv[1:]):
         px_size_xy=control_image.physical_pixel_sizes.X,
     )
 
-    image = AICSImage(input_image_fms_record.path)
+    image = AICSImage(input_image_path)
     # Iterate over all scenes in the image...
     for scene in image.scenes:
         start_time_scene = time.perf_counter()
@@ -228,7 +236,7 @@ def main(cli_args: typing.List[str] = sys.argv[1:]):
         with tempfile.TemporaryDirectory() as tempdir:
             temp_save_path = (
                 pathlib.Path(tempdir)
-                / f"{pathlib.Path(input_image_fms_record.name).stem}_{scene}_aligned.ome.tiff"
+                / f"{input_image_path.stem}_{scene}_aligned.ome.tiff"
             )
 
             processed_image_data = numpy.stack(processed_timepoints)  # TCZYX
@@ -260,8 +268,8 @@ def main(cli_args: typing.List[str] = sys.argv[1:]):
                 metadata = {
                     "provenance": {
                         "input_files": [
-                            args.input_fms_file_id,
-                            args.optical_control_fms_file_id,
+                            input_image_fms_record.id,
+                            control_image_fms_record.id,
                         ],
                         "algorithm": f"camera_alignment_core v{__version__}",
                     },

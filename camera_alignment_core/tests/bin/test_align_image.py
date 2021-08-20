@@ -39,10 +39,11 @@ class TestAlignImageBinScript:
                 patch("aicsfiles.FileManagementSystem.find_one_by_id", autospec=True),
             )
             input_image_fms_record = create_autospec(FMSFile)
+            input_image_fms_record.id = "mock_input_fms_file_id"
             input_image_fms_record.path = microscopy_image_path
-            input_image_fms_record.name = microscopy_image_path.name
 
             control_image_fms_record = create_autospec(FMSFile)
+            control_image_fms_record.id = "mock_optical_control_fms_file_id"
             control_image_fms_record.path = optical_control_image_path
 
             fms_find_one_by_id.side_effect = [
