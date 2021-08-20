@@ -17,6 +17,7 @@ from camera_alignment_core.constants import (
 )
 from camera_alignment_core.exception import (
     IncompatibleImageException,
+    UnsupportedMagnification,
 )
 
 log = logging.getLogger(LOGGER_NAME)
@@ -217,6 +218,13 @@ class TestAlignmentCore:
                 ARGOLIGHT_OPTICAL_CONTROL_IMAGE_URL,
                 ALIGNED_ZSD1_IMAGE_URL,
                 100,
+            ),
+            pytest.param(
+                UNALIGNED_ZSD1_IMAGE_URL,
+                ARGOLIGHT_OPTICAL_CONTROL_IMAGE_URL,
+                ALIGNED_ZSD1_IMAGE_URL,
+                30,  # Unsupported magnification
+                marks=pytest.mark.xfail(raises=UnsupportedMagnification),
             ),
         ],
     )
