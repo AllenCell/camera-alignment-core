@@ -9,6 +9,7 @@ Subpackages
 
    camera_alignment_core.alignment_utils
    camera_alignment_core.bin
+   camera_alignment_core.exception
 
 Submodules
 ----------
@@ -17,6 +18,14 @@ camera\_alignment\_core.alignment\_core module
 ----------------------------------------------
 
 .. automodule:: camera_alignment_core.alignment_core
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+camera\_alignment\_core.channel\_info module
+--------------------------------------------
+
+.. automodule:: camera_alignment_core.channel_info
    :members:
    :undoc-members:
    :show-inheritance:

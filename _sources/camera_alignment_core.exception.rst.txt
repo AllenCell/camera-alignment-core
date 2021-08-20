@@ -1,0 +1,10 @@
+camera\_alignment\_core.exception package
+=========================================
+
+Module contents
+---------------
+
+.. automodule:: camera_alignment_core.exception
+   :members:
+   :undoc-members:
+   :show-inheritance:
