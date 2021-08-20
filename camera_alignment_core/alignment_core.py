@@ -178,7 +178,7 @@ class AlignmentCore:
         channels = image.channel_names
         channel_info_dict = dict()
         for channel in channels:
-            if channel in ["Bright_2", "TL_100x"]:
+            if channel in ["Bright", "Bright_2", "TL_100x"]:
                 channel_info_dict.update(
                     {Channel.RAW_BRIGHTFIELD: channels.index(channel)}
                 )
@@ -188,7 +188,7 @@ class AlignmentCore:
                 channel_info_dict.update({Channel.RAW_638_NM: channels.index(channel)})
             elif channel in ["H3342"]:
                 channel_info_dict.update({Channel.RAW_405_NM: channels.index(channel)})
-            elif channel in ["TaRFP"]:
+            elif channel in ["TaRFP", "TagRFP"]:
                 channel_info_dict.update({Channel.RAW_561_NM: channels.index(channel)})
             else:
                 log.warning("Encountered unknown channel: %s", channel)

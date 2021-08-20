@@ -151,7 +151,10 @@ class TestAlignmentCore:
                     }
                 ),
             ),
-            (GENERIC_CZI_URL, ChannelInfo({Channel.RAW_561_NM: 1})),
+            (
+                GENERIC_CZI_URL,
+                ChannelInfo({Channel.RAW_BRIGHTFIELD: 0, Channel.RAW_561_NM: 1}),
+            ),
         ],
     )
     @pytest.mark.slow
