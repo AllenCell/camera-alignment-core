@@ -209,7 +209,19 @@ class AlignmentCore:
             )
 
         cropping_dimension = magnification.cropping_dimension
+        log.debug(
+            "Cropping to <X: %s, Y: %s>", cropping_dimension.x, cropping_dimension.y
+        )
+
         (_, _, Y, X) = image.shape
+
+        assert (
+            Y >= cropping_dimension.y
+        ), f"Image is smaller than intended cropping dimension in Y: actual == {Y}; intended == {cropping_dimension.y}"
+        assert (
+            X >= cropping_dimension.x
+        ), f"Image is smaller than intended cropping dimension in X: actual == {X}; intended == {cropping_dimension.x}"
+
         half_diff_x = (X - cropping_dimension.x) // 2
         half_diff_y = (Y - cropping_dimension.y) // 2
         cropped_image: numpy.typing.NDArray[numpy.uint16] = image[
@@ -221,8 +233,13 @@ class AlignmentCore:
 
         # Check if there are black pixels, if so, crop a little further
         if numpy.any(cropped_image < black_pixel_cutoff):
-            log.warning("After cropping, detected pixels under %s", black_pixel_cutoff)
             SMALL_AMOUNT_OF_ADDITIONAL_CROP = 20  # px
+            log.warning(
+                "After cropping, detected pixels under %s. Taking off an additional %s pixels",
+                black_pixel_cutoff,
+                SMALL_AMOUNT_OF_ADDITIONAL_CROP,
+            )
+
             (_, _, Y, X) = cropped_image.shape
             out_x = cropping_dimension.x - SMALL_AMOUNT_OF_ADDITIONAL_CROP
             out_y = cropping_dimension.y - SMALL_AMOUNT_OF_ADDITIONAL_CROP
