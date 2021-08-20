@@ -1,9 +1,10 @@
 import argparse
-import datetime
 import logging
 import pathlib
+import shutil
 import sys
 import tempfile
+import time
 import typing
 
 from aicsfiles import FileManagementSystem
@@ -32,15 +33,15 @@ class Args(argparse.Namespace):
         )
 
         parser.add_argument(
-            "input_fms_file_id",
+            "image",
             type=str,
-            help="FMS file_id for microscopy image that requires alignment",
+            help="Microscopy image that requires alignment. Can specify as either an FMS id or as a file path.",
         )
 
         parser.add_argument(
-            "optical_control_fms_file_id",
+            "optical_control",
             type=str,
-            help="FMS file_id for optical control image",
+            help="Optical control image to use to align `image`. Can specify as either an FMS id or as a file path.",
         )
 
         parser.add_argument(
@@ -98,6 +99,13 @@ class Args(argparse.Namespace):
         )
 
         parser.add_argument(
+            "-o",
+            "--out-dir",
+            type=lambda p: pathlib.Path(p).expanduser().resolve(strict=True),
+            help="If provided, aligned images will be saved into `out-dir` instead of being uploaded to FMS.",
+        )
+
+        parser.add_argument(
             "-d",
             "--debug",
             action="store_true",
@@ -145,7 +153,7 @@ def main(cli_args: typing.List[str] = sys.argv[1:]):
 
     args.print_args()
 
-    start_time = datetime.datetime.now()
+    start_time = time.perf_counter()
 
     fms = FileManagementSystem(env=args.fms_env)
     input_image_fms_record = fms.find_one_by_id(args.input_fms_file_id)
@@ -184,6 +192,8 @@ def main(cli_args: typing.List[str] = sys.argv[1:]):
     image = AICSImage(input_image_fms_record.path)
     # Iterate over all scenes in the image...
     for scene in image.scenes:
+        start_time_scene = time.perf_counter()
+
         # ...operate on current scene
         image.set_scene(scene)
 
@@ -193,6 +203,8 @@ def main(cli_args: typing.List[str] = sys.argv[1:]):
         # align each timepoint in the image
         processed_timepoints: typing.List[numpy.typing.NDArray[numpy.uint16]] = list()
         for timepoint in range(0, image.dims.T):
+            start_time_timepoint = time.perf_counter()
+
             image_slice = image.get_image_data("CZYX", T=timepoint)
             processed = alignment_core.align_image(
                 alignment_matrix,
@@ -202,7 +214,17 @@ def main(cli_args: typing.List[str] = sys.argv[1:]):
             )
             processed_timepoints.append(processed)
 
-        # collect all newly aligned timepoints into one file and save to FMS
+            end_time_timepoint = time.perf_counter()
+            log.debug(
+                f"END TIMEPOINT: aligned {timepoint} in {end_time_timepoint - start_time_timepoint:0.4f} seconds"
+            )
+
+        end_time_scene = time.perf_counter()
+        log.debug(
+            f"END SCENE: aligned scene {scene} in {end_time_scene - start_time_scene:0.4f} seconds"
+        )
+
+        # Collect all newly aligned timepoints for this scene into one file and save output
         with tempfile.TemporaryDirectory() as tempdir:
             temp_save_path = (
                 pathlib.Path(tempdir)
@@ -229,26 +251,32 @@ def main(cli_args: typing.List[str] = sys.argv[1:]):
                 dim_order="TCZYX",
             )
 
-            # Save combined file to FMS
-            log.debug("Uploading %s to FMS", temp_save_path)
-            metadata = {
-                "provenance": {
-                    "input_files": [
-                        args.input_fms_file_id,
-                        args.optical_control_fms_file_id,
-                    ],
-                    "algorithm": f"camera_alignment_core v{__version__}",
-                },
-            }
-            uploaded_file = fms.upload_file(
-                temp_save_path, file_type="image", metadata=metadata
-            )
-            log.info(
-                "Uploaded aligned scene (%s) as FMS file_id %s", scene, uploaded_file.id
-            )
+            # If args.out_dir is specified, save output to out_dir
+            if args.out_dir:
+                shutil.copy(temp_save_path, args.out_dir)
+            else:
+                # Save combined file to FMS
+                log.debug("Uploading %s to FMS", temp_save_path)
+                metadata = {
+                    "provenance": {
+                        "input_files": [
+                            args.input_fms_file_id,
+                            args.optical_control_fms_file_id,
+                        ],
+                        "algorithm": f"camera_alignment_core v{__version__}",
+                    },
+                }
+                uploaded_file = fms.upload_file(
+                    temp_save_path, file_type="image", metadata=metadata
+                )
+                log.info(
+                    "Uploaded aligned scene (%s) as FMS file_id %s",
+                    scene,
+                    uploaded_file.id,
+                )
 
-    end_time = datetime.datetime.now()
-    log.info(f"Finished in {end_time - start_time}")
+    end_time = time.perf_counter()
+    log.info(f"Finished in {end_time - start_time:0.4f} seconds")
 
 
 if __name__ == "__main__":
