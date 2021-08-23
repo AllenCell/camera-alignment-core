@@ -50,7 +50,6 @@ class Args(argparse.Namespace):
         )
 
         parser.add_argument(
-            "-m",
             "--magnification",
             choices=[mag.value for mag in list(Magnification)],
             type=int,
@@ -59,7 +58,6 @@ class Args(argparse.Namespace):
         )
 
         parser.add_argument(
-            "-s",
             "--scene",
             type=str,
             required=False,
@@ -69,7 +67,6 @@ class Args(argparse.Namespace):
         )
 
         parser.add_argument(
-            "-t",
             "--timepoint",
             type=str,
             required=False,
@@ -79,7 +76,6 @@ class Args(argparse.Namespace):
         )
 
         parser.add_argument(
-            "-r",
             "--ref-channel",
             type=int,
             choices=[405, 488, 561, 638],
@@ -91,7 +87,6 @@ class Args(argparse.Namespace):
         )
 
         parser.add_argument(
-            "-a",
             "--align-channel",
             type=int,
             choices=[405, 488, 561, 638],
@@ -103,7 +98,6 @@ class Args(argparse.Namespace):
         )
 
         parser.add_argument(
-            "-e",
             "--fms-env",
             type=str,
             choices=["prod", "stg", "dev"],
@@ -112,7 +106,6 @@ class Args(argparse.Namespace):
         )
 
         parser.add_argument(
-            "-o",
             "--out-dir",
             type=lambda p: pathlib.Path(p).expanduser().resolve(strict=True),
             help="If provided, aligned images will be saved into `out-dir` instead of being uploaded to FMS.",
