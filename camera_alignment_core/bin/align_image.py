@@ -61,7 +61,7 @@ class Args(argparse.Namespace):
         parser.add_argument(
             "-s",
             "--scene",
-            type=int,
+            type=str,
             required=False,
             dest="scene",
             action=ImageDimensionAction,
@@ -71,7 +71,7 @@ class Args(argparse.Namespace):
         parser.add_argument(
             "-t",
             "--timepoint",
-            type=int,
+            type=str,
             required=False,
             dest="timepoint",
             action=ImageDimensionAction,
@@ -248,10 +248,11 @@ def main(cli_args: typing.List[str] = sys.argv[1:]):
             # In the case of a single scene image file, **assume** the filename already contains the scene name, e.g. "3500004473_100X_20210430_1c-Scene-24-P96-G06.czi."
             # Unfortunately, cannot check `if scene in input_image_path.stem`--that assumes too much conformance between how the scene is named
             # in the filename and how AICSImageIO deals with scene naming.
+            stem, *_ = input_image_path.name.split(".")
             out_name = (
-                f"{input_image_path.stem}_aligned.ome.tiff"
+                f"{stem}_aligned.ome.tiff"
                 if len(image.scenes) == 1
-                else f"{input_image_path.stem}_Scene-{scene}_aligned.ome.tiff"
+                else f"{stem}_Scene-{scene}_aligned.ome.tiff"
             )
             temp_save_path = pathlib.Path(tempdir) / out_name
 
