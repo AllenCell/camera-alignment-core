@@ -54,7 +54,7 @@ class Args(argparse.Namespace):
             choices=[mag.value for mag in list(Magnification)],
             type=int,
             required=True,
-            help="Magnification at which both input_image and optical_control were acquired",
+            help="Magnification at which both `image` and `optical_control` were acquired.",
         )
 
         parser.add_argument(
@@ -63,7 +63,7 @@ class Args(argparse.Namespace):
             required=False,
             dest="scene",
             action=ImageDimensionAction,
-            help="On which scene or scenes within input image to align.",
+            help="On which scene or scenes within `image` to align. If not specified, will align all scenes within `image`.",
         )
 
         parser.add_argument(
@@ -72,7 +72,7 @@ class Args(argparse.Namespace):
             required=False,
             dest="timepoint",
             action=ImageDimensionAction,
-            help="On which timepoint or timepoints within input image to perform the alignment.",
+            help="On which timepoint or timepoints within `image` to perform the alignment. If not specified, will align all timepoints within `image`.",
         )
 
         parser.add_argument(
@@ -82,7 +82,7 @@ class Args(argparse.Namespace):
             default=561,
             dest="reference_channel",
             help=(
-                "Which channel of the optical control file to treat as the 'reference' for alignment. I.e., the 'static' channel. Defined in terms of the wavelength used in that channel."
+                "Which channel of `optical_control` to treat as the 'reference' for alignment. I.e., the 'static' channel. Defined in terms of the wavelength used in that channel."
             ),
         )
 
@@ -93,7 +93,7 @@ class Args(argparse.Namespace):
             default=638,
             dest="alignment_channel",
             help=(
-                "Which channel of the optical control file to align, relative to 'reference.' I.e., the 'moving' channel. Defined in terms of the wavelength used in that channel."
+                "Which channel of `optical_control` to align, relative to 'reference.' I.e., the 'moving' channel. Defined in terms of the wavelength used in that channel."
             ),
         )
 
@@ -102,13 +102,13 @@ class Args(argparse.Namespace):
             type=str,
             choices=["prod", "stg", "dev"],
             default="prod",
-            help="FMS env to run against. You should only set this option if you're testing output.",
+            help="FMS env to run against.",
         )
 
         parser.add_argument(
             "--out-dir",
             type=lambda p: pathlib.Path(p).expanduser().resolve(strict=True),
-            help="If provided, aligned images will be saved into `out-dir` instead of being uploaded to FMS.",
+            help="If provided, aligned images will be saved into `out-dir` instead of uploaded to FMS.",
         )
 
         parser.add_argument(
