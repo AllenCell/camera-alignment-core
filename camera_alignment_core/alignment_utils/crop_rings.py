@@ -138,7 +138,7 @@ class CropRings:
 
         # crop if image is below minimum maginification
         if self.magnification < min_no_crop_magnification:
-            log.debug("Determining croping dimensions")
+            log.debug("Determining cropping dimensions")
             crop_top, crop_bottom, crop_left, crop_right = self.get_crop_dimensions(
                 self.img.shape[0],
                 self.img.shape[1],
