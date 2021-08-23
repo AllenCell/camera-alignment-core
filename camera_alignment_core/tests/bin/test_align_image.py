@@ -7,6 +7,9 @@ from aicsfiles.model import FMSFile
 from aicsimageio import AICSImage
 
 from camera_alignment_core.bin import align_image
+from camera_alignment_core.constants import (
+    Magnification,
+)
 
 from .. import (
     ARGOLIGHT_OPTICAL_CONTROL_IMAGE_URL,
@@ -16,10 +19,7 @@ from .. import (
 
 
 class TestAlignImageBinScript:
-    def test_aligns_image(
-        self,
-        tmp_path: pathlib.Path,
-    ) -> None:
+    def test_aligns_image(self, tmp_path: pathlib.Path) -> None:
         # Arrange
         _, optical_control_image_path = get_test_image(
             ARGOLIGHT_OPTICAL_CONTROL_IMAGE_URL
@@ -27,6 +27,44 @@ class TestAlignImageBinScript:
         microscopy_image, microscopy_image_path = get_test_image(
             UNALIGNED_ZSD1_IMAGE_URL
         )
+
+        expected_aligned_image_path = (
+            tmp_path / f"{microscopy_image_path.stem}_aligned.ome.tiff"
+        )
+
+        cli_args = [
+            str(microscopy_image_path),
+            str(optical_control_image_path),
+            "--magnification",
+            str(Magnification.ONE_HUNDRED.value),
+            "--out-dir",
+            str(tmp_path),
+            "--debug",
+        ]
+
+        # Act
+        align_image.main(cli_args)
+
+        # Assert
+        assert expected_aligned_image_path.exists()
+
+        aligned_image = AICSImage(expected_aligned_image_path)
+        assert len(aligned_image.scenes) == len(microscopy_image.scenes)
+        assert aligned_image.dims.T == microscopy_image.dims.T
+        assert aligned_image.dims.C == microscopy_image.dims.C
+        assert aligned_image.dims.Z == microscopy_image.dims.Z
+        assert aligned_image.dims.Y == Magnification.ONE_HUNDRED.cropping_dimension.y
+        assert aligned_image.dims.X == Magnification.ONE_HUNDRED.cropping_dimension.x
+
+    def test_aligns_image_fms_integation(
+        self,
+        tmp_path: pathlib.Path,
+    ) -> None:
+        # Arrange
+        _, optical_control_image_path = get_test_image(
+            ARGOLIGHT_OPTICAL_CONTROL_IMAGE_URL
+        )
+        _, microscopy_image_path = get_test_image(UNALIGNED_ZSD1_IMAGE_URL)
 
         expected_aligned_image_path = (
             tmp_path / f"{pathlib.Path(microscopy_image_path).stem}_aligned.ome.tiff"
@@ -71,17 +109,12 @@ class TestAlignImageBinScript:
                 "mock_input_fms_file_id",
                 "mock_optical_control_fms_file_id",
                 "--magnification",
-                "100",
+                str(Magnification.ONE_HUNDRED.value),
             ]
 
             # Act
             align_image.main(cli_args)
 
             # Assert
-            assert expected_aligned_image_path.exists()
-
-            aligned_image = AICSImage(expected_aligned_image_path)
-            assert len(aligned_image.scenes) == 1
-            assert aligned_image.dims.T == microscopy_image.dims.T
-            assert aligned_image.dims.C == microscopy_image.dims.C
-            assert aligned_image.dims.Z == microscopy_image.dims.Z
+            assert fms_find_one_by_id.call_count == 2
+            assert fms_upload_file.called

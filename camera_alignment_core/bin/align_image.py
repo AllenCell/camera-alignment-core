@@ -210,7 +210,7 @@ def main(cli_args: typing.List[str] = sys.argv[1:]):
 
     image = AICSImage(input_image_path)
     # Iterate over scenes to align
-    scene_indices = args.scene if args.scene else image.scenes
+    scene_indices = args.scene if args.scene else range(len(image.scenes))
     for scene in scene_indices:
         start_time_scene = time.perf_counter()
 
@@ -244,10 +244,16 @@ def main(cli_args: typing.List[str] = sys.argv[1:]):
 
         # Collect all newly aligned timepoints for this scene into one file and save output
         with tempfile.TemporaryDirectory() as tempdir:
-            temp_save_path = (
-                pathlib.Path(tempdir)
-                / f"{input_image_path.stem}_{scene}_aligned.ome.tiff"
+            # In general, expect multi-scene images as input. Input may, however, be single scene image.
+            # In the case of a single scene image file, **assume** the filename already contains the scene name, e.g. "3500004473_100X_20210430_1c-Scene-24-P96-G06.czi."
+            # Unfortunately, cannot check `if scene in input_image_path.stem`--that assumes too much conformance between how the scene is named
+            # in the filename and how AICSImageIO deals with scene naming.
+            out_name = (
+                f"{input_image_path.stem}_aligned.ome.tiff"
+                if len(image.scenes) == 1
+                else f"{input_image_path.stem}_Scene-{scene}_aligned.ome.tiff"
             )
+            temp_save_path = pathlib.Path(tempdir) / out_name
 
             processed_image_data = numpy.stack(processed_timepoints)  # TCZYX
             (T, C, Z, Y, X) = processed_image_data.shape
@@ -272,6 +278,7 @@ def main(cli_args: typing.List[str] = sys.argv[1:]):
             # If args.out_dir is specified, save output to out_dir
             if args.out_dir:
                 shutil.copy(temp_save_path, args.out_dir)
+                log.debug("Copied %s to %s", temp_save_path, args.out_dir)
             else:
                 # Save combined file to FMS
                 log.debug("Uploading %s to FMS", temp_save_path)
