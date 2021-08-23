@@ -40,13 +40,8 @@ class TestAlignmentCore:
         """You can use this to setup before each test"""
         self.alignment_core = AlignmentCore()
 
-    @pytest.mark.slow
-    def test_generate_alignment_matrix(
-        self,
-        caplog: pytest.LogCaptureFixture,
-    ):
+    def test_generate_alignment_matrix(self):
         # Arrange
-        caplog.set_level(logging.DEBUG, logger=LOGGER_NAME)
         optical_control_image, _ = get_test_image(ZSD_100x_OPTICAL_CONTROL_IMAGE_URL)
         control_image_channel_info = self.alignment_core.get_channel_info(
             optical_control_image
@@ -79,18 +74,15 @@ class TestAlignmentCore:
         expected_matrix = numpy.load(expected_matrix_path, allow_pickle=True)
 
         # Act
-        (
-            actual_alignment_matrix,
-            actual_alignment_info,
-        ) = self.alignment_core.generate_alignment_matrix(
+        (actual_alignment_matrix, _,) = self.alignment_core.generate_alignment_matrix(
             optical_control_image_data,
             reference_channel=control_image_channel_info.index_of_channel(
-                Channel.RAW_405_NM
+                Channel.RAW_561_NM
             ),
             shift_channel=control_image_channel_info.index_of_channel(
                 Channel.RAW_638_NM
             ),
-            magnification=100,
+            magnification=Magnification.ONE_HUNDRED.value,
             px_size_xy=optical_control_image.physical_pixel_sizes.X,
         )
 
@@ -100,23 +92,18 @@ class TestAlignmentCore:
             actual_alignment_matrix - expected_matrix
         )
 
-    @pytest.mark.slow
-    def test_generate_alignment_matrix_reproducability(
-        self,
-        caplog: pytest.LogCaptureFixture,
-    ):
+    def test_generate_alignment_matrix_reproducability(self):
         # Arrange
-        caplog.set_level(logging.DEBUG, logger=LOGGER_NAME)
         optical_control_image, _ = get_test_image(ZSD_100x_OPTICAL_CONTROL_IMAGE_URL)
         optical_control_image_data = optical_control_image.get_image_data("CZYX")
         control_image_channel_info = self.alignment_core.get_channel_info(
             optical_control_image
         )
         reference_channel = control_image_channel_info.index_of_channel(
-            Channel.RAW_405_NM
+            Channel.RAW_561_NM
         )
         shift_channel = control_image_channel_info.index_of_channel(Channel.RAW_638_NM)
-        magnification = 100
+        magnification = Magnification.ONE_HUNDRED.value
         pixel_size_xy = optical_control_image.physical_pixel_sizes.X
 
         # Act
@@ -157,15 +144,12 @@ class TestAlignmentCore:
             ),
         ],
     )
-    @pytest.mark.slow
     def test_get_channel_info(
         self,
         image_path,
         expectation,
-        caplog: pytest.LogCaptureFixture,
     ):
         # Arrange
-        caplog.set_level(logging.DEBUG, logger=LOGGER_NAME)
         image, _ = get_test_image(image_path)
 
         # Act
@@ -186,32 +170,26 @@ class TestAlignmentCore:
                 UNALIGNED_ZSD1_IMAGE_URL,
                 ARGOLIGHT_OPTICAL_CONTROL_IMAGE_URL,
                 ALIGNED_ZSD1_IMAGE_URL,
-                100,
+                Magnification.ONE_HUNDRED.value,
             ),
         ],
     )
-    @pytest.mark.slow
     def test_align_image(
         self,
         image_path,
         alignment_image_path,
         expectation_image_path,
         magnification,
-        caplog: pytest.LogCaptureFixture,
     ):
 
         # Arrange
-        caplog.set_level(logging.DEBUG, logger=LOGGER_NAME)
         image, _ = get_test_image(image_path)
         optical_control_image, _ = get_test_image(alignment_image_path)
         optical_control_image_data = optical_control_image.get_image_data("CZYX", T=0)
         optical_control_channel_info = self.alignment_core.get_channel_info(
             optical_control_image
         )
-        (
-            alignment_matrix,
-            alignment_info,
-        ) = self.alignment_core.generate_alignment_matrix(
+        (alignment_matrix, _,) = self.alignment_core.generate_alignment_matrix(
             optical_control_image=optical_control_image_data,
             shift_channel=optical_control_channel_info.index_of_channel(
                 Channel.RAW_638_NM
@@ -251,14 +229,14 @@ class TestAlignmentCore:
                 numpy.random.rand(1, 1, 1, 1, 1),  # Wrong dimensions
                 numpy.eye(3, 3),
                 ChannelInfo({Channel.RAW_BRIGHTFIELD: 0}),
-                100,
+                Magnification.ONE_HUNDRED.value,
                 IncompatibleImageException,
             ),
             (
                 numpy.random.rand(1, 1, 1, 1),
                 numpy.eye(3, 3),
                 ChannelInfo({}),  # Empty ChannelInfo
-                100,
+                Magnification.ONE_HUNDRED.value,
                 ValueError,
             ),
             (
@@ -272,7 +250,7 @@ class TestAlignmentCore:
                         Channel.RAW_561_NM: 2,
                     }
                 ),
-                100,
+                Magnification.ONE_HUNDRED.value,
                 IncompatibleImageException,
             ),
             (
