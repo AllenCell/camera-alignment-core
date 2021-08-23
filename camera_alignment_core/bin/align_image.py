@@ -21,6 +21,11 @@ from camera_alignment_core import (
 from camera_alignment_core.constants import (
     LOGGER_NAME,
     Channel,
+    Magnification,
+)
+
+from .image_dimension_action import (
+    ImageDimensionAction,
 )
 
 log = logging.getLogger(LOGGER_NAME)
@@ -56,9 +61,11 @@ class Args(argparse.Namespace):
         parser.add_argument(
             "-s",
             "--scene",
-            type=str,
+            type=int,
             required=False,
-            help="Scene within input image to align. Takes same input as AICSImage::set_scene",
+            dest="scene",
+            action=ImageDimensionAction,
+            help="On which scene or scenes within input image to align.",
         )
 
         parser.add_argument(
@@ -66,7 +73,9 @@ class Args(argparse.Namespace):
             "--timepoint",
             type=int,
             required=False,
-            help="On which timepoint or timepoints within file to perform the alignment",
+            dest="timepoint",
+            action=ImageDimensionAction,
+            help="On which timepoint or timepoints within input image to perform the alignment.",
         )
 
         parser.add_argument(
@@ -198,33 +207,32 @@ def main(cli_args: typing.List[str] = sys.argv[1:]):
     )
 
     image = AICSImage(input_image_path)
-    # Iterate over all scenes in the image...
-    for scene in image.scenes:
+    # Iterate over scenes to align
+    scene_indices = args.scene if args.scene else image.scenes
+    for scene in scene_indices:
         start_time_scene = time.perf_counter()
 
-        # ...operate on current scene
+        # Operate on current scene
         image.set_scene(scene)
 
-        # arrange some values for later use
-        channel_info = alignment_core.get_channel_info(image)
-
-        # align each timepoint in the image
+        # Align timepoints within scene
         processed_timepoints: typing.List[numpy.typing.NDArray[numpy.uint16]] = list()
-        for timepoint in range(0, image.dims.T):
+        timepoint_indices = args.timepoint if args.timepoint else range(0, image.dims.T)
+        for timepoint in timepoint_indices:
             start_time_timepoint = time.perf_counter()
 
             image_slice = image.get_image_data("CZYX", T=timepoint)
             processed = alignment_core.align_image(
                 alignment_matrix,
                 image_slice,
-                channel_info,
+                alignment_core.get_channel_info(image),
                 args.magnification,
             )
             processed_timepoints.append(processed)
 
             end_time_timepoint = time.perf_counter()
             log.debug(
-                f"END TIMEPOINT: aligned {timepoint} in {end_time_timepoint - start_time_timepoint:0.4f} seconds"
+                f"END TIMEPOINT: aligned timepoint {timepoint} in {end_time_timepoint - start_time_timepoint:0.4f} seconds"
             )
 
         end_time_scene = time.perf_counter()
