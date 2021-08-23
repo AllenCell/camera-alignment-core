@@ -52,7 +52,7 @@ class Args(argparse.Namespace):
         parser.add_argument(
             "-m",
             "--magnification",
-            choices=[20, 63, 100],
+            choices=[mag.value for mag in list(Magnification)],
             type=int,
             required=True,
             help="Magnification at which both input_image and optical_control were acquired",
@@ -83,19 +83,23 @@ class Args(argparse.Namespace):
             "--ref-channel",
             type=int,
             choices=[405, 488, 561, 638],
-            default=405,
+            default=561,
             dest="reference_channel",
-            help="Which channel of the optical control file to treat as the 'reference' for alignment.",
+            help=(
+                "Which channel of the optical control file to treat as the 'reference' for alignment. I.e., the 'static' channel. Defined in terms of the wavelength used in that channel."
+            ),
         )
 
         parser.add_argument(
             "-a",
-            "--alignment-channel",
+            "--align-channel",
             type=int,
             choices=[405, 488, 561, 638],
             default=638,
             dest="alignment_channel",
-            help="Which channel of the optical control file to align, relative to 'reference.'",
+            help=(
+                "Which channel of the optical control file to align, relative to 'reference.' I.e., the 'moving' channel. Defined in terms of the wavelength used in that channel."
+            ),
         )
 
         parser.add_argument(
@@ -139,11 +143,8 @@ class Args(argparse.Namespace):
 
     def print_args(self):
         """Print arguments this script is running with"""
-
         log.info("*" * 50)
         for attr in vars(self):
-            if attr == "pg_pass":
-                continue
             log.info(f"{attr}: {getattr(self, attr)}")
         log.info("*" * 50)
 
@@ -166,7 +167,7 @@ def main(cli_args: typing.List[str] = sys.argv[1:]):
 
     fms = FileManagementSystem(env=args.fms_env)
 
-    # Check if args.image is a file path
+    # Check if args.image is a file path, else treat as an FMS ID
     if pathlib.Path(args.image).exists():
         input_image_path = pathlib.Path(args.image)
     else:
@@ -175,6 +176,7 @@ def main(cli_args: typing.List[str] = sys.argv[1:]):
             raise ValueError(f"Could not find image in FMS with ID: {args.image}")
         input_image_path = pathlib.Path(input_image_fms_record.path)
 
+    # Check if args.optical_control is a file path, else treat as an FMS ID
     if pathlib.Path(args.optical_control).exists():
         control_image_path = pathlib.Path(args.optical_control)
     else:
@@ -286,8 +288,9 @@ def main(cli_args: typing.List[str] = sys.argv[1:]):
                     temp_save_path, file_type="image", metadata=metadata
                 )
                 log.info(
-                    "Uploaded aligned scene (%s) as FMS file_id %s",
+                    "Uploaded aligned scene %s for file %s as FMS file_id %s",
                     scene,
+                    args.image,
                     uploaded_file.id,
                 )
 
