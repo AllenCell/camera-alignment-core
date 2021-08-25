@@ -1,5 +1,7 @@
 import contextlib
 import pathlib
+import shutil
+import tempfile
 import typing
 from unittest.mock import create_autospec, patch
 
@@ -22,8 +24,61 @@ from .. import (
 )
 
 
+@pytest.fixture
+def auto_clean_tmp_dir(
+    tmp_path: pathlib.Path,
+) -> typing.Generator[pathlib.Path, None, None]:
+    """
+    The built-in tmp_path pytest fixture will be left in place for three test sessions.
+    This instead immediately removes the tmp dir.
+    """
+    yield tmp_path
+    shutil.rmtree(tmp_path)
+
+
+@pytest.fixture(scope="session")
+def multi_scene_image() -> typing.Generator[pathlib.Path, None, None]:
+    print("Generating multi_scene_image")
+    microscopy_image, _ = get_test_image(UNALIGNED_ZSD1_IMAGE_URL)
+    scene_image_data = microscopy_image.get_image_data("TCZYX")
+    tmpdir = pathlib.Path(tempfile.mkdtemp())
+    multi_scene_image_path = tmpdir / "multiscene.ome.tiff"
+    num_scenes = 3
+    OmeTiffWriter.save(
+        channel_names=microscopy_image.channel_names,
+        data=[scene_image_data for _ in range(num_scenes)],
+        dim_order="TCZYX",
+        uri=multi_scene_image_path,
+    )
+
+    yield multi_scene_image_path
+
+    shutil.rmtree(tmpdir)
+
+
+@pytest.fixture(scope="session")
+def multi_timepoint_image() -> typing.Generator[pathlib.Path, None, None]:
+    print("Generating multi_timepoint_image")
+    microscopy_image, _ = get_test_image(UNALIGNED_ZSD1_IMAGE_URL)
+    timepoint_image_data = microscopy_image.get_image_data("CZYX", T=0)
+    tmpdir = pathlib.Path(tempfile.mkdtemp())
+    out_path = tmpdir / "multitimepoint.ome.tiff"
+    OmeTiffWriter.save(
+        channel_names=microscopy_image.channel_names,
+        data=numpy.stack(
+            [timepoint_image_data, timepoint_image_data, timepoint_image_data]
+        ),
+        dim_order="TCZYX",
+        uri=out_path,
+    )
+
+    yield out_path
+
+    shutil.rmtree(tmpdir)
+
+
 class TestAlignImageBinScript:
-    def test_aligns_image(self, tmp_path: pathlib.Path) -> None:
+    def test_aligns_image(self, auto_clean_tmp_dir: pathlib.Path) -> None:
         # Arrange
         _, optical_control_image_path = get_test_image(
             ARGOLIGHT_OPTICAL_CONTROL_IMAGE_URL
@@ -33,7 +88,7 @@ class TestAlignImageBinScript:
         )
 
         expected_aligned_image_path = (
-            tmp_path / f"{microscopy_image_path.stem}_aligned.ome.tiff"
+            auto_clean_tmp_dir / f"{microscopy_image_path.stem}_aligned.ome.tiff"
         )
 
         cli_args = [
@@ -42,7 +97,7 @@ class TestAlignImageBinScript:
             "--magnification",
             str(Magnification.ONE_HUNDRED.value),
             "--out-dir",
-            str(tmp_path),
+            str(auto_clean_tmp_dir),
         ]
 
         # Act
@@ -85,39 +140,30 @@ class TestAlignImageBinScript:
         self,
         scene_selection_spec: str,
         expected_files: typing.List[str],
-        tmp_path: pathlib.Path,
+        auto_clean_tmp_dir: pathlib.Path,
+        multi_scene_image: pathlib.Path,
     ) -> None:
         # Arrange
         _, optical_control_image_path = get_test_image(
             ARGOLIGHT_OPTICAL_CONTROL_IMAGE_URL
         )
-        microscopy_image, _ = get_test_image(UNALIGNED_ZSD1_IMAGE_URL)
-        scene_image_data = microscopy_image.get_image_data("TCZYX")
-        multi_scene_image_path = tmp_path / "multiscene.ome.tiff"
-        num_scenes = 3
-        OmeTiffWriter.save(
-            channel_names=microscopy_image.channel_names,
-            data=[scene_image_data for _ in range(num_scenes)],
-            dim_order="TCZYX",
-            uri=multi_scene_image_path,
-        )
 
         cli_args = [
-            str(multi_scene_image_path),
+            str(multi_scene_image),
             str(optical_control_image_path),
             "--magnification",
             str(Magnification.ONE_HUNDRED.value),
             "--scene",
             scene_selection_spec,
             "--out-dir",
-            str(tmp_path),
+            str(auto_clean_tmp_dir),
         ]
 
         # Act
         align_image.main(cli_args)
 
         # Assert
-        matching = sorted(tmp_path.glob("*_aligned.ome.tiff"))
+        matching = sorted(auto_clean_tmp_dir.glob("*_aligned.ome.tiff"))
         assert len(matching) == len(expected_files)
         for file in matching:
             assert file.name in expected_files
@@ -135,34 +181,25 @@ class TestAlignImageBinScript:
         self,
         timepoint_selection_spec: str,
         expected_timepoints: int,
-        tmp_path: pathlib.Path,
+        auto_clean_tmp_dir: pathlib.Path,
+        multi_timepoint_image: pathlib.Path,
     ) -> None:
         # Arrange
         _, optical_control_image_path = get_test_image(
             ARGOLIGHT_OPTICAL_CONTROL_IMAGE_URL
         )
-        microscopy_image, _ = get_test_image(UNALIGNED_ZSD1_IMAGE_URL)
-        timepoint_image_data = microscopy_image.get_image_data("CZYX", T=0)
-        multi_scene_image_path = tmp_path / "multitimepoint.ome.tiff"
-        OmeTiffWriter.save(
-            channel_names=microscopy_image.channel_names,
-            data=numpy.stack(
-                [timepoint_image_data, timepoint_image_data, timepoint_image_data]
-            ),
-            dim_order="TCZYX",
-            uri=multi_scene_image_path,
-        )
-        expected_out_file = tmp_path / "multitimepoint_aligned.ome.tiff"
+
+        expected_out_file = auto_clean_tmp_dir / "multitimepoint_aligned.ome.tiff"
 
         cli_args = [
-            str(multi_scene_image_path),
+            str(multi_timepoint_image),
             str(optical_control_image_path),
             "--magnification",
             str(Magnification.ONE_HUNDRED.value),
             "--timepoint",
             timepoint_selection_spec,
             "--out-dir",
-            str(tmp_path),
+            str(auto_clean_tmp_dir),
         ]
 
         # Act
@@ -174,7 +211,7 @@ class TestAlignImageBinScript:
 
     def test_aligns_image_fms_integation(
         self,
-        tmp_path: pathlib.Path,
+        auto_clean_tmp_dir: pathlib.Path,
     ) -> None:
         # Arrange
         _, optical_control_image_path = get_test_image(
@@ -183,7 +220,8 @@ class TestAlignImageBinScript:
         _, microscopy_image_path = get_test_image(UNALIGNED_ZSD1_IMAGE_URL)
 
         expected_aligned_image_path = (
-            tmp_path / f"{pathlib.Path(microscopy_image_path).stem}_aligned.ome.tiff"
+            auto_clean_tmp_dir
+            / f"{pathlib.Path(microscopy_image_path).stem}_aligned.ome.tiff"
         )
 
         with contextlib.ExitStack() as stack:
