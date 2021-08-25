@@ -9,26 +9,18 @@ pipeline {
     options {
         timeout(time: 1, unit: "HOURS")
     }
-    agent any
+    agent {
+        dockerfile {
+            filename ".jenkins/Dockerfile"
+            additionalBuildArgs "--build-arg USER=`whoami` --build-arg GROUP=jenkins --build-arg UID=`id -u` --build-arg GID=`id -g`"
+            args '--mount type=bind,src=${HOME},dst=${HOME},ro=true --mount type=bind,src=/etc,dst=/etc,ro=true -e HOME=${HOME} -e PATH=${WORKSPACE}/.local/bin:${PATH}'
+        }
+    }
     environment {
         REQUESTS_CA_BUNDLE = "/etc/ssl/certs"
     }
     stages {
-        stage ("create virtualenv") {
-            steps {
-                sh "make venv"
-                sh "make install"
-            }
-        }
-
         stage ("lint, type check, test, and build") {
-            agent {
-                dockerfile {
-                    filename ".jenkins/Dockerfile"
-                    additionalBuildArgs "--build-arg USER=`whoami` --build-arg GROUP=jenkins --build-arg UID=`id -u` --build-arg GID=`id -g`"
-                    args '--mount type=bind,src=${HOME},dst=${HOME},ro=true --mount type=bind,src=/etc,dst=/etc,ro=true -e HOME=${HOME} -e PATH=${WORKSPACE}/.local/bin:${PATH}'
-                }
-            }
             steps {
                 sh "make build"
                 sh "make lint"
