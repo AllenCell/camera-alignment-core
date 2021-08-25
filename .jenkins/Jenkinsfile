@@ -1,0 +1,115 @@
+pipeline {
+    parameters {
+        booleanParam(
+            name: "REGENERATE_DOCS",
+            defaultValue: false,
+            description: "If true, regenerates API documentation and pushes to remote gh-pages branch"
+        )
+    }
+    options {
+        timeout(time: 1, unit: "HOURS")
+    }
+    agent any
+    environment {
+        REQUESTS_CA_BUNDLE = "/etc/ssl/certs"
+    }
+    stages {
+        stage ("create virtualenv") {
+            steps {
+                sh "make venv"
+                sh "make install"
+            }
+        }
+
+        stage ("lint, type check, test, and build") {
+            agent {
+                dockerfile {
+                    filename ".jenkins/Dockerfile"
+                    additionalBuildArgs "--build-arg USER=`whoami` --build-arg GROUP=jenkins --build-arg UID=`id -u` --build-arg GID=`id -g`"
+                    args '--mount type=bind,src=${HOME},dst=${HOME},ro=true --mount type=bind,src=/etc,dst=/etc,ro=true -e HOME=${HOME} -e PATH=${WORKSPACE}/.local/bin:${PATH}'
+                }
+            }
+            steps {
+                sh "make build"
+                sh "make lint"
+                sh "make type-check"
+                sh "make fmt-check"
+                sh "make import-sort-check"
+                sh "make test"
+            }
+        }
+
+        stage ("publish snapshot") {
+            when {
+                expression {
+                    // Tag(s) associated with HEAD, if any
+                    tags = sh(returnStdout: true, script: 'git tag --points-at HEAD').trim().split(/\n/)
+
+                    // Run this stage if any tag is formatted like vX.Y.Z.devN
+                    return tags.any { it ==~ /v\d+\.\d+\.\d+\.dev\d+/ }
+                }
+            }
+            steps {
+                sh "make publish-snapshot"
+            }
+        }
+
+        stage ("publish release") {
+            when {
+                expression {
+                    // Tag(s) associated with HEAD, if any
+                    tags = sh(returnStdout: true, script: 'git tag --points-at HEAD').trim().split(/\n/)
+
+                    // Run this stage if any tag is formatted like vX.Y.Z
+                    return tags.any { it ==~ /v\d+\.\d+\.\d+$/ }
+                }
+            }
+            steps {
+                sh "make publish"
+             }
+        }
+
+        stage ("rebuild documentation") {
+            when {
+                anyOf {
+                    expression { return params.REGENERATE_DOCS }
+                    expression {
+                        // Tag(s) associated with HEAD, if any
+                        tags = sh(returnStdout: true, script: 'git tag --points-at HEAD').trim().split(/\n/)
+
+                        // Run this stage if any tag is formatted like vX.Y.Z
+                        return tags.any { it ==~ /v\d+\.\d+\.\d+$/ }
+                    }
+                }
+
+            }
+
+            steps {
+                withCredentials([sshUserPrivateKey(credentialsId: "aicsgithub-ssh-key", keyFileVariable: "SSH_KEY")]) {
+                    sh """
+                    git worktree add docs/build gh-pages
+                    make docs
+                    cd docs/build
+                    touch .nojekyll
+                    git add --all
+                    git commit -m "Regenerate documentation"
+                    GIT_SSH_COMMAND="ssh -i ${SSH_KEY} -o IdentitiesOnly=yes" git push origin gh-pages
+                    cd ../../
+                    git worktree remove docs/build
+                    """.trim()
+                }
+
+            }
+        }
+
+    }
+    post {
+        cleanup {
+            deleteDir()
+        }
+    }
+}
+
+def gitAuthor() {
+    sh(returnStdout: true, script: 'git log -1 --format=%an').trim()
+}
