@@ -27,9 +27,7 @@ from . import (
     GENERIC_OME_TIFF_URL,
     UNALIGNED_ZSD1_IMAGE_URL,
     ZSD_100x_OPTICAL_CONTROL_IMAGE_URL,
-    ZSD_100x_OPTICAL_CONTROL_TRANSFORM_MATRIX_URL,
     get_test_image,
-    get_test_resource,
 )
 
 log = logging.getLogger(LOGGER_NAME)
@@ -48,30 +46,13 @@ class TestAlignmentCore:
         )
         optical_control_image_data = optical_control_image.get_image_data("CZYX", T=0)
 
-        # Transform matrix for this same test resource produced by Calysta's version of this code found here:
-        # /allen/aics/microscopy/PRODUCTION/OpticalControl/ArgoLight/Argo_QC_Daily/ZSD1/ZSD1_argo_100X_SLF-015_20210624/argo_ZSD1_100X_SLF-015_20210624_sim_matrix.txt
-        # [
-        #     [
-        #         1.001828593258253797e00,
-        #         -5.167305751106508228e-03,
-        #         -5.272046139691610733e-02,
-        #     ],
-        #     [
-        #         5.167305751106508228e-03,
-        #         1.001828593258254241e00,
-        #         -3.061419473755620402e00,
-        #     ],
-        #     [
-        #         0.000000000000000000e00,
-        #         0.000000000000000000e00,
-        #         1.000000000000000000e00,
-        #     ],
-        # ]
-
-        expected_matrix_path = get_test_resource(
-            ZSD_100x_OPTICAL_CONTROL_TRANSFORM_MATRIX_URL
+        expected_matrix = numpy.array(
+            [
+                [1.0013714116607422, -0.0052382809204566, 0.2719881272043381],
+                [0.0052382809204566, 1.0013714116607422, -2.940886545198339],
+                [0.0, 0.0, 1.0],
+            ]
         )
-        expected_matrix = numpy.load(expected_matrix_path, allow_pickle=True)
 
         # Act
         (actual_alignment_matrix, _,) = self.alignment_core.generate_alignment_matrix(
@@ -88,9 +69,12 @@ class TestAlignmentCore:
 
         # Assert
         assert actual_alignment_matrix.shape == expected_matrix.shape
-        assert numpy.array_equal(actual_alignment_matrix, expected_matrix), (
-            actual_alignment_matrix - expected_matrix
-        )
+
+        # Due to inherent challenges with floating point precision across different environments,
+        # compare actual vs expected elementwise with a (very) small epsilon (i.e., allowed error margin)
+        assert numpy.allclose(
+            actual_alignment_matrix, expected_matrix, atol=1e-14, rtol=0
+        ), (actual_alignment_matrix - expected_matrix)
 
     def test_generate_alignment_matrix_reproducability(self):
         # Arrange

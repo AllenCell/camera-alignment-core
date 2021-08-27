@@ -16,7 +16,6 @@ log = logging.getLogger(LOGGER_NAME)
 # --- TEST RESOURCES ---
 # Taken from /allen/aics/microscopy/PRODUCTION/OpticalControl/ArgoLight/Argo_QC_Daily/ZSD1/ZSD1_argo_100X_SLF-015_20210624
 ZSD_100x_OPTICAL_CONTROL_IMAGE_URL = "https://s3.us-west-2.amazonaws.com/public-dev-objects.allencell.org/camera-alignment-core/optical-controls/argo_ZSD1_100X_SLF-015_20210624.czi"
-ZSD_100x_OPTICAL_CONTROL_TRANSFORM_MATRIX_URL = "https://s3.us-west-2.amazonaws.com/public-dev-objects.allencell.org/camera-alignment-core/transform-matrices/argo_ZSD1_100X_SLF-015_20210624_alignment_matrix.npy"
 
 # FMS ID: 0023c446cd384dc3947c90dc7a76f794; 303.38 MB
 GENERIC_OME_TIFF_URL = "https://s3.us-west-2.amazonaws.com/public-dev-objects.allencell.org/camera-alignment-core/images/3500003897_100X_20200306_1r-Scene-30-P89-G11.ome.tiff"
