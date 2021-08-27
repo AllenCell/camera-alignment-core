@@ -30,7 +30,7 @@ install: venv requirements.txt setup.py
 > $(VENV_BIN)/pre-commit install
 
 lint:
-> $(PYTHON) -m flake8 --count --show-source --statistics camera_alignment_core
+> $(PYTHON) -m flake8 --count --count --show-source --statistics camera_alignment_core
 .PHONY: lint
 
 type-check:
@@ -41,16 +41,8 @@ fmt:
 > $(PYTHON) -m black camera_alignment_core
 .PHONY: fmt
 
-fmt-check:
-> $(PYTHON) -m black --check camera_alignment_core
-.PHONY: fmt
-
 import-sort:
 > $(PYTHON) -m isort camera_alignment_core
-.PHONY: import-sort
-
-import-sort-check:
-> $(PYTHON) -m isort --check --diff camera_alignment_core
 .PHONY: import-sort
 
 test:
