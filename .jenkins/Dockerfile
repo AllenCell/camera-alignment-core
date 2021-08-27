@@ -28,3 +28,5 @@ RUN add-apt-repository ppa:deadsnakes/ppa && \
 
 RUN /usr/sbin/groupadd -g ${GID} ${GROUP} && \
     /usr/sbin/useradd --gid ${GID} -G sudo -N --shell /bin/bash --create-home --uid ${UID} ${USER}
+
+ENV REQUESTS_CA_BUNDLE="/etc/ssl/certs"

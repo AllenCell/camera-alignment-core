@@ -13,11 +13,8 @@ pipeline {
         dockerfile {
             filename ".jenkins/Dockerfile"
             additionalBuildArgs "--build-arg USER=`whoami` --build-arg GROUP=jenkins --build-arg UID=`id -u` --build-arg GID=`id -g`"
-            args "--mount type=bind,src=/etc,dst=/etc,readonly"
+            args '--mount type=bind,src=${HOME}/.pypirc,dst=${HOME}/.pypirc,readonly'
         }
-    }
-    environment {
-        REQUESTS_CA_BUNDLE = "/etc/ssl/certs"
     }
     stages {
         stage ("lint, type check, test, and build") {
