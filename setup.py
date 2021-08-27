@@ -18,8 +18,8 @@ setup_requirements = [
 ]
 
 test_requirements = [
-    "codecov ~= 2.1.4",
     "pytest ~= 6.2",
+    "pytest-runner ~= 5.3",
     "pytest-cov ~= 2.12",
     "pytest-raises ~= 0.11",
 ]
@@ -27,15 +27,14 @@ test_requirements = [
 dev_requirements = [
     *setup_requirements,
     *test_requirements,
-    "bump2version ~= 1.0",
-    "coverage ~= 5.1",
-    "m2r2 ~= 0.2",
-    "pytest-runner ~= 5.3",
-    "Sphinx ~= 4.0",
-    "sphinx_rtd_theme ~= 0.5",
-    "tox ~= 3.15",
-    "twine ~= 3.4",
-    "wheel ~= 0.36",
+    "bump2version ~= 1.0.1",
+    "twine ~= 3.4.2",
+    "wheel ~= 0.37.0",
+
+    # Documentation generation
+    "Sphinx ~= 4.1.2",
+    "furo == 2021.8.17b43",  # Third-party theme (https://pradyunsg.me/furo/quickstart/)
+    "m2r2 ~= 0.3.1",  # Sphinx extension for parsing README.md as reST and including in Sphinx docs
 ]
 
 requirements = [

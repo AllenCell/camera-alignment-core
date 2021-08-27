@@ -13,7 +13,7 @@ pipeline {
         dockerfile {
             filename ".jenkins/Dockerfile"
             additionalBuildArgs "--build-arg USER=`whoami` --build-arg GROUP=jenkins --build-arg UID=`id -u` --build-arg GID=`id -g`"
-            args '--mount type=bind,src=${HOME},dst=${HOME} --mount type=bind,src=/etc,dst=/etc,ro=true -e HOME=${HOME} -e PATH=${WORKSPACE}/.local/bin:${PATH}'
+            args "--mount type=bind,src=/etc,dst=/etc,readonly"
         }
     }
     environment {

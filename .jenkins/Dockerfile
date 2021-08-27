@@ -27,4 +27,4 @@ RUN add-apt-repository ppa:deadsnakes/ppa && \
     python3-pip
 
 RUN /usr/sbin/groupadd -g ${GID} ${GROUP} && \
-    /usr/sbin/useradd -g ${GROUP} -G sudo -N --shell /bin/bash --create-home -u ${UID} ${USER}
+    /usr/sbin/useradd --gid ${GID} -G sudo -N --shell /bin/bash --create-home --uid ${UID} ${USER}

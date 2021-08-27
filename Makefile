@@ -70,6 +70,10 @@ docs:
 > source $(ACTIVATE) && sphinx-build -b html docs docs/build
 .PHONY: docs
 
+docs-serve:
+> $(PYTHON) -m http.server --directory docs/build 8080
+.PHONY: docs-serve
+
 build: clean install
 > $(PYTHON) setup.py bdist_wheel
 .PHONY: build
