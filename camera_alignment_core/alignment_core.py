@@ -114,11 +114,13 @@ class AlignmentCore:
         image: numpy.typing.NDArray[numpy.uint16],
         channel_info: ChannelInfo,
         magnification: int,
+        crop: bool = True,
     ) -> numpy.typing.NDArray[numpy.uint16]:
         """
         Align a CZYX `image` using `alignment_matrix`.
         Uses `channel_info` to know which channels within `image` to align.
         Uses `magnification` to know how to crop the resulting aligned image.
+        Does not crop aligned image if crop=False.
         """
         if not image.ndim == 4:
             raise IncompatibleImageException(
@@ -165,10 +167,11 @@ class AlignmentCore:
                     log.debug("Skipping alignment for %s channel", channel.value)
                     aligned_image[index] = image[index]
 
-        # Some of the channels were aligned. Crop to adjust for differences in border position.
-        aligned_cropped_image = self._crop(aligned_image, Magnification(magnification))
+        if crop:
+            # Some of the channels were aligned. Crop to adjust for differences in border position.
+            return self._crop(aligned_image, Magnification(magnification))
 
-        return aligned_cropped_image
+        return aligned_image
 
     def get_channel_info(self, image: AICSImage) -> ChannelInfo:
         """

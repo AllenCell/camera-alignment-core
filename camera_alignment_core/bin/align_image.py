@@ -115,6 +115,13 @@ class Args(argparse.Namespace):
         )
 
         parser.add_argument(
+            "--crop",
+            action=argparse.BooleanOptionalAction,
+            default=True,
+            help="Boolean flag for toggling whether or not to crop the aligned image(s).",
+        )
+
+        parser.add_argument(
             "-d",
             "--debug",
             action="store_true",
@@ -224,6 +231,7 @@ def main(cli_args: typing.List[str] = sys.argv[1:]):
         control_image_data,
         alignment_core.get_channel_info(control_image),
         args.magnification,
+        crop=args.crop,
     )
     aligned_control_outpath = (
         pathlib.Path(args.out_dir) / f"{control_image_name}_aligned.ome.tiff"
@@ -258,6 +266,7 @@ def main(cli_args: typing.List[str] = sys.argv[1:]):
                 image_slice,
                 alignment_core.get_channel_info(image),
                 args.magnification,
+                crop=args.crop,
             )
             processed_timepoints.append(processed)
 
