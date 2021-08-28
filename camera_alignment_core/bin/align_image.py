@@ -1,5 +1,6 @@
 import argparse
 import dataclasses
+import datetime
 import json
 import logging
 import pathlib
@@ -20,6 +21,10 @@ from camera_alignment_core.constants import (
     Magnification,
 )
 
+from .alignment_output_manifest import (
+    AlignedImage,
+    AlignmentOutputManifest,
+)
 from .image_dimension_action import (
     ImageDimensionAction,
 )
@@ -47,8 +52,8 @@ class Args(argparse.Namespace):
 
         parser.add_argument(
             "--out-dir",
-            required=True,
             dest="out_dir",
+            required=True,
             type=lambda p: pathlib.Path(p).expanduser().resolve(strict=True),
             help="Save output into `out-dir`",
         )
@@ -59,6 +64,14 @@ class Args(argparse.Namespace):
             type=int,
             required=True,
             help="Magnification at which both `image` and `optical_control` were acquired.",
+        )
+
+        parser.add_argument(
+            "--manifest-file",
+            dest="manifest_file",
+            required=False,
+            type=lambda p: pathlib.Path(p).expanduser().resolve(),
+            help="Path to file at which manifest of output of this script will be written. See camera_alignment_core.bin.alignment_output_manifest.",
         )
 
         parser.add_argument(
@@ -231,6 +244,8 @@ def main(cli_args: typing.List[str] = sys.argv[1:]):
     )
 
     image = AICSImage(args.image)
+    aligned_image_paths: typing.List[AlignedImage] = []
+
     # Iterate over scenes to align
     scene_indices = args.scene if args.scene else range(len(image.scenes))
     for scene in scene_indices:
@@ -278,6 +293,23 @@ def main(cli_args: typing.List[str] = sys.argv[1:]):
         save_path = pathlib.Path(args.out_dir) / out_name
         processed_image_data = numpy.stack(processed_timepoints)  # TCZYX
         save_ndarray_to_ome_tiff(processed_image_data, save_path, image.channel_names)
+        aligned_image_paths.append(AlignedImage(scene, save_path))
+
+    # Save file describing/recording output of this script
+    output = AlignmentOutputManifest(
+        alignment_info_outpath, aligned_control_outpath, aligned_image_paths
+    )
+    today = datetime.date.today()
+    default_manifest_file_path = (
+        args.out_dir
+        / AlignmentOutputManifest.DEFAULT_FILE_NAME_PATTERN.format(
+            year=today.year, month=today.month, day=today.day
+        )
+    )
+    manifest_file_path = (
+        args.manifest_file if args.manifest_file else default_manifest_file_path
+    )
+    output.to_file(manifest_file_path)
 
     end_time = time.perf_counter()
     log.info(f"Finished in {end_time - start_time:0.4f} seconds")

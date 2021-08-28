@@ -8,7 +8,13 @@ from aicsimageio.writers import OmeTiffWriter
 import numpy
 import pytest
 
-from camera_alignment_core.bin import align_image
+from camera_alignment_core.bin import (
+    AlignmentOutputManifest,
+    align_image,
+)
+from camera_alignment_core.bin.image_dimension_action import (
+    parse_dimension_str,
+)
 from camera_alignment_core.constants import (
     Magnification,
 )
@@ -83,26 +89,29 @@ class TestAlignImageBinScript:
             UNALIGNED_ZSD1_IMAGE_URL
         )
 
-        expected_aligned_image_path = (
-            auto_clean_tmp_dir / f"{microscopy_image_path.stem}_aligned.ome.tiff"
-        )
+        output_manifest_path = auto_clean_tmp_dir / "manifest.json"
 
         cli_args = [
             str(microscopy_image_path),
             str(optical_control_image_path),
-            "--magnification",
-            str(Magnification.ONE_HUNDRED.value),
             "--out-dir",
             str(auto_clean_tmp_dir),
+            "--magnification",
+            str(Magnification.ONE_HUNDRED.value),
+            "--manifest-file",
+            str(output_manifest_path),
         ]
 
         # Act
         align_image.main(cli_args)
+        output = AlignmentOutputManifest.from_file(output_manifest_path)
 
         # Assert
-        assert expected_aligned_image_path.exists()
+        assert len(output.aligned_images) == 1
+        aligned_image_info = output.aligned_images[0]
+        assert aligned_image_info.path.exists()
 
-        aligned_image = AICSImage(expected_aligned_image_path)
+        aligned_image = AICSImage(aligned_image_info.path)
         assert len(aligned_image.scenes) == len(microscopy_image.scenes)
         assert aligned_image.dims.T == microscopy_image.dims.T
         assert aligned_image.dims.C == microscopy_image.dims.C
@@ -144,39 +153,45 @@ class TestAlignImageBinScript:
             ARGOLIGHT_OPTICAL_CONTROL_IMAGE_URL
         )
 
+        output_manifest_path = auto_clean_tmp_dir / "manifest.json"
+
         cli_args = [
             str(multi_scene_image),
             str(optical_control_image_path),
-            "--magnification",
-            str(Magnification.ONE_HUNDRED.value),
-            "--scene",
-            scene_selection_spec,
             "--out-dir",
             str(auto_clean_tmp_dir),
+            "--magnification",
+            str(Magnification.ONE_HUNDRED.value),
+            "--manifest-file",
+            str(output_manifest_path),
+            "--scene",
+            scene_selection_spec,
         ]
+
+        expected_scenes = parse_dimension_str(scene_selection_spec)
 
         # Act
         align_image.main(cli_args)
+        output = AlignmentOutputManifest.from_file(output_manifest_path)
 
         # Assert
-        matching = sorted(auto_clean_tmp_dir.glob("multiscene*_aligned.ome.tiff"))
-        assert len(matching) == len(expected_files)
-        for file in matching:
-            assert file.name in expected_files
+        assert len(output.aligned_images) == len(expected_files)
+        for file in output.aligned_images:
+            assert file.scene in expected_scenes
+            assert file.path.name in expected_files
 
     @pytest.mark.parametrize(
-        ["timepoint_selection_spec", "expected_timepoints"],
+        ["timepoint_selection_spec"],
         [
-            ("1", 1),
-            ("0-2", 3),
-            ("0, 2", 2),
-            pytest.param("0, 3", None, marks=pytest.mark.xfail(raises=IndexError)),
+            ("1",),
+            ("0-2",),
+            ("0, 2",),
+            pytest.param("0, 3", marks=pytest.mark.xfail(raises=IndexError)),
         ],
     )
     def test_aligns_selected_timepoints(
         self,
         timepoint_selection_spec: str,
-        expected_timepoints: int,
         auto_clean_tmp_dir: pathlib.Path,
         multi_timepoint_image: pathlib.Path,
     ) -> None:
@@ -185,22 +200,28 @@ class TestAlignImageBinScript:
             ARGOLIGHT_OPTICAL_CONTROL_IMAGE_URL
         )
 
-        expected_out_file = auto_clean_tmp_dir / "multitimepoint_aligned.ome.tiff"
+        output_manifest_path = auto_clean_tmp_dir / "manifest.json"
 
         cli_args = [
             str(multi_timepoint_image),
             str(optical_control_image_path),
-            "--magnification",
-            str(Magnification.ONE_HUNDRED.value),
-            "--timepoint",
-            timepoint_selection_spec,
             "--out-dir",
             str(auto_clean_tmp_dir),
+            "--magnification",
+            str(Magnification.ONE_HUNDRED.value),
+            "--manifest-file",
+            str(output_manifest_path),
+            "--timepoint",
+            timepoint_selection_spec,
         ]
+
+        expected_timepoints = parse_dimension_str(timepoint_selection_spec)
 
         # Act
         align_image.main(cli_args)
+        output = AlignmentOutputManifest.from_file(output_manifest_path)
 
         # Assert
-        assert expected_out_file.exists()
-        assert AICSImage(expected_out_file).dims.T == expected_timepoints
+        assert len(output.aligned_images) == 1
+        aligned_image_info = output.aligned_images[0]
+        assert AICSImage(aligned_image_info.path).dims.T == len(expected_timepoints)
