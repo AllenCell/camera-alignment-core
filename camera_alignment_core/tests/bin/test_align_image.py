@@ -1,3 +1,4 @@
+import json
 import pathlib
 import shutil
 import tempfile
@@ -8,6 +9,9 @@ from aicsimageio.writers import OmeTiffWriter
 import numpy
 import pytest
 
+from camera_alignment_core.alignment_utils import (
+    AlignmentInfo,
+)
 from camera_alignment_core.bin import (
     AlignmentOutputManifest,
     align_image,
@@ -80,7 +84,73 @@ def multi_timepoint_image() -> typing.Generator[pathlib.Path, None, None]:
 
 
 class TestAlignImageBinScript:
-    def test_aligns_image(self, auto_clean_tmp_dir: pathlib.Path) -> None:
+    def test_default_behavior(self, auto_clean_tmp_dir: pathlib.Path) -> None:
+        # Arrange
+        optical_control_image, optical_control_image_path = get_test_image(
+            ARGOLIGHT_OPTICAL_CONTROL_IMAGE_URL
+        )
+        microscopy_image, microscopy_image_path = get_test_image(
+            UNALIGNED_ZSD1_IMAGE_URL
+        )
+
+        cli_args = [
+            str(microscopy_image_path),
+            str(optical_control_image_path),
+            "--out-dir",
+            str(auto_clean_tmp_dir),
+            "--magnification",
+            str(Magnification.ONE_HUNDRED.value),
+        ]
+
+        # Act
+        align_image.main(cli_args)
+
+        # Assert
+        # Manifest file describing output is saved and re-serializable
+        manifest_candidates = sorted(
+            auto_clean_tmp_dir.glob(
+                AlignmentOutputManifest.DEFAULT_FILE_NAME_PATTERN.format(
+                    year="*", month="*", day="*"
+                )
+            )
+        )
+        assert len(manifest_candidates) == 1
+        manifest_path = manifest_candidates[0]
+        output = AlignmentOutputManifest.from_file(manifest_path)
+
+        # Alignment info: just a smoke test that it serializes
+        AlignmentInfo(**json.loads(output.alignment_info_path.read_text()))
+
+        # Assert optical control file was itself aligned
+        assert output.aligned_optical_control_path.exists()
+        aligned_optical_control = AICSImage(output.aligned_optical_control_path)
+        assert len(aligned_optical_control.scenes) == len(optical_control_image.scenes)
+        assert aligned_optical_control.dims.T == optical_control_image.dims.T
+        assert aligned_optical_control.dims.C == optical_control_image.dims.C
+        assert aligned_optical_control.dims.Z == optical_control_image.dims.Z
+        assert (
+            aligned_optical_control.dims.Y
+            == Magnification.ONE_HUNDRED.cropping_dimension.y
+        )
+        assert (
+            aligned_optical_control.dims.X
+            == Magnification.ONE_HUNDRED.cropping_dimension.x
+        )
+
+        # Assert microscopy image was aligned
+        assert len(output.aligned_images) == 1
+        aligned_image_info = output.aligned_images[0]
+        assert aligned_image_info.path.exists()
+
+        aligned_image = AICSImage(aligned_image_info.path)
+        assert len(aligned_image.scenes) == len(microscopy_image.scenes)
+        assert aligned_image.dims.T == microscopy_image.dims.T
+        assert aligned_image.dims.C == microscopy_image.dims.C
+        assert aligned_image.dims.Z == microscopy_image.dims.Z
+        assert aligned_image.dims.Y == Magnification.ONE_HUNDRED.cropping_dimension.y
+        assert aligned_image.dims.X == Magnification.ONE_HUNDRED.cropping_dimension.x
+
+    def test_aligns_image_no_crop(self, auto_clean_tmp_dir: pathlib.Path) -> None:
         # Arrange
         _, optical_control_image_path = get_test_image(
             ARGOLIGHT_OPTICAL_CONTROL_IMAGE_URL
@@ -100,6 +170,7 @@ class TestAlignImageBinScript:
             str(Magnification.ONE_HUNDRED.value),
             "--manifest-file",
             str(output_manifest_path),
+            "--no-crop",
         ]
 
         # Act
@@ -116,8 +187,8 @@ class TestAlignImageBinScript:
         assert aligned_image.dims.T == microscopy_image.dims.T
         assert aligned_image.dims.C == microscopy_image.dims.C
         assert aligned_image.dims.Z == microscopy_image.dims.Z
-        assert aligned_image.dims.Y == Magnification.ONE_HUNDRED.cropping_dimension.y
-        assert aligned_image.dims.X == Magnification.ONE_HUNDRED.cropping_dimension.x
+        assert aligned_image.dims.Y == microscopy_image.dims.Y
+        assert aligned_image.dims.X == microscopy_image.dims.X
 
     @pytest.mark.parametrize(
         ["scene_selection_spec", "expected_files"],
