@@ -33,6 +33,19 @@ log = logging.getLogger(LOGGER_NAME)
 
 
 class Args(argparse.Namespace):
+    @property
+    def crop(self) -> bool:
+        """
+        The purpose of this property is to avoid the use of double-negatives elsewhere.
+        The console_script accepts a "--no-crop" optional argument which defaults to False. So:
+            - if self.no_crop is truthy, self.crop should be False
+            - if self.no_crop is falsey, self.crop should be True
+        """
+        if getattr(self, "no_crop"):
+            return False
+
+        return True
+
     def parse(self, parser_args: typing.List[str]):
         parser = argparse.ArgumentParser(
             description="Run given file through camera alignment, outputting single file per scene."
@@ -115,10 +128,10 @@ class Args(argparse.Namespace):
         )
 
         parser.add_argument(
-            "--crop",
-            action=argparse.BooleanOptionalAction,
-            default=True,
-            help="Boolean flag for toggling whether or not to crop the aligned image(s).",
+            "--no-crop",
+            action="store_true",  # creates default value of False
+            dest="no_crop",
+            help="Do not to crop the aligned image(s).",
         )
 
         parser.add_argument(
