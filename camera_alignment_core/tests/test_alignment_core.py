@@ -72,9 +72,9 @@ class TestAlignmentCore:
 
         # Due to inherent challenges with floating point precision across different environments,
         # compare actual vs expected elementwise with a (very) small epsilon (i.e., allowed error margin)
-        assert numpy.allclose(
-            actual_alignment_matrix, expected_matrix, atol=1e-14, rtol=0
-        ), (actual_alignment_matrix - expected_matrix)
+        assert numpy.allclose(actual_alignment_matrix, expected_matrix, atol=1e-14), (
+            actual_alignment_matrix - expected_matrix
+        )
 
     def test_generate_alignment_matrix_reproducability(self):
         # Arrange
