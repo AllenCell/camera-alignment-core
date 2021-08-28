@@ -115,14 +115,6 @@ class Args(argparse.Namespace):
         )
 
         parser.add_argument(
-            "--fms-env",
-            type=str,
-            choices=["prod", "stg", "dev"],
-            default="prod",
-            help="FMS env to run against.",
-        )
-
-        parser.add_argument(
             "-d",
             "--debug",
             action="store_true",
