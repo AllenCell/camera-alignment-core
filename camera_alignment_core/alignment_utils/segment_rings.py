@@ -297,20 +297,16 @@ class SegmentRings:
     ) -> Tuple[
         np.typing.NDArray[np.uint16], np.typing.NDArray[np.uint16], pd.DataFrame, int
     ]:
-
         img_preprocessed = self.preprocess_img()
 
-        log.debug(type(img_preprocessed))
         num_beads = self.get_number_rings(img=img_preprocessed, mult_factor=5)
         minArea = int(self.ring_size_px * 0.8)
 
         if self.magnification in [40, 63, 100]:
-            log.debug(type(img_preprocessed))
             seg_rings, label_rings = self.segment_rings_intensity_threshold(
                 img_preprocessed
             )
         else:
-            log.debug(type(img_preprocessed))
             seg_cross, _ = self.segment_cross(img=img_preprocessed)
 
             seg_rings, label_rings, _ = self.segment_rings_dot_filter(

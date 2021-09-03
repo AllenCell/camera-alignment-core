@@ -30,7 +30,7 @@ install: venv requirements.txt setup.py
 > $(VENV_BIN)/pre-commit install
 
 lint:
-> $(PYTHON) -m flake8 --count --exit-zero camera_alignment_core
+> $(PYTHON) -m flake8 --count --count --show-source --statistics camera_alignment_core
 .PHONY: lint
 
 type-check:
@@ -53,13 +53,9 @@ test-exclude-slow:
 > $(PYTHON) -m pytest -m "not slow"
 .PHONY: test-exclude-slow
 
-clean:  ## clean all generated files
-> git clean -Xfd
+clean:  # Clear proj dir of all .gitignored files
+> git clean -xfd -e .vscode
 .PHONY: clean
-
-build: ## run tox / run tests and lint
-> $(PYTHON) -m tox
-.PHONY: build
 
 docs:
 > source $(ACTIVATE) && sphinx-apidoc -f -o docs camera_alignment_core camera_alignment_core/tests
@@ -69,6 +65,18 @@ docs:
 docs-serve:
 > $(PYTHON) -m http.server --directory docs/build 8080
 .PHONY: docs-serve
+
+build: clean install
+> $(PYTHON) setup.py bdist_wheel
+.PHONY: build
+
+publish: build
+> $(PYTHON) -m twine upload --verbose -r release-local --cert /etc/ssl/certs/aics-ca.pem dist/*.whl
+.PHONY: publish
+
+publish-snapshot: build
+> $(PYTHON) -m twine upload --verbose -r snapshot-local --cert /etc/ssl/certs/aics-ca.pem dist/*.whl
+.PHONY: publish-snapshot
 
 bumpversion-release:
 > $(PYTHON) -m bumpversion --list release

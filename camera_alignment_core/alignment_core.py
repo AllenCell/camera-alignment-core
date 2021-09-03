@@ -38,15 +38,20 @@ class AlignmentCore:
         shift_channel: int,
         magnification: int,
         px_size_xy: float,
-    ) -> Tuple[numpy.typing.NDArray[numpy.uint16], AlignmentInfo]:
+    ) -> Tuple[numpy.typing.NDArray[numpy.float16], AlignmentInfo]:
 
-        # if more than 4 dimensions, trip extra dims from beginning
-        ndim = optical_control_image.ndim
-        log.debug(f"image has shape {ndim}")
-        while optical_control_image.ndim > 4:
-            optical_control_image = optical_control_image[0, ...]
-            ndim = optical_control_image.ndim
-            log.debug(f"image has shape {ndim}")
+        log.debug(
+            "Params -- reference_channel: %s; shift_channel: %s; magnification: %s; px_size_xy: %s",
+            reference_channel,
+            shift_channel,
+            magnification,
+            px_size_xy,
+        )
+
+        if not optical_control_image.ndim == 4:
+            raise IncompatibleImageException(
+                f"Expected optical_control_image to be 4 dimensional ('CZYX'). Got: {optical_control_image.shape}"
+            )
 
         # detect center z-slice on reference channel
         log.debug("detecing center z in ref")
@@ -90,7 +95,7 @@ class AlignmentCore:
 
         # Create alignment from segmentation
         log.debug("Creating alignment matrix")
-        tform, align_info = RingAlignment(
+        similarity_transform, align_info = RingAlignment(
             ref_seg_rings,
             ref_seg_rings_label,
             ref_props_df,
@@ -101,7 +106,7 @@ class AlignmentCore:
             mov_cross_label,
         ).run()
 
-        return tform, align_info
+        return similarity_transform.params, align_info
 
     def align_image(
         self,
@@ -109,11 +114,13 @@ class AlignmentCore:
         image: numpy.typing.NDArray[numpy.uint16],
         channel_info: ChannelInfo,
         magnification: int,
+        crop: bool = True,
     ) -> numpy.typing.NDArray[numpy.uint16]:
         """
         Align a CZYX `image` using `alignment_matrix`.
         Uses `channel_info` to know which channels within `image` to align.
         Uses `magnification` to know how to crop the resulting aligned image.
+        Does not crop aligned image if crop=False.
         """
         if not image.ndim == 4:
             raise IncompatibleImageException(
@@ -160,10 +167,11 @@ class AlignmentCore:
                     log.debug("Skipping alignment for %s channel", channel.value)
                     aligned_image[index] = image[index]
 
-        # Some of the channels were aligned. Crop to adjust for differences in border position.
-        aligned_cropped_image = self._crop(aligned_image, Magnification(magnification))
+        if crop:
+            # Some of the channels were aligned. Crop to adjust for differences in border position.
+            return self._crop(aligned_image, Magnification(magnification))
 
-        return aligned_cropped_image
+        return aligned_image
 
     def get_channel_info(self, image: AICSImage) -> ChannelInfo:
         """
@@ -173,7 +181,7 @@ class AlignmentCore:
         channels = image.channel_names
         channel_info_dict = dict()
         for channel in channels:
-            if channel in ["Bright_2", "TL_100x"]:
+            if channel in ["Bright", "Bright_2", "TL_100x"]:
                 channel_info_dict.update(
                     {Channel.RAW_BRIGHTFIELD: channels.index(channel)}
                 )
@@ -183,7 +191,7 @@ class AlignmentCore:
                 channel_info_dict.update({Channel.RAW_638_NM: channels.index(channel)})
             elif channel in ["H3342"]:
                 channel_info_dict.update({Channel.RAW_405_NM: channels.index(channel)})
-            elif channel in ["TaRFP"]:
+            elif channel in ["TaRFP", "TagRFP"]:
                 channel_info_dict.update({Channel.RAW_561_NM: channels.index(channel)})
             else:
                 log.warning("Encountered unknown channel: %s", channel)
@@ -204,7 +212,19 @@ class AlignmentCore:
             )
 
         cropping_dimension = magnification.cropping_dimension
+        log.debug(
+            "Cropping to <X: %s, Y: %s>", cropping_dimension.x, cropping_dimension.y
+        )
+
         (_, _, Y, X) = image.shape
+
+        assert (
+            Y >= cropping_dimension.y
+        ), f"Image is smaller than intended cropping dimension in Y: actual == {Y}; intended == {cropping_dimension.y}"
+        assert (
+            X >= cropping_dimension.x
+        ), f"Image is smaller than intended cropping dimension in X: actual == {X}; intended == {cropping_dimension.x}"
+
         half_diff_x = (X - cropping_dimension.x) // 2
         half_diff_y = (Y - cropping_dimension.y) // 2
         cropped_image: numpy.typing.NDArray[numpy.uint16] = image[
@@ -216,8 +236,13 @@ class AlignmentCore:
 
         # Check if there are black pixels, if so, crop a little further
         if numpy.any(cropped_image < black_pixel_cutoff):
-            log.warning("After cropping, detected pixels under %s", black_pixel_cutoff)
             SMALL_AMOUNT_OF_ADDITIONAL_CROP = 20  # px
+            log.warning(
+                "After cropping, detected pixels under %s. Taking off an additional %s pixels",
+                black_pixel_cutoff,
+                SMALL_AMOUNT_OF_ADDITIONAL_CROP,
+            )
+
             (_, _, Y, X) = cropped_image.shape
             out_x = cropping_dimension.x - SMALL_AMOUNT_OF_ADDITIONAL_CROP
             out_y = cropping_dimension.y - SMALL_AMOUNT_OF_ADDITIONAL_CROP

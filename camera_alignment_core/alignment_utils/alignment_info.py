@@ -1,7 +1,5 @@
 import dataclasses
 
-from skimage.transform import SimilarityTransform
-
 
 @dataclasses.dataclass
 class AlignmentInfo:
@@ -17,6 +15,3 @@ class AlignmentInfo:
 
     # image scaling
     scaling: float
-
-    # Complete transform object
-    tform: SimilarityTransform

@@ -1,7 +1,6 @@
 import logging
 import typing
 
-from aicsimageio import AICSImage
 import numpy
 import numpy.testing
 import numpy.typing
@@ -21,21 +20,17 @@ from camera_alignment_core.exception import (
     UnsupportedMagnification,
 )
 
+from . import (
+    ALIGNED_ZSD1_IMAGE_URL,
+    ARGOLIGHT_OPTICAL_CONTROL_IMAGE_URL,
+    GENERIC_CZI_URL,
+    GENERIC_OME_TIFF_URL,
+    UNALIGNED_ZSD1_IMAGE_URL,
+    ZSD_100x_OPTICAL_CONTROL_IMAGE_URL,
+    get_test_image,
+)
+
 log = logging.getLogger(LOGGER_NAME)
-
-
-ZSD_100x_OPTICAL_CONTROL_IMAGE_URL = "https://s3.us-west-2.amazonaws.com/public-dev-objects.allencell.org/camera-alignment-core/optical-controls/argo_ZSD1_100X_SLF-015_20210624.czi"
-
-# FMS ID: 0023c446cd384dc3947c90dc7a76f794; 303.38 MB
-GENERIC_OME_TIFF_URL = "https://s3.us-west-2.amazonaws.com/public-dev-objects.allencell.org/camera-alignment-core/images/3500003897_100X_20200306_1r-Scene-30-P89-G11.ome.tiff"  # noqa E501
-
-# FMS ID: 439c852ea76e46d4b9a9f8813f331b4d; 264.43 MB
-GENERIC_CZI_URL = "https://s3.us-west-2.amazonaws.com/public-dev-objects.allencell.org/camera-alignment-core/images/20200701_N04_001.czi"  # noqa E501
-
-UNALIGNED_ZSD1_IMAGE_URL = "https://s3.us-west-2.amazonaws.com/public-dev-objects.allencell.org/camera-alignment-core/images/3500004473_100X_20210430_1c-Scene-24-P96-G06.czi"
-ALIGNED_ZSD1_IMAGE_URL = "https://s3.us-west-2.amazonaws.com/public-dev-objects.allencell.org/camera-alignment-core/aligned-images/3500004473_100X_20210430_1c-Scene-24-P96-G06_aligned.ome.tiff"
-ARGOLIGHT_OPTICAL_CONTROL_IMAGE_URL = "https://s3.us-west-2.amazonaws.com/public-dev-objects.allencell.org/camera-alignment-core/optical-controls/argo_100X_20210430_fieldofrings.czi"
-ARGOLIGHT_ALIGNED_IMAGE_URL = "https://s3.us-west-2.amazonaws.com/public-dev-objects.allencell.org/camera-alignment-core/optical-controls/argo_100X_20210430_fieldofrings_aligned.tif"
 
 
 class TestAlignmentCore:
@@ -43,105 +38,57 @@ class TestAlignmentCore:
         """You can use this to setup before each test"""
         self.alignment_core = AlignmentCore()
 
-    @pytest.mark.slow
-    def test_generate_alignment_matrix(
-        self,
-        get_image: typing.Callable[[str], AICSImage],
-        caplog: pytest.LogCaptureFixture,
-        output: bool = False,
-    ):
+    def test_generate_alignment_matrix(self):
         # Arrange
-        caplog.set_level(logging.DEBUG, logger=LOGGER_NAME)
-        zsd_100x_optical_control_image = get_image(ZSD_100x_OPTICAL_CONTROL_IMAGE_URL)
-        optical_control_image_data = zsd_100x_optical_control_image.get_image_data(
-            "CZYX"
+        optical_control_image, _ = get_test_image(ZSD_100x_OPTICAL_CONTROL_IMAGE_URL)
+        control_image_channel_info = self.alignment_core.get_channel_info(
+            optical_control_image
         )
-        reference_channel = 1
-        shift_channel = 2
-        magnification = 100
-        pixel_size_xy = 0.108
-
-        # This is the output of the old alignment code for the optical control saved at
-        # /allen/aics/microscopy/PRODUCTION/OpticalControl/ArgoLight/Argo_QC_Daily/ZSD1/ZSD1_argo_100X_SLF-015_20210624
-
-        # Original Matrix
-        # expected_matrix = numpy.array(
-        #     [
-        #         [
-        #             1.001828593258253797e00,
-        #             -5.167305751106508228e-03,
-        #             -5.272046139691610733e-02,
-        #         ],
-        #         [
-        #             5.167305751106508228e-03,
-        #             1.001828593258254241e00,
-        #             -3.061419473755620402e00,
-        #         ],
-        #         [
-        #             0.000000000000000000e00,
-        #             0.000000000000000000e00,
-        #             1.000000000000000000e00,
-        #         ],
-        #     ]
-        # )
+        optical_control_image_data = optical_control_image.get_image_data("CZYX", T=0)
 
         expected_matrix = numpy.array(
             [
-                [
-                    1.00022523e00,
-                    8.68926296e-05,
-                    -2.10827503e-01,
-                ],
-                [
-                    -8.68926296e-05,
-                    1.00022523e00,
-                    2.84065985e-02,
-                ],
-                [
-                    0.00000000e00,
-                    0.00000000e00,
-                    1.00000000e00,
-                ],
+                [1.0013714116607422, -0.0052382809204566, 0.2719881272043381],
+                [0.0052382809204566, 1.0013714116607422, -2.940886545198339],
+                [0.0, 0.0, 1.0],
             ]
         )
 
         # Act
-        (
-            actual_alignment_matrix,
-            actual_alignment_info,
-        ) = self.alignment_core.generate_alignment_matrix(
+        (actual_alignment_matrix, _,) = self.alignment_core.generate_alignment_matrix(
             optical_control_image_data,
-            reference_channel,
-            shift_channel,
-            magnification,
-            pixel_size_xy,
+            reference_channel=control_image_channel_info.index_of_channel(
+                Channel.RAW_561_NM
+            ),
+            shift_channel=control_image_channel_info.index_of_channel(
+                Channel.RAW_638_NM
+            ),
+            magnification=Magnification.ONE_HUNDRED.value,
+            px_size_xy=optical_control_image.physical_pixel_sizes.X,
         )
 
         # Assert
-        log.debug("Expected Matrix")
-        log.debug(expected_matrix)
-        log.debug("Estimated Matrix")
-        log.debug(numpy.array(actual_alignment_matrix.params))
+        assert actual_alignment_matrix.shape == expected_matrix.shape
 
-        assert numpy.allclose(expected_matrix, actual_alignment_matrix.params)
-
-    @pytest.mark.slow
-    def test_generate_alignment_matrix_reproducability(
-        self,
-        get_image: typing.Callable[[str], AICSImage],
-        caplog: pytest.LogCaptureFixture,
-        output: bool = False,
-    ):
-        # Arrange
-        caplog.set_level(logging.DEBUG, logger=LOGGER_NAME)
-        zsd_100x_optical_control_image = get_image(ZSD_100x_OPTICAL_CONTROL_IMAGE_URL)
-        optical_control_image_data = zsd_100x_optical_control_image.get_image_data(
-            "CZYX"
+        # Due to inherent challenges with floating point precision across different environments,
+        # compare actual vs expected elementwise with a (very) small epsilon (i.e., allowed error margin)
+        assert numpy.allclose(actual_alignment_matrix, expected_matrix, atol=1e-14), (
+            actual_alignment_matrix - expected_matrix
         )
-        reference_channel = 1
-        shift_channel = 2
-        magnification = 100
-        pixel_size_xy = 0.108
+
+    def test_generate_alignment_matrix_reproducability(self):
+        # Arrange
+        optical_control_image, _ = get_test_image(ZSD_100x_OPTICAL_CONTROL_IMAGE_URL)
+        optical_control_image_data = optical_control_image.get_image_data("CZYX")
+        control_image_channel_info = self.alignment_core.get_channel_info(
+            optical_control_image
+        )
+        reference_channel = control_image_channel_info.index_of_channel(
+            Channel.RAW_561_NM
+        )
+        shift_channel = control_image_channel_info.index_of_channel(Channel.RAW_638_NM)
+        magnification = Magnification.ONE_HUNDRED.value
+        pixel_size_xy = optical_control_image.physical_pixel_sizes.X
 
         # Act
         (alignment_matrix_1, _,) = self.alignment_core.generate_alignment_matrix(
@@ -159,17 +106,7 @@ class TestAlignmentCore:
             pixel_size_xy,
         )
 
-        mat1 = numpy.array(alignment_matrix_1.params)
-        mat2 = numpy.array(alignment_matrix_1.params)
-
-        # Assert
-        log.debug("First Estimated Matrix")
-        log.debug(mat1)
-
-        log.debug("Second Estimated Matrix")
-        log.debug(mat2)
-
-        assert numpy.allclose(mat1, mat2)
+        assert numpy.array_equal(alignment_matrix_1, alignment_matrix_2)
 
     @pytest.mark.parametrize(
         ["image_path", "expectation"],
@@ -185,20 +122,19 @@ class TestAlignmentCore:
                     }
                 ),
             ),
-            (GENERIC_CZI_URL, ChannelInfo({Channel.RAW_561_NM: 1})),
+            (
+                GENERIC_CZI_URL,
+                ChannelInfo({Channel.RAW_BRIGHTFIELD: 0, Channel.RAW_561_NM: 1}),
+            ),
         ],
     )
-    @pytest.mark.slow
     def test_get_channel_info(
         self,
         image_path,
         expectation,
-        get_image: typing.Callable[[str], AICSImage],
-        caplog: pytest.LogCaptureFixture,
     ):
         # Arrange
-        caplog.set_level(logging.DEBUG, logger=LOGGER_NAME)
-        image = get_image(image_path)
+        image, _ = get_test_image(image_path)
 
         # Act
         result = self.alignment_core.get_channel_info(image)
@@ -218,33 +154,26 @@ class TestAlignmentCore:
                 UNALIGNED_ZSD1_IMAGE_URL,
                 ARGOLIGHT_OPTICAL_CONTROL_IMAGE_URL,
                 ALIGNED_ZSD1_IMAGE_URL,
-                100,
+                Magnification.ONE_HUNDRED.value,
             ),
         ],
     )
-    @pytest.mark.slow
     def test_align_image(
         self,
         image_path,
         alignment_image_path,
         expectation_image_path,
         magnification,
-        get_image: typing.Callable[[str], AICSImage],
-        caplog: pytest.LogCaptureFixture,
     ):
 
         # Arrange
-        caplog.set_level(logging.DEBUG, logger=LOGGER_NAME)
-        image = get_image(image_path)
-        optical_control_image = get_image(alignment_image_path)
+        image, _ = get_test_image(image_path)
+        optical_control_image, _ = get_test_image(alignment_image_path)
         optical_control_image_data = optical_control_image.get_image_data("CZYX", T=0)
         optical_control_channel_info = self.alignment_core.get_channel_info(
             optical_control_image
         )
-        (
-            alignment_matrix,
-            alignment_info,
-        ) = self.alignment_core.generate_alignment_matrix(
+        (alignment_matrix, _,) = self.alignment_core.generate_alignment_matrix(
             optical_control_image=optical_control_image_data,
             shift_channel=optical_control_channel_info.index_of_channel(
                 Channel.RAW_638_NM
@@ -258,7 +187,7 @@ class TestAlignmentCore:
 
         image_channel_info = self.alignment_core.get_channel_info(image)
 
-        expectation = get_image(expectation_image_path).get_image_data("CZYX", T=0)
+        expectation_image, _ = get_test_image(expectation_image_path)
 
         # Act
         result = self.alignment_core.align_image(
@@ -269,7 +198,7 @@ class TestAlignmentCore:
         )
 
         # Assert
-        assert numpy.allclose(result, expectation)
+        assert numpy.array_equal(result, expectation_image.get_image_data("CZYX", T=0))
 
     @pytest.mark.parametrize(
         [
@@ -284,14 +213,14 @@ class TestAlignmentCore:
                 numpy.random.rand(1, 1, 1, 1, 1),  # Wrong dimensions
                 numpy.eye(3, 3),
                 ChannelInfo({Channel.RAW_BRIGHTFIELD: 0}),
-                100,
+                Magnification.ONE_HUNDRED.value,
                 IncompatibleImageException,
             ),
             (
                 numpy.random.rand(1, 1, 1, 1),
                 numpy.eye(3, 3),
                 ChannelInfo({}),  # Empty ChannelInfo
-                100,
+                Magnification.ONE_HUNDRED.value,
                 ValueError,
             ),
             (
@@ -305,7 +234,7 @@ class TestAlignmentCore:
                         Channel.RAW_561_NM: 2,
                     }
                 ),
-                100,
+                Magnification.ONE_HUNDRED.value,
                 IncompatibleImageException,
             ),
             (
@@ -347,12 +276,15 @@ class TestAlignmentCore:
         image_path,
         magnification,
         expected_shape,
-        get_image: typing.Callable[[str], AICSImage],
         caplog: pytest.LogCaptureFixture,
     ):
+        # Arrange
         caplog.set_level(logging.DEBUG, logger=LOGGER_NAME)
-        image = get_image(image_path).get_image_dask_data()[0]
+        image, _ = get_test_image(image_path)
+        image_data = image.get_image_data("CZYX", T=0)
 
-        result = self.alignment_core._crop(image, magnification)
+        # Act
+        result = self.alignment_core._crop(image_data, magnification)
 
+        # Assert
         assert result.shape == expected_shape

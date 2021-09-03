@@ -3,7 +3,6 @@ import typing
 import numpy
 import pandas
 import pytest
-from skimage.transform import SimilarityTransform
 
 from camera_alignment_core.alignment_utils import (
     RingAlignment,
@@ -58,41 +57,3 @@ class TestRingAlign:
 
         # Assert
         assert not any(missmatch)
-
-    def test_report_matrix_parameters(self):
-        tform_matrix = numpy.array(
-            [
-                [
-                    1.001828593258253797e00,
-                    -5.167305751106508228e-03,
-                    -5.272046139691610733e-02,
-                ],
-                [
-                    5.167305751106508228e-03,
-                    1.001828593258254241e00,
-                    -3.061419473755620402e00,
-                ],
-                [
-                    0.000000000000000000e00,
-                    0.000000000000000000e00,
-                    1.000000000000000000e00,
-                ],
-            ]
-        )
-
-        tform = SimilarityTransform(matrix=tform_matrix)
-        alignInfo = RingAlignment(
-            numpy.zeros((1)),
-            numpy.zeros((1)),
-            pandas.DataFrame(),
-            0,
-            numpy.zeros((1)),
-            numpy.zeros((1)),
-            pandas.DataFrame(),
-            0,
-        ).report_similarity_matrix_parameters(tform)
-
-        assert tform.scale == alignInfo.scaling
-        assert tform.translation[0] == alignInfo.shift_y
-        assert tform.translation[1] == alignInfo.shift_x
-        assert tform.rotation == alignInfo.rotation

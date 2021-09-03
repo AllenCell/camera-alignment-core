@@ -1,3 +1,8 @@
 # -*- coding: utf-8 -*-
 
-"""Bin scripts package for camera_alignment_core."""
+from .alignment_output_manifest import (
+    AlignedImage,
+    AlignmentOutputManifest,
+)
+
+__all__ = ("AlignedImage", "AlignmentOutputManifest")

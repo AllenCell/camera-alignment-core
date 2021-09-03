@@ -110,41 +110,6 @@ class RingAlignment:
             )
         return rev_yx_to_xy
 
-    def report_similarity_matrix_parameters(
-        self, tform: tf.SimilarityTransform
-    ) -> AlignmentInfo:
-        """
-        Reports similarity matrix and its parameters
-        :param tform: A transform generated from skimage.transform.estimate_transform
-        :param method_logging: A boolean to indicate if printing/logging statements is selected
-        :return: A dictionary with the following keys and values:
-            transform: A transform to be applied to moving images
-            scaling: Uniform scaling parameter
-            shift_y: Shift in y
-            shift_x: Shift in x
-            rotate_angle: Rotation angle
-        """
-        tform_dict = {
-            "transform": tform,
-            "scaling": tform.scale,
-            "shift_y": tform.translation[0],
-            "shift_x": tform.translation[1],
-            "rotate_angle": tform.rotation,
-        }
-
-        log.debug("%s", tform_dict)
-
-        align_info = AlignmentInfo(
-            tform=tform,
-            rotation=tform.rotation,
-            shift_x=tform.translation[1],
-            shift_y=tform.translation[0],
-            z_offset=0,
-            scaling=tform.scale,
-        )
-
-        return align_info
-
     def run(
         self,
     ) -> Tuple[tf.SimilarityTransform, AlignmentInfo]:
@@ -170,6 +135,12 @@ class RingAlignment:
         )
 
         # create alignment info
-        align_info = self.report_similarity_matrix_parameters(tform)
+        align_info = AlignmentInfo(
+            rotation=tform.rotation,
+            shift_x=tform.translation[1],
+            shift_y=tform.translation[0],
+            z_offset=0,
+            scaling=tform.scale,
+        )
 
         return tform, align_info
