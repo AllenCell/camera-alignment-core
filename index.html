@@ -3,7 +3,7 @@
   <head><meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
     <meta name="color-scheme" content="light dark"><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
-<link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" /><link rel="next" title="Installation" href="installation.html" />
+<link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" /><link rel="next" title="camera_alignment_core" href="modules.html" />
 
     <meta name="generator" content="sphinx-4.1.2, furo 2021.08.17.beta43"/>
         <title>camera_alignment_core 0.1.0 documentation</title>
@@ -155,7 +155,6 @@
   <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul class="current">
 <li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Overview</a></li>
-<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="modules.html">Package modules</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l2 has-children"><a class="reference internal" href="camera_alignment_core.html">camera_alignment_core package</a><input class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="camera_alignment_core.alignment_utils.html">camera_alignment_core.alignment_utils package</a></li>
@@ -165,7 +164,6 @@
 </li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="contributing.html">Contributing</a></li>
 </ul>
 
 </div>
@@ -191,38 +189,99 @@
             <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
           </label>
         </div>
-        <section id="welcome-to-camera-alignment-core-s-documentation">
-<h1>Welcome to camera-alignment-core’s documentation!<a class="headerlink" href="#welcome-to-camera-alignment-core-s-documentation" title="Permalink to this headline">¶</a></h1>
-<div class="toctree-wrapper compound">
+        <div class="toctree-wrapper compound">
 </div>
-</section>
 <section id="camera-alignment-core">
 <h1>camera-alignment-core<a class="headerlink" href="#camera-alignment-core" title="Permalink to this headline">¶</a></h1>
-<a class="reference external image-reference" href="https://github.com/aics-int/camera_alignment_core/actions"><img alt="Build Status" src="https://github.com/aics-int/camera_alignment_core/workflows/Build%20Main/badge.svg"/></a>
-<a class="reference external image-reference" href="https://aics-int.github.io/camera_alignment_core/"><img alt="Documentation" src="https://github.com/aics-int/camera_alignment_core/workflows/Documentation/badge.svg"/></a>
-<a class="reference external image-reference" href="https://codecov.io/gh/aics-int/camera_alignment_core"><img alt="Code Coverage" src="https://codecov.io/gh/aics-int/camera_alignment_core/branch/main/graph/badge.svg"/></a>
 <p>Core algorithms for aligning two-camera microscopy imagery</p>
 <hr class="docutils"/>
-<section id="quick-start">
-<h2>Quick Start<a class="headerlink" href="#quick-start" title="Permalink to this headline">¶</a></h2>
-<p>TODO</p>
-</section>
 <section id="installation">
 <h2>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h2>
-<p>TODO
-<strong>Stable Release:</strong> <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">camera_alignment_core</span></code><span class="raw-html-m2r"><br/></span>
-<strong>Development Head:</strong> <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">git+https://github.com/aics-int/camera_alignment_core.git</span></code></p>
+<p><strong>Stable Release:</strong> <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">camera_alignment_core</span></code><span class="raw-html-m2r"><br/></span></p>
+<p>This library is published to a private PyPI server (“Artifactory”) accessible within the Allen Institute network or over VPN. This has downstream effects for how this library is installed into other Python packages.</p>
+<p>These instructions assume the use of a virtual environment.</p>
+<hr class="docutils"/>
+<p><strong>NOTE</strong></p>
+<p>It is highly recommended to immediately upgrade <code class="docutils literal notranslate"><span class="pre">pip</span></code> to its latest version after creating a new virtual environment. For example:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Create new virtual environment</span>
+python3.9 -m venv venv
+
+<span class="c1"># Upgrade pip</span>
+venv/bin/python3 -m pip install -U pip
+</pre></div>
+</div>
+<hr class="docutils"/>
+<section id="configure-pip">
+<h3>Configure <code class="docutils literal notranslate"><span class="pre">pip</span></code><a class="headerlink" href="#configure-pip" title="Permalink to this headline">¶</a></h3>
+<p>The recommended way to configure <code class="docutils literal notranslate"><span class="pre">pip</span></code> to install <code class="docutils literal notranslate"><span class="pre">camera_alignment_core</span></code> from our private PyPI server is to add a few directives to your <code class="docutils literal notranslate"><span class="pre">pip</span></code> configuration (<code class="docutils literal notranslate"><span class="pre">pip.conf</span></code>):</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="k">global</span><span class="p">]</span>
+<span class="n">index</span><span class="o">-</span><span class="n">url</span> <span class="o">=</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">artifactory</span><span class="o">.</span><span class="n">corp</span><span class="o">.</span><span class="n">alleninstitute</span><span class="o">.</span><span class="n">org</span><span class="o">/</span><span class="n">artifactory</span><span class="o">/</span><span class="n">api</span><span class="o">/</span><span class="n">pypi</span><span class="o">/</span><span class="n">pypi</span><span class="o">-</span><span class="n">virtual</span><span class="o">/</span><span class="n">simple</span>
+<span class="n">extra</span><span class="o">-</span><span class="n">index</span><span class="o">-</span><span class="n">url</span> <span class="o">=</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">artifactory</span><span class="o">.</span><span class="n">corp</span><span class="o">.</span><span class="n">alleninstitute</span><span class="o">.</span><span class="n">org</span><span class="o">/</span><span class="n">artifactory</span><span class="o">/</span><span class="n">api</span><span class="o">/</span><span class="n">pypi</span><span class="o">/</span><span class="n">pypi</span><span class="o">-</span><span class="n">snapshot</span><span class="o">-</span><span class="n">local</span><span class="o">/</span><span class="n">simple</span>
+
+<span class="p">[</span><span class="n">install</span><span class="p">]</span>
+<span class="n">trusted</span><span class="o">-</span><span class="n">host</span> <span class="o">=</span> <span class="n">artifactory</span><span class="o">.</span><span class="n">corp</span><span class="o">.</span><span class="n">alleninstitute</span><span class="o">.</span><span class="n">org</span>
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">pip</span></code> will search for and merge configuration files from a number of locations: system-, user-, and virtual-environment-level configuration files. See <a class="reference external" href="https://pip.pypa.io/en/stable/user_guide/#configuration">pip</a> documentation for where these files should be created–if not already–depending on your operating system.</p>
+<p>You may add this configuration to the <code class="docutils literal notranslate"><span class="pre">pip.conf</span></code> of your choosing, but note that <code class="docutils literal notranslate"><span class="pre">pip</span></code> reads and merges configuration in order, allowing virtual-env-level config to override user-level configuration, which overrides system-level config.</p>
+</section>
+<section id="alternate-approach-use-a-requirements-txt-file-in-your-repository">
+<h3>Alternate approach: use a requirements.txt file in your repository<a class="headerlink" href="#alternate-approach-use-a-requirements-txt-file-in-your-repository" title="Permalink to this headline">¶</a></h3>
+<p>Assuming you make use of <code class="docutils literal notranslate"><span class="pre">setuptools</span></code> to manage your Python package’s build, you can use <code class="docutils literal notranslate"><span class="pre">pip</span></code> to install the dependencies you’ve declared in <code class="docutils literal notranslate"><span class="pre">setup.[py|cfg]</span></code>, and in the process, instruct <code class="docutils literal notranslate"><span class="pre">pip</span></code> how to install from our private PyPI server.</p>
+<p>This can be done either by using <code class="docutils literal notranslate"><span class="pre">pip</span></code> configuration files (detailed above), or by adding a <code class="docutils literal notranslate"><span class="pre">requirements.txt</span></code> file to your repository. That <code class="docutils literal notranslate"><span class="pre">requirements.txt</span></code> file should contain commandline <code class="docutils literal notranslate"><span class="pre">pip</span></code> options that accomplish the same as the directives detailed in the section above, and then instruct <code class="docutils literal notranslate"><span class="pre">pip</span></code> to install packages from <code class="docutils literal notranslate"><span class="pre">setup.[py|cfg]</span></code>. An example <code class="docutils literal notranslate"><span class="pre">requirements.txt</span></code> file:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">--</span><span class="n">trusted</span><span class="o">-</span><span class="n">host</span> <span class="n">artifactory</span><span class="o">.</span><span class="n">corp</span><span class="o">.</span><span class="n">alleninstitute</span><span class="o">.</span><span class="n">org</span>
+<span class="o">--</span><span class="n">index</span><span class="o">-</span><span class="n">url</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">artifactory</span><span class="o">.</span><span class="n">corp</span><span class="o">.</span><span class="n">alleninstitute</span><span class="o">.</span><span class="n">org</span><span class="o">/</span><span class="n">artifactory</span><span class="o">/</span><span class="n">api</span><span class="o">/</span><span class="n">pypi</span><span class="o">/</span><span class="n">pypi</span><span class="o">-</span><span class="n">virtual</span><span class="o">/</span><span class="n">simple</span>
+<span class="o">--</span><span class="n">extra</span><span class="o">-</span><span class="n">index</span><span class="o">-</span><span class="n">url</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">artifactory</span><span class="o">.</span><span class="n">corp</span><span class="o">.</span><span class="n">alleninstitute</span><span class="o">.</span><span class="n">org</span><span class="o">/</span><span class="n">artifactory</span><span class="o">/</span><span class="n">api</span><span class="o">/</span><span class="n">pypi</span><span class="o">/</span><span class="n">pypi</span><span class="o">-</span><span class="n">snapshot</span><span class="o">-</span><span class="n">local</span><span class="o">/</span><span class="n">simple</span>
+
+<span class="o">-</span><span class="n">e</span> <span class="o">.</span><span class="p">[</span><span class="nb">all</span><span class="p">]</span>
+</pre></div>
+</div>
+</section>
 </section>
 <section id="documentation">
 <h2>Documentation<a class="headerlink" href="#documentation" title="Permalink to this headline">¶</a></h2>
-<p>For full package documentation please visit <a class="reference external" href="https://aics-int.github.io/camera_alignment_core">aics-int.github.io/camera_alignment_core</a>.</p>
+<section id="cli-usage">
+<h3>CLI Usage<a class="headerlink" href="#cli-usage" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>align --help
+usage: align [-h] --out-dir OUT_DIR --magnification {100,63,20} [--manifest-file MANIFEST_FILE] [--scene SCENE] [--timepoint TIMEPOINT]
+             [--ref-channel {405,488,561,638}] [--align-channel {405,488,561,638}] [--no-crop] [-d]
+             image optical_control
+
+Run given file through camera alignment, outputting single file per scene.
+
+positional arguments:
+  image                 Microscopy image that requires alignment. Passed directly to aicsimageio.AICSImage constructor.
+  optical_control       Optical control image to use to align `image`. Passed directly to aicsimageio.AICSImage constructor.
+
+optional arguments:
+  -h, --help            show this help message and exit
+  --out-dir OUT_DIR     Save output into `out-dir`
+  --magnification {100,63,20}
+                        Magnification at which both `image` and `optical_control` were acquired.
+  --manifest-file MANIFEST_FILE
+                        Path to file at which manifest of output of this script will be written. See camera_alignment_core.bin.alignment_output_manifest.
+  --scene SCENE         On which scene or scenes within `image` to align. If not specified, will align all scenes within `image`.
+  --timepoint TIMEPOINT
+                        On which timepoint or timepoints within `image` to perform the alignment. If not specified, will align all timepoints within
+                        `image`.
+  --ref-channel {405,488,561,638}
+                        Which channel of `optical_control` to treat as the 'reference' for alignment. I.e., the 'static' channel. Defined in terms of the
+                        wavelength used in that channel.
+  --align-channel {405,488,561,638}
+                        Which channel of `optical_control` to align, relative to 'reference.' I.e., the 'moving' channel. Defined in terms of the
+                        wavelength used in that channel.
+  --no-crop             Do not to crop the aligned image(s).
+  -d, --debug
+</pre></div>
+</div>
+</section>
+<section id="api-documentation">
+<h3>API Documentation<a class="headerlink" href="#api-documentation" title="Permalink to this headline">¶</a></h3>
+<p>For full package documentation please visit <a class="reference external" href="https://aics-int.github.io/camera-alignment-core/">aics-int.github.io/camera-alignment-core</a>.</p>
+</section>
 </section>
 <section id="development">
 <h2>Development<a class="headerlink" href="#development" title="Permalink to this headline">¶</a></h2>
-<p>See <a class="reference external" href="CONTRIBUTING.md">CONTRIBUTING.md</a> for information related to developing the code.</p>
-</section>
-<section id="the-four-commands-you-need-to-know">
-<h2>The Four Commands You Need To Know<a class="headerlink" href="#the-four-commands-you-need-to-know" title="Permalink to this headline">¶</a></h2>
 <ol class="arabic">
 <li><p><code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">install</span></code></p>
 <blockquote>
@@ -230,9 +289,9 @@
 project’s dependencies into it. The virtual env will be located in <code class="docutils literal notranslate"><span class="pre">camera-alignment-core/venv</span></code>.</p>
 </div></blockquote>
 </li>
-<li><p><code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">test</span></code></p>
+<li><p><code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">test</span></code>, <code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">fmt</span></code>, <code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">lint</span></code>, <code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">type-check</span></code>, <code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">import-sort</span></code></p>
 <blockquote>
-<div><p>Run tests. Do this often!</p>
+<div><p>Quality assurance</p>
 </div></blockquote>
 </li>
 <li><p><code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">clean</span></code></p>
@@ -241,71 +300,8 @@ project’s dependencies into it. The virtual env will be located in <code class
 that you are working in a clean workspace.</p>
 </div></blockquote>
 </li>
-<li><p><code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">docs</span></code></p>
-<blockquote>
-<div><p>This will generate the most up-to-date documentation for your Python package.</p>
-</div></blockquote>
-</li>
-</ol>
-<section id="additional-optional-setup-steps">
-<h3>Additional Optional Setup Steps:<a class="headerlink" href="#additional-optional-setup-steps" title="Permalink to this headline">¶</a></h3>
-<ul class="simple">
-<li><p>Turn your project into a GitHub repository:</p>
-<ul>
-<li><p>Make an account on <a class="reference external" href="https://github.com">github.com</a></p></li>
-<li><p>Go to <a class="reference external" href="https://github.com/new">make a new repository</a></p></li>
-<li><p><em>Recommendations:</em></p>
-<ul>
-<li><p><em>It is strongly recommended to make the repository name the same as the Python
-package name</em></p></li>
-<li><p><em>A lot of the following optional steps are *free</em> if the repository is Public,
-plus open source is cool*</p></li>
-</ul>
-</li>
-<li><p>After a GitHub repo has been created, run the commands listed under:
-“…or push an existing repository from the command line”</p></li>
-</ul>
-</li>
-<li><p>Register your project with Codecov:</p>
-<ul>
-<li><p>Make an account on <a class="reference external" href="https://codecov.io">codecov.io</a>(Recommended to sign in with GitHub)
-everything else will be handled for you.</p></li>
-</ul>
-</li>
-<li><p>Ensure that you have set GitHub pages to build the <code class="docutils literal notranslate"><span class="pre">gh-pages</span></code> branch by selecting the
-<code class="docutils literal notranslate"><span class="pre">gh-pages</span></code> branch in the dropdown in the “GitHub Pages” section of the repository settings.
-(<a class="reference external" href="https://github.com/aics-int/camera_alignment_core/settings">Repo Settings</a>)</p></li>
-<li><p>Register your project with PyPI:</p>
-<ul>
-<li><p>Make an account on <a class="reference external" href="https://pypi.org">pypi.org</a></p></li>
-<li><p>Go to your GitHub repository’s settings and under the
-<a class="reference external" href="https://github.com/aics-int/camera_alignment_core/settings/secrets/actions">Secrets tab</a>,
-add a secret called <code class="docutils literal notranslate"><span class="pre">PYPI_TOKEN</span></code> with your password for your PyPI account.
-Don’t worry, no one will see this password because it will be encrypted.</p></li>
-<li><p>Next time you push to the branch <code class="docutils literal notranslate"><span class="pre">main</span></code> after using <code class="docutils literal notranslate"><span class="pre">bump2version</span></code>, GitHub
-actions will build and deploy your Python package to PyPI.</p></li>
-</ul>
-</li>
-</ul>
-</section>
-<section id="suggested-git-branch-strategy">
-<h3>Suggested Git Branch Strategy<a class="headerlink" href="#suggested-git-branch-strategy" title="Permalink to this headline">¶</a></h3>
-<ol class="arabic simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">main</span></code> is for the most up-to-date development, very rarely should you directly
-commit to this branch. GitHub Actions will run on every push and on a CRON to this
-branch but still recommended to commit to your development branches and make pull
-requests to main. If you push a tagged commit with bumpversion, this will also release to PyPI.</p></li>
-<li><p>Your day-to-day work should exist on branches separate from <code class="docutils literal notranslate"><span class="pre">main</span></code>. Even if it is
-just yourself working on the repository, make a PR from your working branch to <code class="docutils literal notranslate"><span class="pre">main</span></code>
-so that you can ensure your commits don’t break the development head. GitHub Actions
-will run on every push to any branch or any pull request from any branch to any other
-branch.</p></li>
-<li><p>It is recommended to use “Squash and Merge” commits when committing PR’s. It makes
-each set of changes to <code class="docutils literal notranslate"><span class="pre">main</span></code> atomic and as a side effect naturally encourages small
-well defined PR’s.</p></li>
 </ol>
 <p><strong>Allen Institute Software License</strong></p>
-</section>
 </section>
 </section>
 <section id="indices-and-tables">
@@ -321,12 +317,12 @@ well defined PR’s.</p></li>
       <footer>
         
         <div class="related-pages">
-          <a class="next-page" href="installation.html">
+          <a class="next-page" href="modules.html">
               <div class="page-info">
                 <div class="context">
                   <span>Next</span>
                 </div>
-                <div class="title">Installation</div>
+                <div class="title">camera_alignment_core</div>
               </div>
               <svg><use href="#svg-arrow-right"></use></svg>
             </a>
@@ -361,17 +357,18 @@ well defined PR’s.</p></li>
         <div class="toc-tree-container">
           <div class="toc-tree">
             <ul>
-<li><a class="reference internal" href="#">Welcome to camera-alignment-core’s documentation!</a></li>
-<li><a class="reference internal" href="#camera-alignment-core">camera-alignment-core</a><ul>
-<li><a class="reference internal" href="#quick-start">Quick Start</a></li>
-<li><a class="reference internal" href="#installation">Installation</a></li>
-<li><a class="reference internal" href="#documentation">Documentation</a></li>
-<li><a class="reference internal" href="#development">Development</a></li>
-<li><a class="reference internal" href="#the-four-commands-you-need-to-know">The Four Commands You Need To Know</a><ul>
-<li><a class="reference internal" href="#additional-optional-setup-steps">Additional Optional Setup Steps:</a></li>
-<li><a class="reference internal" href="#suggested-git-branch-strategy">Suggested Git Branch Strategy</a></li>
+<li><a class="reference internal" href="#">camera-alignment-core</a><ul>
+<li><a class="reference internal" href="#installation">Installation</a><ul>
+<li><a class="reference internal" href="#configure-pip">Configure <code class="docutils literal notranslate"><span class="pre">pip</span></code></a></li>
+<li><a class="reference internal" href="#alternate-approach-use-a-requirements-txt-file-in-your-repository">Alternate approach: use a requirements.txt file in your repository</a></li>
 </ul>
 </li>
+<li><a class="reference internal" href="#documentation">Documentation</a><ul>
+<li><a class="reference internal" href="#cli-usage">CLI Usage</a></li>
+<li><a class="reference internal" href="#api-documentation">API Documentation</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#development">Development</a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#indices-and-tables">Indices and tables</a></li>
