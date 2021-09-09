@@ -16,14 +16,14 @@ jobs:
       uses: actions/setup-python@v1
       with:
         python-version: 3.9
-    - name: Install Dependencies
+    - name: Install dependencies
       run: |
         make install
-    - name: Generate Docs
+    - name: Generate docs
       run: |
         make docs
         touch docs/build/.nojekyll
-    - name: Publish Docs
+    - name: Publish docs
       uses: JamesIves/github-pages-deploy-action@3.7.1
       with:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
