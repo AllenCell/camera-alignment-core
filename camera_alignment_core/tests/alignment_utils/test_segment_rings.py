@@ -43,7 +43,7 @@ class TestSegmentRings:
         # Act
         seg_rings, _, _, _ = SegmentRings(
             img=numpy.max(synthetic_image, axis=0),
-            pixel_size=1,
+            pixel_size_um=1,
             magnification=1,
             thresh=(50, 99),
             bead_distance_um=10,
