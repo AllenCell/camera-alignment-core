@@ -3,7 +3,6 @@ import math
 from typing import List, Optional, Tuple
 
 import numpy as np
-from numpy.core.fromnumeric import size
 import pandas as pd
 from scipy import ndimage as ndi
 from skimage import exposure as exp
