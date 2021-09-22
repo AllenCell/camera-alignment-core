@@ -47,7 +47,7 @@ class AlignmentCore:
         log.debug("crop rings")
         ref_crop, crop_dims = CropRings(
             img=optical_control_image[reference_channel, ref_center_z, :, :],
-            pixel_size=px_size_xy,
+            pixel_size_um=px_size_xy,
             magnification=magnification,
             filter_px_size=50,
         ).run()

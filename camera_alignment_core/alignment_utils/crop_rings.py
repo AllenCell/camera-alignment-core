@@ -19,13 +19,13 @@ class CropRings:
     def __init__(
         self,
         img: NDArray[np.uint16],
-        pixel_size: float,
+        pixel_size_um: float,
         magnification: int,
         filter_px_size: int = 50,
         bead_distance: int = BEAD_DISTANCE_UM,
     ):
         self.img = img
-        self.bead_dist_px = bead_distance / pixel_size
+        self.bead_dist_px = bead_distance / pixel_size_um
         self.filter_px_size = filter_px_size
         self.magnification = magnification
 
