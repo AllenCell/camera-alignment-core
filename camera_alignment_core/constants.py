@@ -45,9 +45,10 @@ class Magnification(enum.Enum):
             #       - Applied a translation of **5 pixels in both x and y** and a **rotation of 0.5 degrees**
             #   - Use the line tool to measure the length of the largest regions of black pixels in the resulting image along each axis
             #   - Multiply those numbers by 2 and subtract from the minimum dimensions
-            return CroppingDimension(1828, 1224)
+            #   New method used to find 1800x1200 value, will update in future.
+            return CroppingDimension(1800, 1200)
         elif self == Magnification.TWENTY:
             # See notes re 63X magnification for process by which these cropping dimensions were determined
-            return CroppingDimension(1828, 1224)
+            return CroppingDimension(1800, 1200)
 
         raise ValueError(f"No cropping dimension defined for {self}")
