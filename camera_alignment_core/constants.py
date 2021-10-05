@@ -45,7 +45,9 @@ class Magnification(enum.Enum):
             #       - Applied a translation of **5 pixels in both x and y** and a **rotation of 0.5 degrees**
             #   - Use the line tool to measure the length of the largest regions of black pixels in the resulting image along each axis
             #   - Multiply those numbers by 2 and subtract from the minimum dimensions
-            #   New method used to find 1800x1200 value, will update in future.
+            #   Found that 6.3% of image was cropped in 100X (using 924x624 to 900x600). Kept this constant for 63X and 20X to get 1800x1200
+            #   Argolight images that were analyzed were shown to have no black pixels once cropped with these dimensions, 
+            #   other than 5 outliers which would be failed.
             return CroppingDimension(1800, 1200)
         elif self == Magnification.TWENTY:
             # See notes re 63X magnification for process by which these cropping dimensions were determined
