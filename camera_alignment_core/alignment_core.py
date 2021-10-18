@@ -234,30 +234,11 @@ class AlignmentCore:
             half_diff_x : half_diff_x + cropping_dimension.x,  # X
         ]
 
-        # Check if there are black pixels, if so, crop a little further
+        # Check if there are black pixels, if so, throw a warning
         if numpy.any(cropped_image < black_pixel_cutoff):
-            SMALL_AMOUNT_OF_ADDITIONAL_CROP = 20  # px
             log.warning(
-                "After cropping, detected pixels under %s. Taking off an additional %s pixels",
-                black_pixel_cutoff,
-                SMALL_AMOUNT_OF_ADDITIONAL_CROP,
-            )
-
-            (_, _, Y, X) = cropped_image.shape
-            out_x = cropping_dimension.x - SMALL_AMOUNT_OF_ADDITIONAL_CROP
-            out_y = cropping_dimension.y - SMALL_AMOUNT_OF_ADDITIONAL_CROP
-            half_diff_x = (X - out_x) // 2
-            half_diff_y = (Y - out_y) // 2
-            cropped_image = cropped_image[
-                :,  # C
-                :,  # Z
-                half_diff_y : half_diff_y + out_y,  # Y
-                half_diff_x : half_diff_x + out_x,  # X
-            ]
-
-        assert not numpy.any(
-            cropped_image < black_pixel_cutoff
-        ), "Black pixels are detected, either from original image or due to alignment"
+                "Black pixels are detected, either from original image or due to alignment."
+        )
 
         return cropped_image
 
