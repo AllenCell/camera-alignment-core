@@ -238,7 +238,7 @@ class AlignmentCore:
         if numpy.any(cropped_image < black_pixel_cutoff):
             log.warning(
                 "Black pixels are detected, either from original image or due to alignment."
-        )
+            )
 
         return cropped_image
 
