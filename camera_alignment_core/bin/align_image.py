@@ -14,7 +14,12 @@ from aicsimageio.writers import OmeTiffWriter
 import numpy
 import numpy.typing
 
-from camera_alignment_core import AlignmentCore
+from camera_alignment_core.alignment_core import (
+    align_image,
+    crop,
+    generate_alignment_matrix,
+    get_channel_info,
+)
 from camera_alignment_core.constants import (
     LOGGER_NAME,
     Channel,
@@ -207,17 +212,15 @@ def main(cli_args: typing.List[str] = sys.argv[1:]):
 
     start_time = time.perf_counter()
 
-    alignment_core = AlignmentCore()
-
     control_image = AICSImage(args.optical_control)
-    control_image_channel_info = alignment_core.get_channel_info(control_image)
+    control_image_channel_info = get_channel_info(control_image)
 
     assert (
         control_image.physical_pixel_sizes.X == control_image.physical_pixel_sizes.Y
     ), "Physical pixel sizes in X and Y dimensions do not match in optical control image"
 
     control_image_data = control_image.get_image_data("CZYX", T=0)
-    alignment_matrix, alignment_info = alignment_core.generate_alignment_matrix(
+    alignment_matrix, alignment_info = generate_alignment_matrix(
         control_image_data,
         reference_channel=control_image_channel_info.index_of_channel(
             args.reference_channel
@@ -239,13 +242,16 @@ def main(cli_args: typing.List[str] = sys.argv[1:]):
     )
 
     # Align the optical itself as a control
-    aligned_control = alignment_core.align_image(
+    aligned_control = align_image(
         alignment_matrix,
         control_image_data,
-        alignment_core.get_channel_info(control_image),
+        get_channel_info(control_image),
         args.magnification,
-        crop=args.crop,
     )
+
+    if args.crop:
+        aligned_control = crop(aligned_control, Magnification(args.magnification))
+
     aligned_control_outpath = (
         pathlib.Path(args.out_dir) / f"{control_image_name}_aligned.ome.tiff"
     )
@@ -274,14 +280,18 @@ def main(cli_args: typing.List[str] = sys.argv[1:]):
             start_time_timepoint = time.perf_counter()
 
             image_slice = image.get_image_data("CZYX", T=timepoint)
-            processed = alignment_core.align_image(
+            processed = align_image(
                 alignment_matrix,
                 image_slice,
-                alignment_core.get_channel_info(image),
+                get_channel_info(image),
                 args.magnification,
-                crop=args.crop,
             )
-            processed_timepoints.append(processed)
+            if args.crop:
+                processed_timepoints.append(
+                    crop(processed, Magnification(args.magnification))
+                )
+            else:
+                processed_timepoints.append(processed)
 
             end_time_timepoint = time.perf_counter()
             log.debug(
