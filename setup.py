@@ -66,11 +66,6 @@ setup(
         "Programming Language :: Python :: 3.9",
     ],
     description="Core algorithms for aligning two-camera microscopy imagery",
-    entry_points={
-        "console_scripts": [
-            "align=camera_alignment_core.bin.align_image:main"
-        ],
-    },
     install_requires=requirements,
     license="Allen Institute Software License",
     long_description=readme,

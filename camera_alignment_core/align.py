@@ -14,9 +14,6 @@ from .alignment_core import (
     generate_alignment_matrix,
     get_channel_info,
 )
-from .alignment_output_manifest import (
-    AlignedImage,
-)
 from .alignment_utils import AlignmentInfo
 from .constants import (
     LOGGER_NAME,
@@ -30,6 +27,14 @@ log = logging.getLogger(LOGGER_NAME)
 class AlignmentTransform(typing.NamedTuple):
     matrix: numpy.typing.NDArray[numpy.float16]
     info: AlignmentInfo
+
+
+class AlignedImage(typing.NamedTuple):
+    # Which scene from the original, unaligned image this corresponds to
+    scene: int
+
+    # Output path of the aligned image
+    path: pathlib.Path
 
 
 class Align:
