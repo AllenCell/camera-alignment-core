@@ -52,7 +52,7 @@ class Align:
 
     def __init__(
         self,
-        optical_control: str,
+        optical_control: typing.Union[str, pathlib.Path],
         magnification: Magnification,
         reference_channel: Channel,
         alignment_channel: Channel,
@@ -62,7 +62,7 @@ class Align:
 
         Parameters
         ----------
-        optical_control : str
+        optical_control : Union[str, Path]
             Optical control image that will be used to generate an alignment matrix. Passed as-is to aicsimageio.AICSImage constructor.
         magnification : Magnification
             Magnification at which `optical_control` (and any images to be aligned using `optical_control`) was acquired.
@@ -163,7 +163,7 @@ class Align:
 
     def align_image(
         self,
-        image: str,
+        image: typing.Union[str, pathlib.Path],
         scenes: typing.List[int] = [],
         timepoints: typing.List[int] = [],
         crop_output: bool = True,
@@ -173,7 +173,7 @@ class Align:
 
         Parameters
         ----------
-        image : str
+        image : Union[str, Path]
             Microscopy image that requires alignment. Passed as-is to aicsimageio.AICSImage constructor.
 
         Keyword Arguments
@@ -187,10 +187,15 @@ class Align:
         crop_output : Optional[bool]
             Optionally do not crop aligned image according to standard dimensions
             for the magnification at which the image was acquired. Defaults to cropping.
+
+        Returns
+        -------
+        List[AlignedImage]
+            A list of namedtuples, each of which describes a scene within `image` that was aligned.
         """
         aics_image = AICSImage(image)
 
-        aligned_image_paths: typing.List[AlignedImage] = []
+        aligned_scenes: typing.List[AlignedImage] = []
 
         # Iterate over scenes to align
         scene_indices = scenes if scenes else range(len(aics_image.scenes))
@@ -253,6 +258,6 @@ class Align:
                 channel_names=aics_image.channel_names,
                 dim_order="TCZYX",
             )
-            aligned_image_paths.append(AlignedImage(scene, save_path))
+            aligned_scenes.append(AlignedImage(scene, save_path))
 
-        return aligned_image_paths
+        return aligned_scenes
