@@ -9,13 +9,13 @@ from aicsimageio.writers import OmeTiffWriter
 import numpy
 import pytest
 
+from camera_alignment_core.alignment_output_manifest import (
+    AlignmentOutputManifest,
+)
 from camera_alignment_core.alignment_utils import (
     AlignmentInfo,
 )
-from camera_alignment_core.bin import (
-    AlignmentOutputManifest,
-    align_image,
-)
+from camera_alignment_core.bin import align_image
 from camera_alignment_core.bin.image_dimension_action import (
     parse_dimension_str,
 )

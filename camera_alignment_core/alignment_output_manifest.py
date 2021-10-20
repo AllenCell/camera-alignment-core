@@ -1,4 +1,5 @@
 import dataclasses
+import datetime
 import json
 import pathlib
 import typing
@@ -55,6 +56,39 @@ class AlignmentOutputManifest:
     # One or many aligned images. The input microscopy image will be split by scene.
     aligned_images: typing.List[AlignedImage]
 
-    def to_file(self, path: pathlib.Path) -> None:
+    def to_file(
+        self,
+        out_path: typing.Optional[pathlib.Path] = None,
+        out_dir: typing.Optional[pathlib.Path] = None,
+        out_name: typing.Optional[str] = None,
+    ) -> None:
+        """
+        Write manifest to a file.
+
+        If an `out_path` is given, it is expected to be the full path at which to write the manifest and will be used.
+
+        If `out_path` is not given, `out_dir` is required. This is the directory into which the manifest will be written.
+        The manifest will be saved at `out_dir / out_name` if `out_name` is given, otherwise a default name based on the
+        day will be used.
+        """
         as_dict = dataclasses.asdict(self)
-        path.write_text(json.dumps(as_dict, cls=PathlibAwareEncoder, indent=4))
+        as_text = json.dumps(as_dict, cls=PathlibAwareEncoder, indent=4)
+        if out_path:
+            out_path.parent.mkdir(parents=True, exist_ok=True)
+            out_path.write_text(as_text)
+
+        if not out_dir:
+            raise ValueError(
+                "AlignmentOutputManifest::to_file -> `out_dir` must be defined if `out_path` is not"
+            )
+
+        today = datetime.date.today()
+        name = (
+            out_name
+            if out_name
+            else AlignmentOutputManifest.DEFAULT_FILE_NAME_PATTERN.format(
+                year=today.year, month=today.month, day=today.day
+            )
+        )
+        out_dir.mkdir(parents=True, exist_ok=True)
+        (out_dir / name).write_text(as_text)

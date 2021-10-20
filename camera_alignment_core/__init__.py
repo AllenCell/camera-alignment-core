@@ -1,4 +1,4 @@
-__author__ = "AICS Software"
+__author__ = "AICS"
 
 # Do not edit this string manually, always use bumpversion
 # Details in CONTRIBUTING.md
@@ -9,4 +9,6 @@ def get_module_version():
     return __version__
 
 
-__all__ = "get_module_version"
+from .align import Align
+
+__all__ = ("Align", "get_module_version")

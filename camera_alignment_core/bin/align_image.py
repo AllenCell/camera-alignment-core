@@ -1,6 +1,5 @@
 import argparse
 import dataclasses
-import datetime
 import json
 import logging
 import pathlib
@@ -8,17 +7,9 @@ import sys
 import time
 import typing
 
-from aicsimageio import AICSImage
-from aicsimageio.types import PhysicalPixelSizes
-from aicsimageio.writers import OmeTiffWriter
-import numpy
-import numpy.typing
-
-from camera_alignment_core.alignment_core import (
-    align_image,
-    crop,
-    generate_alignment_matrix,
-    get_channel_info,
+from camera_alignment_core import Align
+from camera_alignment_core.alignment_output_manifest import (
+    AlignmentOutputManifest,
 )
 from camera_alignment_core.constants import (
     LOGGER_NAME,
@@ -26,10 +17,6 @@ from camera_alignment_core.constants import (
     Magnification,
 )
 
-from .alignment_output_manifest import (
-    AlignedImage,
-    AlignmentOutputManifest,
-)
 from .image_dimension_action import (
     ImageDimensionAction,
 )
@@ -170,32 +157,6 @@ class Args(argparse.Namespace):
         log.info("*" * 50)
 
 
-def save_ndarray_to_ome_tiff(
-    data: numpy.typing.NDArray[numpy.uint16],
-    save_path: pathlib.Path,
-    channel_names: typing.List[str],
-) -> None:
-    (T, C, Z, Y, X) = data.shape
-    # TODO: Uncomment once https://github.com/AllenCellModeling/aicsimageio/pull/292 merges
-    # ome_xml = image.ome_metadata
-    # ome_xml.images[0].pixels.size_t = T
-    # ome_xml.images[0].pixels.size_c = C
-    # ome_xml.images[0].pixels.size_z = Z
-    # ome_xml.images[0].pixels.size_y = Y
-    # ome_xml.images[0].pixels.size_x = X
-    # ome_xml.images[0].pixels.dimension_order = DimensionOrder.XYZCT
-    OmeTiffWriter.save(
-        data=data,
-        # TODO, same as above, uncomment once https://github.com/AllenCellModeling/aicsimageio/pull/292 merges
-        # ome_xml=ome_xml,
-        uri=save_path,
-        channel_names=channel_names,
-        physical_pixel_sizes=PhysicalPixelSizes(Z=Z, Y=Y, X=X),
-        dim_order="TCZYX",
-    )
-    log.debug("Output %s", save_path)
-
-
 def main(cli_args: typing.List[str] = sys.argv[1:]):
     args = Args().parse(cli_args)
 
@@ -211,129 +172,37 @@ def main(cli_args: typing.List[str] = sys.argv[1:]):
     args.print_args()
 
     start_time = time.perf_counter()
+    align = Align(
+        optical_control=args.optical_control,
+        magnification=Magnification(args.magnification),
+        reference_channel=args.reference_channel,
+        alignment_channel=args.alignment_channel,
+        out_dir=args.out_dir,
+    )
 
-    control_image = AICSImage(args.optical_control)
-    control_image_channel_info = get_channel_info(control_image)
+    # Align the optical itself as a control
+    aligned_control_outpath = align.align_optical_control(crop_output=args.crop)
 
-    assert (
-        control_image.physical_pixel_sizes.X == control_image.physical_pixel_sizes.Y
-    ), "Physical pixel sizes in X and Y dimensions do not match in optical control image"
-
-    control_image_data = control_image.get_image_data("CZYX", T=0)
-    alignment_matrix, alignment_info = generate_alignment_matrix(
-        control_image_data,
-        reference_channel=control_image_channel_info.index_of_channel(
-            args.reference_channel
-        ),
-        shift_channel=control_image_channel_info.index_of_channel(
-            args.alignment_channel
-        ),
-        magnification=args.magnification,
-        px_size_xy=control_image.physical_pixel_sizes.X,
+    # Align the image
+    aligned_images = align.align_image(
+        args.image,
+        scenes=args.scene,
+        timepoints=args.timepoint,
+        crop_output=args.crop,
     )
 
     # Output alignment info as JSON
     control_image_name = pathlib.Path(args.optical_control).stem
-    alignment_info_outpath = (
-        pathlib.Path(args.out_dir) / f"{control_image_name}_info.json"
-    )
+    alignment_info_outpath = args.out_dir / f"{control_image_name}_info.json"
     alignment_info_outpath.write_text(
-        json.dumps(dataclasses.asdict(alignment_info), indent=4)
+        json.dumps(dataclasses.asdict(align.alignment_transform.info), indent=4)
     )
-
-    # Align the optical itself as a control
-    aligned_control = align_image(
-        alignment_matrix,
-        control_image_data,
-        get_channel_info(control_image),
-        args.magnification,
-    )
-
-    if args.crop:
-        aligned_control = crop(aligned_control, Magnification(args.magnification))
-
-    aligned_control_outpath = (
-        pathlib.Path(args.out_dir) / f"{control_image_name}_aligned.ome.tiff"
-    )
-    save_ndarray_to_ome_tiff(
-        # aligned_control is CZYX, wrap in an array to fill it out to TCZYX
-        numpy.stack([aligned_control]),
-        aligned_control_outpath,
-        control_image.channel_names,
-    )
-
-    image = AICSImage(args.image)
-    aligned_image_paths: typing.List[AlignedImage] = []
-
-    # Iterate over scenes to align
-    scene_indices = args.scene if args.scene else range(len(image.scenes))
-    for scene in scene_indices:
-        start_time_scene = time.perf_counter()
-
-        # Operate on current scene
-        image.set_scene(scene)
-
-        # Align timepoints within scene
-        processed_timepoints: typing.List[numpy.typing.NDArray[numpy.uint16]] = list()
-        timepoint_indices = args.timepoint if args.timepoint else range(0, image.dims.T)
-        for timepoint in timepoint_indices:
-            start_time_timepoint = time.perf_counter()
-
-            image_slice = image.get_image_data("CZYX", T=timepoint)
-            processed = align_image(
-                alignment_matrix,
-                image_slice,
-                get_channel_info(image),
-                args.magnification,
-            )
-            if args.crop:
-                processed_timepoints.append(
-                    crop(processed, Magnification(args.magnification))
-                )
-            else:
-                processed_timepoints.append(processed)
-
-            end_time_timepoint = time.perf_counter()
-            log.debug(
-                f"END TIMEPOINT: aligned timepoint {timepoint} in {end_time_timepoint - start_time_timepoint:0.4f} seconds"
-            )
-
-        end_time_scene = time.perf_counter()
-        log.debug(
-            f"END SCENE: aligned scene {scene} in {end_time_scene - start_time_scene:0.4f} seconds"
-        )
-
-        # Collect all newly aligned timepoints for this scene into one file and save output
-        # In general, expect multi-scene images as input. Input may, however, be single scene image.
-        # In the case of a single scene image file, **assume** the filename already contains the scene name, e.g. "3500004473_100X_20210430_1c-Scene-24-P96-G06.czi."
-        # Unfortunately, cannot check `if scene in input_image_path.stem`--that assumes too much conformance between how the scene is named
-        # in the filename and how AICSImageIO deals with scene naming.
-        stem, *_ = pathlib.Path(args.image).name.split(".")
-        out_name = (
-            f"{stem}_aligned.ome.tiff"
-            if len(image.scenes) == 1
-            else f"{stem}_Scene-{scene}_aligned.ome.tiff"
-        )
-        save_path = pathlib.Path(args.out_dir) / out_name
-        processed_image_data = numpy.stack(processed_timepoints)  # TCZYX
-        save_ndarray_to_ome_tiff(processed_image_data, save_path, image.channel_names)
-        aligned_image_paths.append(AlignedImage(scene, save_path))
 
     # Save file describing/recording output of this script
     output = AlignmentOutputManifest(
-        alignment_info_outpath, aligned_control_outpath, aligned_image_paths
+        alignment_info_outpath, aligned_control_outpath, aligned_images
     )
-    today = datetime.date.today()
-    default_manifest_file_path = (
-        args.out_dir
-        / AlignmentOutputManifest.DEFAULT_FILE_NAME_PATTERN.format(
-            year=today.year, month=today.month, day=today.day
-        )
-    )
-    manifest_file_path = (
-        args.manifest_file if args.manifest_file else default_manifest_file_path
-    )
-    output.to_file(manifest_file_path)
+    output.to_file(out_path=args.manifest_file, out_dir=args.out_dir)
 
     end_time = time.perf_counter()
     log.info(f"Finished in {end_time - start_time:0.4f} seconds")
