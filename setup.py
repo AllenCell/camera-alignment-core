@@ -38,7 +38,7 @@ dev_requirements = [
 ]
 
 requirements = [
-    "aicsimageio[czi] == 4.1.0",
+    "aicsimageio[czi] == 4.4.0",
     "numpy ~= 1.21",
     "scikit-image ~= 0.18"
 ]
