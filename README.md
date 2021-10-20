@@ -17,7 +17,7 @@ Having trouble installing? Start here: http://confluence.corp.alleninstitute.org
 
 ## Documentation
 
-The primary export of this package is the [Align](/camera_alignment_core.html#camera_alignment_core.align.Align) class.
+The primary export of this package is the [Align](https://aics-int.github.io/camera-alignment-core/camera_alignment_core.html#camera_alignment_core.align.Align) class.
 It provides a convenient abstraction over what is expected to be the most common usage of this package. Example use:
 ```python
 from camera_alignment_core import Align, Channel, Magnification
@@ -37,12 +37,12 @@ alignment_info = align.alignment_transform.info
 ```
 
 ##### Low-level API
-In addition, the lower-level functional building blocks used internally by [Align](/camera_alignment_core.html#camera_alignment_core.align.Align) are accessible in the `camera_alignment_core.alignment_core` module. See:
-1. [align_image](/camera_alignment_core.html#camera_alignment_core.alignment_core.align_image)
-1. [apply_alignment_matrix](/camera_alignment_core.html#camera_alignment_core.alignment_core.apply_alignment_matrix)
-1. [crop](/camera_alignment_core.html#camera_alignment_core.alignment_core.crop)
-1. [generate_alignment_matrix](/camera_alignment_core.html#camera_alignment_core.alignment_core.generate_alignment_matrix)
-1. [get_channel_info](/camera_alignment_core.html#camera_alignment_core.alignment_core.get_channel_info)
+In addition, the lower-level functional building blocks used internally by [Align](https://aics-int.github.io/camera-alignment-core/camera_alignment_core.html#camera_alignment_core.align.Align) are accessible in the `camera_alignment_core.alignment_core` module. See:
+1. [align_image](https://aics-int.github.io/camera-alignment-core/camera_alignment_core.html#camera_alignment_core.alignment_core.align_image)
+1. [apply_alignment_matrix](https://aics-int.github.io/camera-alignment-core/camera_alignment_core.html#camera_alignment_core.alignment_core.apply_alignment_matrix)
+1. [crop](https://aics-int.github.io/camera-alignment-core/camera_alignment_core.html#camera_alignment_core.alignment_core.crop)
+1. [generate_alignment_matrix](https://aics-int.github.io/camera-alignment-core/camera_alignment_core.html#camera_alignment_core.alignment_core.generate_alignment_matrix)
+1. [get_channel_info](https://aics-int.github.io/camera-alignment-core/camera_alignment_core.html#camera_alignment_core.alignment_core.get_channel_info)
 
 
 ## Development
