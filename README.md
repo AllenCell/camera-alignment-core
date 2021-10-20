@@ -12,47 +12,8 @@ Core algorithms for aligning two-camera microscopy imagery
 
 This library is published to a private PyPI server ("Artifactory") accessible within the Allen Institute network or over VPN. This has downstream effects for how this library is installed into other Python packages.
 
-These instructions assume the use of a virtual environment.
+Having trouble installing? Start here: http://confluence.corp.alleninstitute.org/display/SF/Using+Artifactory#UsingArtifactory-Python.
 
----
-**NOTE**
-
-It is highly recommended to immediately upgrade `pip` to its latest version after creating a new virtual environment. For example:
-```bash
-# Create new virtual environment
-python3.9 -m venv venv
-
-# Upgrade pip
-venv/bin/python3 -m pip install -U pip
-```
----
-
-#### Configure `pip`
-The recommended way to configure `pip` to install `camera_alignment_core` from our private PyPI server is to add a few directives to your `pip` configuration (`pip.conf`):
-```
-[global]
-index-url = https://artifactory.corp.alleninstitute.org/artifactory/api/pypi/pypi-virtual/simple
-extra-index-url = https://artifactory.corp.alleninstitute.org/artifactory/api/pypi/pypi-snapshot-local/simple
-
-[install]
-trusted-host = artifactory.corp.alleninstitute.org
-```
-
-`pip` will search for and merge configuration files from a number of locations: system-, user-, and virtual-environment-level configuration files. See [pip](https://pip.pypa.io/en/stable/user_guide/#configuration) documentation for where these files should be created--if not already--depending on your operating system.
-
-You may add this configuration to the `pip.conf` of your choosing, but note that `pip` reads and merges configuration in order, allowing virtual-env-level config to override user-level configuration, which overrides system-level config.
-
-#### Alternate approach: use a requirements.txt file in your repository
-Assuming you make use of `setuptools` to manage your Python package's build, you can use `pip` to install the dependencies you've declared in `setup.[py|cfg]`, and in the process, instruct `pip` how to install from our private PyPI server.
-
-This can be done either by using `pip` configuration files (detailed above), or by adding a `requirements.txt` file to your repository. That `requirements.txt` file should contain commandline `pip` options that accomplish the same as the directives detailed in the section above, and then instruct `pip` to install packages from `setup.[py|cfg]`. An example `requirements.txt` file:
-```
---trusted-host artifactory.corp.alleninstitute.org
---index-url https://artifactory.corp.alleninstitute.org/artifactory/api/pypi/pypi-virtual/simple
---extra-index-url https://artifactory.corp.alleninstitute.org/artifactory/api/pypi/pypi-snapshot-local/simple
-
--e .[all]
-```
 
 ## Documentation
 
