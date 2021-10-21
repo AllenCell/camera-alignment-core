@@ -91,7 +91,7 @@ def generate_alignment_matrix(
 
     # Create alignment from segmentation
     log.debug("Creating alignment matrix")
-    similarity_transform, align_info = RingAlignment(
+    similarity_transform, align_info, qc_controller = RingAlignment(
         ref_seg_rings,
         ref_seg_rings_label,
         ref_props_df,
@@ -101,6 +101,15 @@ def generate_alignment_matrix(
         mov_props_df,
         mov_cross_label,
     ).run()
+
+    qc_controller.set_raw_images(
+        reference=optical_control_image[reference_channel, :, :, :],
+        moving=optical_control_image[shift_channel, :, :, :],
+    )
+    qc_controller.apply_transform()
+
+    qc_results = qc_controller.report_full_metrics()
+    align_info.qc_metrics = qc_results
 
     return similarity_transform.params, align_info
 
