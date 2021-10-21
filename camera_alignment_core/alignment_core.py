@@ -63,7 +63,7 @@ class AlignmentCore:
         log.debug("crop rings")
         ref_crop, crop_dims = CropRings(
             img=optical_control_image[reference_channel, ref_center_z, :, :],
-            pixel_size=px_size_xy,
+            pixel_size_um=px_size_xy,
             magnification=magnification,
             filter_px_size=50,
         ).run()
@@ -95,7 +95,7 @@ class AlignmentCore:
 
         # Create alignment from segmentation
         log.debug("Creating alignment matrix")
-        similarity_transform, align_info = RingAlignment(
+        similarity_transform, align_info, qc_controller = RingAlignment(
             ref_seg_rings,
             ref_seg_rings_label,
             ref_props_df,
@@ -105,6 +105,15 @@ class AlignmentCore:
             mov_props_df,
             mov_cross_label,
         ).run()
+
+        qc_controller.set_raw_images(
+            reference=optical_control_image[reference_channel, :, :, :],
+            moving=optical_control_image[shift_channel, :, :, :],
+        )
+        qc_controller.apply_transform()
+
+        qc_results = qc_controller.report_full_metrics()
+        align_info.qc_metrics = qc_results
 
         return similarity_transform.params, align_info
 

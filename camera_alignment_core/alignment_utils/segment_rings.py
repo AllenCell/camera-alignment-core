@@ -16,15 +16,15 @@ from ..constants import LOGGER_NAME
 log = logging.getLogger(LOGGER_NAME)
 
 BEAD_DISTANCE_UM = 15
-CROSS_SIZE_UM = 7.5 * 6 * 10 ** -6
-RING_RADIUS_UM = 0.7 * 10 ** -6
+CROSS_SIZE_UM = 7.5 * 6
+RING_RADIUS_UM = 0.7
 
 
 class SegmentRings:
     def __init__(
         self,
         img: np.typing.NDArray[np.uint16],
-        pixel_size: float,
+        pixel_size_um: float,
         magnification: int,
         thresh: Optional[Tuple[float, float]] = None,
         bead_distance_um: float = BEAD_DISTANCE_UM,
@@ -32,12 +32,13 @@ class SegmentRings:
         ring_radius_um: float = RING_RADIUS_UM,
     ):
         self.img = img
-        self.pixel_size = pixel_size
+        self.pixel_size = pixel_size_um
         self.magnification = magnification
 
         self.cross_size_px = cross_size_um / self.pixel_size
         self.ring_size_px = math.pi * (ring_radius_um / self.pixel_size) ** 2
         self.bead_dist_px = bead_distance_um / self.pixel_size
+        self.ring_radius_px = ring_radius_um / pixel_size_um
 
         if thresh is not None:
             self.thresh = thresh
@@ -173,8 +174,8 @@ class SegmentRings:
         seg_cross: np.typing.NDArray[np.bool_],
         num_beads: int,
         minArea: int,
+        size_param: Optional[float] = None,
         search_range: Tuple[float, float] = (0, 0.75),
-        size_param: float = 2.5,
     ) -> Tuple[
         np.typing.NDArray[np.uint16], np.typing.NDArray[np.uint16], Optional[float]
     ]:
@@ -187,8 +188,9 @@ class SegmentRings:
         seg_cross: binary mask of the center cross object
         num_beads: expected number of beads
         minArea: minimum area of rings, any segmented object below this size will be filtered out
+        size_param: size parameter of dot filter (default is ring radius in pixels)
         search_range: initial search range of filter parameter
-        size_param: size parameter of dot filter
+
 
         Returns
         -------
@@ -199,6 +201,13 @@ class SegmentRings:
         """
         img = np.zeros((1, img_2d.shape[0], img_2d.shape[1]))
         img[0, :, :] = img_2d
+
+        if size_param is None:
+            size_param = self.ring_radius_px - 0.5
+
+            # use previous default value (2.5) if parameter is lower
+            if size_param < 2.5:
+                size_param = 2.5
 
         thresh = None
         for seg_param in np.linspace(search_range[1], search_range[0], 500):
