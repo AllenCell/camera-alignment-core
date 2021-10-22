@@ -12,90 +12,37 @@ Core algorithms for aligning two-camera microscopy imagery
 
 This library is published to a private PyPI server ("Artifactory") accessible within the Allen Institute network or over VPN. This has downstream effects for how this library is installed into other Python packages.
 
-These instructions assume the use of a virtual environment.
+Having trouble installing? Start here: http://confluence.corp.alleninstitute.org/display/SF/Using+Artifactory#UsingArtifactory-Python.
 
----
-**NOTE**
-
-It is highly recommended to immediately upgrade `pip` to its latest version after creating a new virtual environment. For example:
-```bash
-# Create new virtual environment
-python3.9 -m venv venv
-
-# Upgrade pip
-venv/bin/python3 -m pip install -U pip
-```
----
-
-#### Configure `pip`
-The recommended way to configure `pip` to install `camera_alignment_core` from our private PyPI server is to add a few directives to your `pip` configuration (`pip.conf`):
-```
-[global]
-index-url = https://artifactory.corp.alleninstitute.org/artifactory/api/pypi/pypi-virtual/simple
-extra-index-url = https://artifactory.corp.alleninstitute.org/artifactory/api/pypi/pypi-snapshot-local/simple
-
-[install]
-trusted-host = artifactory.corp.alleninstitute.org
-```
-
-`pip` will search for and merge configuration files from a number of locations: system-, user-, and virtual-environment-level configuration files. See [pip](https://pip.pypa.io/en/stable/user_guide/#configuration) documentation for where these files should be created--if not already--depending on your operating system.
-
-You may add this configuration to the `pip.conf` of your choosing, but note that `pip` reads and merges configuration in order, allowing virtual-env-level config to override user-level configuration, which overrides system-level config.
-
-#### Alternate approach: use a requirements.txt file in your repository
-Assuming you make use of `setuptools` to manage your Python package's build, you can use `pip` to install the dependencies you've declared in `setup.[py|cfg]`, and in the process, instruct `pip` how to install from our private PyPI server.
-
-This can be done either by using `pip` configuration files (detailed above), or by adding a `requirements.txt` file to your repository. That `requirements.txt` file should contain commandline `pip` options that accomplish the same as the directives detailed in the section above, and then instruct `pip` to install packages from `setup.[py|cfg]`. An example `requirements.txt` file:
-```
---trusted-host artifactory.corp.alleninstitute.org
---index-url https://artifactory.corp.alleninstitute.org/artifactory/api/pypi/pypi-virtual/simple
---extra-index-url https://artifactory.corp.alleninstitute.org/artifactory/api/pypi/pypi-snapshot-local/simple
-
--e .[all]
-```
 
 ## Documentation
 
+The primary export of this package is the [Align](https://aics-int.github.io/camera-alignment-core/camera_alignment_core.html#camera_alignment_core.align.Align) class.
+It provides a convenient abstraction over what is expected to be the most common usage of this package. Example use:
+```python
+from camera_alignment_core import Align, Channel, Magnification
 
-#### CLI Usage
 
-```
-align --help
-usage: align [-h] --out-dir OUT_DIR --magnification {100,63,20} [--manifest-file MANIFEST_FILE] [--scene SCENE] [--timepoint TIMEPOINT]
-             [--ref-channel {405,488,561,638}] [--align-channel {405,488,561,638}] [--no-crop] [-d]
-             image optical_control
-
-Run given file through camera alignment, outputting single file per scene.
-
-positional arguments:
-  image                 Microscopy image that requires alignment. Passed directly to aicsimageio.AICSImage constructor.
-  optical_control       Optical control image to use to align `image`. Passed directly to aicsimageio.AICSImage constructor.
-
-optional arguments:
-  -h, --help            show this help message and exit
-  --out-dir OUT_DIR     Save output into `out-dir`
-  --magnification {100,63,20}
-                        Magnification at which both `image` and `optical_control` were acquired.
-  --manifest-file MANIFEST_FILE
-                        Path to file at which manifest of output of this script will be written. See camera_alignment_core.bin.alignment_output_manifest.
-  --scene SCENE         On which scene or scenes within `image` to align. If not specified, will align all scenes within `image`.
-  --timepoint TIMEPOINT
-                        On which timepoint or timepoints within `image` to perform the alignment. If not specified, will align all timepoints within
-                        `image`.
-  --ref-channel {405,488,561,638}
-                        Which channel of `optical_control` to treat as the 'reference' for alignment. I.e., the 'static' channel. Defined in terms of the
-                        wavelength used in that channel.
-  --align-channel {405,488,561,638}
-                        Which channel of `optical_control` to align, relative to 'reference.' I.e., the 'moving' channel. Defined in terms of the
-                        wavelength used in that channel.
-  --no-crop             Do not to crop the aligned image(s).
-  -d, --debug
+align = Align(
+    optical_control="/some/path/to/an/argolight-field-of-rings.czi",
+    magnification=Magnification(20),
+    reference_channel=Channel.RAW_561_NM,
+    alignment_channel=Channel.RAW_638_NM,
+    out_dir="/tmp/whereever",
+)
+aligned_scenes = align.align_image("/some/path/to/an/image.czi")
+aligned_optical_control = align.align_optical_control()
+alignment_matrix = align.alignment_transform.matrix
+alignment_info = align.alignment_transform.info
 ```
 
-
-#### API Documentation
-
-For full package documentation please visit [aics-int.github.io/camera-alignment-core](https://aics-int.github.io/camera-alignment-core/).
+##### Low-level API
+In addition, the lower-level functional building blocks used internally by [Align](https://aics-int.github.io/camera-alignment-core/camera_alignment_core.html#camera_alignment_core.align.Align) are accessible in the `camera_alignment_core.alignment_core` module. See:
+1. [align_image](https://aics-int.github.io/camera-alignment-core/camera_alignment_core.html#camera_alignment_core.alignment_core.align_image)
+1. [apply_alignment_matrix](https://aics-int.github.io/camera-alignment-core/camera_alignment_core.html#camera_alignment_core.alignment_core.apply_alignment_matrix)
+1. [crop](https://aics-int.github.io/camera-alignment-core/camera_alignment_core.html#camera_alignment_core.alignment_core.crop)
+1. [generate_alignment_matrix](https://aics-int.github.io/camera-alignment-core/camera_alignment_core.html#camera_alignment_core.alignment_core.generate_alignment_matrix)
+1. [get_channel_info](https://aics-int.github.io/camera-alignment-core/camera_alignment_core.html#camera_alignment_core.alignment_core.get_channel_info)
 
 
 ## Development
