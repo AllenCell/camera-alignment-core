@@ -8,11 +8,18 @@ Subpackages
    :maxdepth: 4
 
    camera_alignment_core.alignment_utils
-   camera_alignment_core.bin
    camera_alignment_core.exception
 
 Submodules
 ----------
+
+camera\_alignment\_core.align module
+------------------------------------
+
+.. automodule:: camera_alignment_core.align
+   :members:
+   :undoc-members:
+   :show-inheritance:
 
 camera\_alignment\_core.alignment\_core module
 ----------------------------------------------

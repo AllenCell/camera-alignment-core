@@ -158,7 +158,6 @@
 <li class="toctree-l1 current has-children"><a class="reference internal" href="modules.html">Package modules</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="current">
 <li class="toctree-l2 current has-children current-page"><a class="current reference internal" href="#">camera_alignment_core package</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="camera_alignment_core.alignment_utils.html">camera_alignment_core.alignment_utils package</a></li>
-<li class="toctree-l3"><a class="reference internal" href="camera_alignment_core.bin.html">camera_alignment_core.bin package</a></li>
 <li class="toctree-l3"><a class="reference internal" href="camera_alignment_core.exception.html">camera_alignment_core.exception package</a></li>
 </ul>
 </li>
@@ -205,14 +204,6 @@
 <li class="toctree-l2"><a class="reference internal" href="camera_alignment_core.alignment_utils.html#module-camera_alignment_core.alignment_utils">Module contents</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="camera_alignment_core.bin.html">camera_alignment_core.bin package</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="camera_alignment_core.bin.html#submodules">Submodules</a></li>
-<li class="toctree-l2"><a class="reference internal" href="camera_alignment_core.bin.html#module-camera_alignment_core.bin.align_image">camera_alignment_core.bin.align_image module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="camera_alignment_core.bin.html#module-camera_alignment_core.bin.alignment_output_manifest">camera_alignment_core.bin.alignment_output_manifest module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="camera_alignment_core.bin.html#module-camera_alignment_core.bin.image_dimension_action">camera_alignment_core.bin.image_dimension_action module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="camera_alignment_core.bin.html#module-camera_alignment_core.bin">Module contents</a></li>
-</ul>
-</li>
 <li class="toctree-l1"><a class="reference internal" href="camera_alignment_core.exception.html">camera_alignment_core.exception package</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="camera_alignment_core.exception.html#module-camera_alignment_core.exception">Module contents</a></li>
 </ul>
@@ -223,31 +214,141 @@
 <section id="submodules">
 <h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
 </section>
+<section id="module-camera_alignment_core.align">
+<span id="camera-alignment-core-align-module"></span><h2>camera_alignment_core.align module<a class="headerlink" href="#module-camera_alignment_core.align" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="camera_alignment_core.align.Align">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">camera_alignment_core.align.</span></span><span class="sig-name descname"><span class="pre">Align</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">optical_control</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span> </span><span class="pre">pathlib.Path</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">magnification</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="#camera_alignment_core.constants.Magnification" title="camera_alignment_core.constants.Magnification"><span class="pre">camera_alignment_core.constants.Magnification</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">reference_channel</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="#camera_alignment_core.constants.Channel" title="camera_alignment_core.constants.Channel"><span class="pre">camera_alignment_core.constants.Channel</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">alignment_channel</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="#camera_alignment_core.constants.Channel" title="camera_alignment_core.constants.Channel"><span class="pre">camera_alignment_core.constants.Channel</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">out_dir</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">pathlib.Path</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#camera_alignment_core.align.Align" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>High-level API for core camera alignment functionality.</p>
+<p class="rubric">Example</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">align</span> <span class="o">=</span> <span class="n">Align</span><span class="p">(</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="n">optical_control</span><span class="o">=</span><span class="s2">"/some/path/to/an/argolight-field-of-rings.czi"</span><span class="p">,</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="n">magnification</span><span class="o">=</span><span class="n">Magnification</span><span class="p">(</span><span class="mi">20</span><span class="p">),</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="n">reference_channel</span><span class="o">=</span><span class="n">Channel</span><span class="o">.</span><span class="n">RAW_561_NM</span><span class="p">,</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="n">alignment_channel</span><span class="o">=</span><span class="n">Channel</span><span class="o">.</span><span class="n">RAW_638_NM</span><span class="p">,</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="n">out_dir</span><span class="o">=</span><span class="s2">"/tmp/whereever"</span><span class="p">,</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">aligned_scenes</span> <span class="o">=</span> <span class="n">align</span><span class="o">.</span><span class="n">align_image</span><span class="p">(</span><span class="s2">"/some/path/to/an/image.czi"</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">aligned_optical_control</span> <span class="o">=</span> <span class="n">align</span><span class="o">.</span><span class="n">align_optical_control</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">alignment_matrix</span> <span class="o">=</span> <span class="n">align</span><span class="o">.</span><span class="n">alignment_transform</span><span class="o">.</span><span class="n">matrix</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">alignment_info</span> <span class="o">=</span> <span class="n">align</span><span class="o">.</span><span class="n">alignment_transform</span><span class="o">.</span><span class="n">info</span>
+</pre></div>
+</div>
+<dl class="py method">
+<dt class="sig sig-object py" id="camera_alignment_core.align.Align.align_image">
+<span class="sig-name descname"><span class="pre">align_image</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">image</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span> </span><span class="pre">pathlib.Path</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scenes</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timepoints</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">crop_output</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">bool</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#camera_alignment_core.align.AlignedImage" title="camera_alignment_core.align.AlignedImage"><span class="pre">camera_alignment_core.align.AlignedImage</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#camera_alignment_core.align.Align.align_image" title="Permalink to this definition">¶</a></dt>
+<dd><p>Align <cite>image</cite> using similarity transform generated from the optical control image passed to
+this instance at construction.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>image</strong> (<em>Union</em><em>[</em><em>str</em><em>, </em><em>Path</em><em>]</em>) – Microscopy image that requires alignment. Passed as-is to aicsimageio.AICSImage constructor.</p>
+</dd>
+<dt class="field-even">Keyword Arguments</dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>scenes</strong> (<em>Optional</em><em>[</em><em>List</em><em>[</em><em>int</em><em>]</em><em>]</em>) – On which scene or scenes within <cite>image</cite> to align. If not specified, will align all scenes within <cite>image</cite>.
+Specify as list of 0-index scene indices within <cite>image</cite>.</p></li>
+<li><p><strong>timepoints</strong> (<em>Optional</em><em>[</em><em>List</em><em>[</em><em>int</em><em>]</em><em>]</em>) – On which timepoint or timepoints within <cite>image</cite> to perform the alignment. If not specified, will align all timepoints within <cite>image</cite>.
+Specify as list of 0-index timepoint indices within <cite>image</cite>.</p></li>
+<li><p><strong>crop_output</strong> (<em>Optional</em><em>[</em><em>bool</em><em>]</em>) – Optionally do not crop aligned image according to standard dimensions
+for the magnification at which the image was acquired. Defaults to cropping.</p></li>
+</ul>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>A list of namedtuples, each of which describes a scene within <cite>image</cite> that was aligned.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>List[<a class="reference internal" href="#camera_alignment_core.align.AlignedImage" title="camera_alignment_core.align.AlignedImage">AlignedImage</a>]</p>
+</dd>
+</dl>
+</dd></dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="camera_alignment_core.align.Align.align_optical_control">
+<span class="sig-name descname"><span class="pre">align_optical_control</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">crop_output</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">bool</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><span class="pre">pathlib.Path</span></span></span><a class="headerlink" href="#camera_alignment_core.align.Align.align_optical_control" title="Permalink to this definition">¶</a></dt>
+<dd><p>Align the optical control image using the similarity matrix generated from
+the optical control itself. Useful as a reference for judging the quality of the alignment.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Keyword Arguments</dt>
+<dd class="field-odd"><p><strong>crop_output</strong> (<em>Optional</em><em>[</em><em>bool</em><em>]</em>) – Optionally do not crop aligned image according to standard dimensions
+for the magnification at which the image was acquired. Defaults to cropping.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>pathlib.Path</p>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>This method will output the aligned optical control image to a file as a side-effect,
+returning the pathlib.Path to the file.</p>
+</dd></dl>
+<dl class="py property">
+<dt class="sig sig-object py" id="camera_alignment_core.align.Align.alignment_transform">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">alignment_transform</span></span><em class="property"><span class="pre">:</span> <span class="pre">camera_alignment_core.align.AlignmentTransform</span></em><a class="headerlink" href="#camera_alignment_core.align.Align.alignment_transform" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the similarity matrix and camera_alignment_core.utils.AlignmentInfo used to perform camera alignment.</p>
+</dd></dl>
+</dd></dl>
+<dl class="py class">
+<dt class="sig sig-object py" id="camera_alignment_core.align.AlignedImage">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">camera_alignment_core.align.</span></span><span class="sig-name descname"><span class="pre">AlignedImage</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">scene</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">path</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#camera_alignment_core.align.AlignedImage" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">NamedTuple</span></code></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="camera_alignment_core.align.AlignedImage.path">
+<span class="sig-name descname"><span class="pre">path</span></span><em class="property"><span class="pre">:</span> <span class="pre">pathlib.Path</span></em><a class="headerlink" href="#camera_alignment_core.align.AlignedImage.path" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for field number 1</p>
+</dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="camera_alignment_core.align.AlignedImage.scene">
+<span class="sig-name descname"><span class="pre">scene</span></span><em class="property"><span class="pre">:</span> <span class="pre">int</span></em><a class="headerlink" href="#camera_alignment_core.align.AlignedImage.scene" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for field number 0</p>
+</dd></dl>
+</dd></dl>
+<dl class="py class">
+<dt class="sig sig-object py" id="camera_alignment_core.align.AlignmentTransform">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">camera_alignment_core.align.</span></span><span class="sig-name descname"><span class="pre">AlignmentTransform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">matrix</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">info</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#camera_alignment_core.align.AlignmentTransform" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">NamedTuple</span></code></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="camera_alignment_core.align.AlignmentTransform.info">
+<span class="sig-name descname"><span class="pre">info</span></span><em class="property"><span class="pre">:</span> <a class="reference internal" href="camera_alignment_core.alignment_utils.html#camera_alignment_core.alignment_utils.alignment_info.AlignmentInfo" title="camera_alignment_core.alignment_utils.alignment_info.AlignmentInfo"><span class="pre">camera_alignment_core.alignment_utils.alignment_info.AlignmentInfo</span></a></em><a class="headerlink" href="#camera_alignment_core.align.AlignmentTransform.info" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for field number 1</p>
+</dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="camera_alignment_core.align.AlignmentTransform.matrix">
+<span class="sig-name descname"><span class="pre">matrix</span></span><em class="property"><span class="pre">:</span> <span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span> </span><span class="pre">numpy.dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float16</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#camera_alignment_core.align.AlignmentTransform.matrix" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for field number 0</p>
+</dd></dl>
+</dd></dl>
+</section>
 <section id="module-camera_alignment_core.alignment_core">
 <span id="camera-alignment-core-alignment-core-module"></span><h2>camera_alignment_core.alignment_core module<a class="headerlink" href="#module-camera_alignment_core.alignment_core" title="Permalink to this headline">¶</a></h2>
-<dl class="py class">
-<dt class="sig sig-object py" id="camera_alignment_core.alignment_core.AlignmentCore">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">camera_alignment_core.alignment_core.</span></span><span class="sig-name descname"><span class="pre">AlignmentCore</span></span><a class="headerlink" href="#camera_alignment_core.alignment_core.AlignmentCore" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
-<p>Wrapper for core of camera alignment algorithm</p>
-<dl class="py method">
-<dt class="sig sig-object py" id="camera_alignment_core.alignment_core.AlignmentCore.align_image">
-<span class="sig-name descname"><span class="pre">align_image</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">alignment_matrix</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span> </span><span class="pre">numpy.dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float16</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">image</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span> </span><span class="pre">numpy.dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.uint16</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">channel_info</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="#camera_alignment_core.channel_info.ChannelInfo" title="camera_alignment_core.channel_info.ChannelInfo"><span class="pre">camera_alignment_core.channel_info.ChannelInfo</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">magnification</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">crop</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">bool</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span> </span><span class="pre">numpy.dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.uint16</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#camera_alignment_core.alignment_core.AlignmentCore.align_image" title="Permalink to this definition">¶</a></dt>
+<dl class="py function">
+<dt class="sig sig-object py" id="camera_alignment_core.alignment_core.align_image">
+<span class="sig-prename descclassname"><span class="pre">camera_alignment_core.alignment_core.</span></span><span class="sig-name descname"><span class="pre">align_image</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">alignment_matrix</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span> </span><span class="pre">numpy.dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float16</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">image</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span> </span><span class="pre">numpy.dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.uint16</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">channel_info</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="#camera_alignment_core.channel_info.ChannelInfo" title="camera_alignment_core.channel_info.ChannelInfo"><span class="pre">camera_alignment_core.channel_info.ChannelInfo</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">magnification</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span> </span><span class="pre">numpy.dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.uint16</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#camera_alignment_core.alignment_core.align_image" title="Permalink to this definition">¶</a></dt>
 <dd><p>Align a CZYX <cite>image</cite> using <cite>alignment_matrix</cite>.
 Uses <cite>channel_info</cite> to know which channels within <cite>image</cite> to align.
 Uses <cite>magnification</cite> to know how to crop the resulting aligned image.
 Does not crop aligned image if crop=False.</p>
 </dd></dl>
-<dl class="py method">
-<dt class="sig sig-object py" id="camera_alignment_core.alignment_core.AlignmentCore.generate_alignment_matrix">
-<span class="sig-name descname"><span class="pre">generate_alignment_matrix</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">optical_control_image</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span> </span><span class="pre">numpy.dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.uint16</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reference_channel</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shift_channel</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">magnification</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">px_size_xy</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span> </span><span class="pre">numpy.dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float16</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span> </span><a class="reference internal" href="camera_alignment_core.alignment_utils.html#camera_alignment_core.alignment_utils.alignment_info.AlignmentInfo" title="camera_alignment_core.alignment_utils.alignment_info.AlignmentInfo"><span class="pre">camera_alignment_core.alignment_utils.alignment_info.AlignmentInfo</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#camera_alignment_core.alignment_core.AlignmentCore.generate_alignment_matrix" title="Permalink to this definition">¶</a></dt>
+<dl class="py function">
+<dt class="sig sig-object py" id="camera_alignment_core.alignment_core.apply_alignment_matrix">
+<span class="sig-prename descclassname"><span class="pre">camera_alignment_core.alignment_core.</span></span><span class="sig-name descname"><span class="pre">apply_alignment_matrix</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">alignment_matrix</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span> </span><span class="pre">numpy.dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float16</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">image_slice</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span> </span><span class="pre">numpy.dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.uint16</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span> </span><span class="pre">numpy.dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.uint16</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#camera_alignment_core.alignment_core.apply_alignment_matrix" title="Permalink to this definition">¶</a></dt>
+<dd><p>Applies an affine transformation matrix to a 3D (ZYX) slice of a multi-channel image.</p>
+</dd></dl>
+<dl class="py function">
+<dt class="sig sig-object py" id="camera_alignment_core.alignment_core.crop">
+<span class="sig-prename descclassname"><span class="pre">camera_alignment_core.alignment_core.</span></span><span class="sig-name descname"><span class="pre">crop</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">image</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span> </span><span class="pre">numpy.dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.uint16</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">magnification</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="#camera_alignment_core.constants.Magnification" title="camera_alignment_core.constants.Magnification"><span class="pre">camera_alignment_core.constants.Magnification</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">black_pixel_cutoff</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">50</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span> </span><span class="pre">numpy.dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.uint16</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#camera_alignment_core.alignment_core.crop" title="Permalink to this definition">¶</a></dt>
+<dd><p>Crops a CZYX image based on the magnification used to generate the image</p>
+</dd></dl>
+<dl class="py function">
+<dt class="sig sig-object py" id="camera_alignment_core.alignment_core.generate_alignment_matrix">
+<span class="sig-prename descclassname"><span class="pre">camera_alignment_core.alignment_core.</span></span><span class="sig-name descname"><span class="pre">generate_alignment_matrix</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">optical_control_image</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span> </span><span class="pre">numpy.dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.uint16</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reference_channel</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shift_channel</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">magnification</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">px_size_xy</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span> </span><span class="pre">numpy.dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float16</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span> </span><a class="reference internal" href="camera_alignment_core.alignment_utils.html#camera_alignment_core.alignment_utils.alignment_info.AlignmentInfo" title="camera_alignment_core.alignment_utils.alignment_info.AlignmentInfo"><span class="pre">camera_alignment_core.alignment_utils.alignment_info.AlignmentInfo</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#camera_alignment_core.alignment_core.generate_alignment_matrix" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
-<dl class="py method">
-<dt class="sig sig-object py" id="camera_alignment_core.alignment_core.AlignmentCore.get_channel_info">
-<span class="sig-name descname"><span class="pre">get_channel_info</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">image</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">aicsimageio.aics_image.AICSImage</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><a class="reference internal" href="#camera_alignment_core.channel_info.ChannelInfo" title="camera_alignment_core.channel_info.ChannelInfo"><span class="pre">camera_alignment_core.channel_info.ChannelInfo</span></a></span></span><a class="headerlink" href="#camera_alignment_core.alignment_core.AlignmentCore.get_channel_info" title="Permalink to this definition">¶</a></dt>
+<dl class="py function">
+<dt class="sig sig-object py" id="camera_alignment_core.alignment_core.get_channel_info">
+<span class="sig-prename descclassname"><span class="pre">camera_alignment_core.alignment_core.</span></span><span class="sig-name descname"><span class="pre">get_channel_info</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">image</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">aicsimageio.aics_image.AICSImage</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><a class="reference internal" href="#camera_alignment_core.channel_info.ChannelInfo" title="camera_alignment_core.channel_info.ChannelInfo"><span class="pre">camera_alignment_core.channel_info.ChannelInfo</span></a></span></span><a class="headerlink" href="#camera_alignment_core.alignment_core.get_channel_info" title="Permalink to this definition">¶</a></dt>
 <dd><p>Map channel names to their corresponding index position within image data. If an unknown channel name
 is encountered, a warning is logged.</p>
-</dd></dl>
 </dd></dl>
 </section>
 <section id="module-camera_alignment_core.channel_info">
@@ -340,28 +441,129 @@ is encountered, a warning is logged.</p>
 <section id="module-camera_alignment_core">
 <span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-camera_alignment_core" title="Permalink to this headline">¶</a></h2>
 <dl class="py class">
-<dt class="sig sig-object py" id="camera_alignment_core.AlignmentCore">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">camera_alignment_core.</span></span><span class="sig-name descname"><span class="pre">AlignmentCore</span></span><a class="headerlink" href="#camera_alignment_core.AlignmentCore" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="camera_alignment_core.Align">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">camera_alignment_core.</span></span><span class="sig-name descname"><span class="pre">Align</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">optical_control</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span> </span><span class="pre">pathlib.Path</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">magnification</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="#camera_alignment_core.constants.Magnification" title="camera_alignment_core.constants.Magnification"><span class="pre">camera_alignment_core.constants.Magnification</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">reference_channel</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="#camera_alignment_core.constants.Channel" title="camera_alignment_core.constants.Channel"><span class="pre">camera_alignment_core.constants.Channel</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">alignment_channel</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="#camera_alignment_core.constants.Channel" title="camera_alignment_core.constants.Channel"><span class="pre">camera_alignment_core.constants.Channel</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">out_dir</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">pathlib.Path</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#camera_alignment_core.Align" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
-<p>Wrapper for core of camera alignment algorithm</p>
+<p>High-level API for core camera alignment functionality.</p>
+<p class="rubric">Example</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">align</span> <span class="o">=</span> <span class="n">Align</span><span class="p">(</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="n">optical_control</span><span class="o">=</span><span class="s2">"/some/path/to/an/argolight-field-of-rings.czi"</span><span class="p">,</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="n">magnification</span><span class="o">=</span><span class="n">Magnification</span><span class="p">(</span><span class="mi">20</span><span class="p">),</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="n">reference_channel</span><span class="o">=</span><span class="n">Channel</span><span class="o">.</span><span class="n">RAW_561_NM</span><span class="p">,</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="n">alignment_channel</span><span class="o">=</span><span class="n">Channel</span><span class="o">.</span><span class="n">RAW_638_NM</span><span class="p">,</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="n">out_dir</span><span class="o">=</span><span class="s2">"/tmp/whereever"</span><span class="p">,</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">aligned_scenes</span> <span class="o">=</span> <span class="n">align</span><span class="o">.</span><span class="n">align_image</span><span class="p">(</span><span class="s2">"/some/path/to/an/image.czi"</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">aligned_optical_control</span> <span class="o">=</span> <span class="n">align</span><span class="o">.</span><span class="n">align_optical_control</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">alignment_matrix</span> <span class="o">=</span> <span class="n">align</span><span class="o">.</span><span class="n">alignment_transform</span><span class="o">.</span><span class="n">matrix</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">alignment_info</span> <span class="o">=</span> <span class="n">align</span><span class="o">.</span><span class="n">alignment_transform</span><span class="o">.</span><span class="n">info</span>
+</pre></div>
+</div>
 <dl class="py method">
-<dt class="sig sig-object py" id="camera_alignment_core.AlignmentCore.align_image">
-<span class="sig-name descname"><span class="pre">align_image</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">alignment_matrix</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span> </span><span class="pre">numpy.dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float16</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">image</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span> </span><span class="pre">numpy.dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.uint16</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">channel_info</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="#camera_alignment_core.channel_info.ChannelInfo" title="camera_alignment_core.channel_info.ChannelInfo"><span class="pre">camera_alignment_core.channel_info.ChannelInfo</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">magnification</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">crop</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">bool</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span> </span><span class="pre">numpy.dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.uint16</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#camera_alignment_core.AlignmentCore.align_image" title="Permalink to this definition">¶</a></dt>
-<dd><p>Align a CZYX <cite>image</cite> using <cite>alignment_matrix</cite>.
-Uses <cite>channel_info</cite> to know which channels within <cite>image</cite> to align.
-Uses <cite>magnification</cite> to know how to crop the resulting aligned image.
-Does not crop aligned image if crop=False.</p>
+<dt class="sig sig-object py" id="camera_alignment_core.Align.align_image">
+<span class="sig-name descname"><span class="pre">align_image</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">image</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span> </span><span class="pre">pathlib.Path</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scenes</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timepoints</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">crop_output</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">bool</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#camera_alignment_core.align.AlignedImage" title="camera_alignment_core.align.AlignedImage"><span class="pre">camera_alignment_core.align.AlignedImage</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#camera_alignment_core.Align.align_image" title="Permalink to this definition">¶</a></dt>
+<dd><p>Align <cite>image</cite> using similarity transform generated from the optical control image passed to
+this instance at construction.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>image</strong> (<em>Union</em><em>[</em><em>str</em><em>, </em><em>Path</em><em>]</em>) – Microscopy image that requires alignment. Passed as-is to aicsimageio.AICSImage constructor.</p>
+</dd>
+<dt class="field-even">Keyword Arguments</dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>scenes</strong> (<em>Optional</em><em>[</em><em>List</em><em>[</em><em>int</em><em>]</em><em>]</em>) – On which scene or scenes within <cite>image</cite> to align. If not specified, will align all scenes within <cite>image</cite>.
+Specify as list of 0-index scene indices within <cite>image</cite>.</p></li>
+<li><p><strong>timepoints</strong> (<em>Optional</em><em>[</em><em>List</em><em>[</em><em>int</em><em>]</em><em>]</em>) – On which timepoint or timepoints within <cite>image</cite> to perform the alignment. If not specified, will align all timepoints within <cite>image</cite>.
+Specify as list of 0-index timepoint indices within <cite>image</cite>.</p></li>
+<li><p><strong>crop_output</strong> (<em>Optional</em><em>[</em><em>bool</em><em>]</em>) – Optionally do not crop aligned image according to standard dimensions
+for the magnification at which the image was acquired. Defaults to cropping.</p></li>
+</ul>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>A list of namedtuples, each of which describes a scene within <cite>image</cite> that was aligned.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>List[<a class="reference internal" href="#camera_alignment_core.align.AlignedImage" title="camera_alignment_core.align.AlignedImage">AlignedImage</a>]</p>
+</dd>
+</dl>
 </dd></dl>
 <dl class="py method">
-<dt class="sig sig-object py" id="camera_alignment_core.AlignmentCore.generate_alignment_matrix">
-<span class="sig-name descname"><span class="pre">generate_alignment_matrix</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">optical_control_image</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span> </span><span class="pre">numpy.dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.uint16</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reference_channel</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shift_channel</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">magnification</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">px_size_xy</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span> </span><span class="pre">numpy.dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float16</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span> </span><a class="reference internal" href="camera_alignment_core.alignment_utils.html#camera_alignment_core.alignment_utils.alignment_info.AlignmentInfo" title="camera_alignment_core.alignment_utils.alignment_info.AlignmentInfo"><span class="pre">camera_alignment_core.alignment_utils.alignment_info.AlignmentInfo</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#camera_alignment_core.AlignmentCore.generate_alignment_matrix" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="camera_alignment_core.Align.align_optical_control">
+<span class="sig-name descname"><span class="pre">align_optical_control</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">crop_output</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">bool</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><span class="pre">pathlib.Path</span></span></span><a class="headerlink" href="#camera_alignment_core.Align.align_optical_control" title="Permalink to this definition">¶</a></dt>
+<dd><p>Align the optical control image using the similarity matrix generated from
+the optical control itself. Useful as a reference for judging the quality of the alignment.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Keyword Arguments</dt>
+<dd class="field-odd"><p><strong>crop_output</strong> (<em>Optional</em><em>[</em><em>bool</em><em>]</em>) – Optionally do not crop aligned image according to standard dimensions
+for the magnification at which the image was acquired. Defaults to cropping.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>pathlib.Path</p>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>This method will output the aligned optical control image to a file as a side-effect,
+returning the pathlib.Path to the file.</p>
+</dd></dl>
+<dl class="py property">
+<dt class="sig sig-object py" id="camera_alignment_core.Align.alignment_transform">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">alignment_transform</span></span><em class="property"><span class="pre">:</span> <span class="pre">camera_alignment_core.align.AlignmentTransform</span></em><a class="headerlink" href="#camera_alignment_core.Align.alignment_transform" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the similarity matrix and camera_alignment_core.utils.AlignmentInfo used to perform camera alignment.</p>
+</dd></dl>
+</dd></dl>
+<dl class="py class">
+<dt class="sig sig-object py" id="camera_alignment_core.Channel">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">camera_alignment_core.</span></span><span class="sig-name descname"><span class="pre">Channel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#camera_alignment_core.Channel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">enum.Enum</span></code></p>
+<p>Standardized channel names</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="camera_alignment_core.Channel.RAW_405_NM">
+<span class="sig-name descname"><span class="pre">RAW_405_NM</span></span><em class="property"> <span class="pre">=</span> <span class="pre">'Raw</span> <span class="pre">405nm'</span></em><a class="headerlink" href="#camera_alignment_core.Channel.RAW_405_NM" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="camera_alignment_core.Channel.RAW_488_NM">
+<span class="sig-name descname"><span class="pre">RAW_488_NM</span></span><em class="property"> <span class="pre">=</span> <span class="pre">'Raw</span> <span class="pre">488nm'</span></em><a class="headerlink" href="#camera_alignment_core.Channel.RAW_488_NM" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="camera_alignment_core.Channel.RAW_561_NM">
+<span class="sig-name descname"><span class="pre">RAW_561_NM</span></span><em class="property"> <span class="pre">=</span> <span class="pre">'Raw</span> <span class="pre">561nm'</span></em><a class="headerlink" href="#camera_alignment_core.Channel.RAW_561_NM" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="camera_alignment_core.Channel.RAW_638_NM">
+<span class="sig-name descname"><span class="pre">RAW_638_NM</span></span><em class="property"> <span class="pre">=</span> <span class="pre">'Raw</span> <span class="pre">638nm'</span></em><a class="headerlink" href="#camera_alignment_core.Channel.RAW_638_NM" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="camera_alignment_core.Channel.RAW_BRIGHTFIELD">
+<span class="sig-name descname"><span class="pre">RAW_BRIGHTFIELD</span></span><em class="property"> <span class="pre">=</span> <span class="pre">'Raw</span> <span class="pre">brightfield'</span></em><a class="headerlink" href="#camera_alignment_core.Channel.RAW_BRIGHTFIELD" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 <dl class="py method">
-<dt class="sig sig-object py" id="camera_alignment_core.AlignmentCore.get_channel_info">
-<span class="sig-name descname"><span class="pre">get_channel_info</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">image</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">aicsimageio.aics_image.AICSImage</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><a class="reference internal" href="#camera_alignment_core.channel_info.ChannelInfo" title="camera_alignment_core.channel_info.ChannelInfo"><span class="pre">camera_alignment_core.channel_info.ChannelInfo</span></a></span></span><a class="headerlink" href="#camera_alignment_core.AlignmentCore.get_channel_info" title="Permalink to this definition">¶</a></dt>
-<dd><p>Map channel names to their corresponding index position within image data. If an unknown channel name
-is encountered, a warning is logged.</p>
+<dt class="sig sig-object py" id="camera_alignment_core.Channel.requires_alignment">
+<span class="sig-name descname"><span class="pre">requires_alignment</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="headerlink" href="#camera_alignment_core.Channel.requires_alignment" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 </dd></dl>
+<dl class="py class">
+<dt class="sig sig-object py" id="camera_alignment_core.Magnification">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">camera_alignment_core.</span></span><span class="sig-name descname"><span class="pre">Magnification</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#camera_alignment_core.Magnification" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">enum.Enum</span></code></p>
+<p>Supported magnification values.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="camera_alignment_core.Magnification.ONE_HUNDRED">
+<span class="sig-name descname"><span class="pre">ONE_HUNDRED</span></span><em class="property"> <span class="pre">=</span> <span class="pre">100</span></em><a class="headerlink" href="#camera_alignment_core.Magnification.ONE_HUNDRED" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="camera_alignment_core.Magnification.SIXTY_THREE">
+<span class="sig-name descname"><span class="pre">SIXTY_THREE</span></span><em class="property"> <span class="pre">=</span> <span class="pre">63</span></em><a class="headerlink" href="#camera_alignment_core.Magnification.SIXTY_THREE" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="camera_alignment_core.Magnification.TWENTY">
+<span class="sig-name descname"><span class="pre">TWENTY</span></span><em class="property"> <span class="pre">=</span> <span class="pre">20</span></em><a class="headerlink" href="#camera_alignment_core.Magnification.TWENTY" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+<dl class="py property">
+<dt class="sig sig-object py" id="camera_alignment_core.Magnification.cropping_dimension">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">cropping_dimension</span></span><em class="property"><span class="pre">:</span> <span class="pre">camera_alignment_core.constants.CroppingDimension</span></em><a class="headerlink" href="#camera_alignment_core.Magnification.cropping_dimension" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 </dd></dl>
 <dl class="py function">
 <dt class="sig sig-object py" id="camera_alignment_core.get_module_version">
@@ -427,6 +629,7 @@ is encountered, a warning is logged.</p>
 <li><a class="reference internal" href="#">camera_alignment_core package</a><ul>
 <li><a class="reference internal" href="#subpackages">Subpackages</a></li>
 <li><a class="reference internal" href="#submodules">Submodules</a></li>
+<li><a class="reference internal" href="#module-camera_alignment_core.align">camera_alignment_core.align module</a></li>
 <li><a class="reference internal" href="#module-camera_alignment_core.alignment_core">camera_alignment_core.alignment_core module</a></li>
 <li><a class="reference internal" href="#module-camera_alignment_core.channel_info">camera_alignment_core.channel_info module</a></li>
 <li><a class="reference internal" href="#module-camera_alignment_core.constants">camera_alignment_core.constants module</a></li>
