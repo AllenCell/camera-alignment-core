@@ -1,5 +1,5 @@
 import logging
-from typing import Dict, Optional, Tuple, Union
+from typing import Dict, Optional, Tuple
 
 import numpy as np
 from numpy.typing import NDArray
@@ -58,7 +58,7 @@ class AlignmentQC:
 
     def report_full_metrics(
         self,
-    ) -> Dict[str, Union[object, None]]:
+    ) -> Dict[str, Optional[object]]:
 
         missing = self.check_all_defined()
         if missing is not None:
@@ -166,7 +166,7 @@ class AlignmentQC:
         else:
             log.error("Error: tform is not yet defined")
 
-    def check_all_defined(self) -> Union[list[str], None]:
+    def check_all_defined(self) -> Optional[list[str]]:
         missing = []
 
         if self.reference is None:
