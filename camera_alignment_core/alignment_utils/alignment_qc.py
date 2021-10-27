@@ -199,7 +199,6 @@ class AlignmentQC:
         if self.reference is None or self.moving_source is None:
             log.error("Error: Raw images are missing for qc")
             raise Exception("Error: Raw images are missing for qc")
-            return -1, -1, -1
 
         z_offset = self.ref_origin - self.mov_origin
 
@@ -209,7 +208,6 @@ class AlignmentQC:
         if self.reference is None or self.moving_source is None:
             log.error("Error: Seg images are missing for qc")
             raise Exception("Error: Seg images are missing for qc")
-            return -1, -1, -1, -1
 
         def get_image_snr(
             seg: Optional[NDArray[np.uint16]],
@@ -235,7 +233,6 @@ class AlignmentQC:
         if self.ref_mov_coor_dict is None:
             log.error("Error: ref_mov_coor_dict is missing for qc")
             raise Exception("Error: ref_mov_coor_dict is missing for qc")
-            return False, -1
 
         bead_num_qc = False
         num_beads = len(self.ref_mov_coor_dict)
@@ -258,7 +255,6 @@ class AlignmentQC:
             raise Exception(
                 "Error: moving source and transformed images are missing for qc"
             )
-            return {"ERROR": -1}
 
         change_fov_intensity_param_dict = {
             "median_intensity": np.median(self.moving_transformed) * 65535
@@ -286,15 +282,14 @@ class AlignmentQC:
         if self.ref_mov_coor_dict is None:
             log.error("Error: ref_mov_coor_dict is missing for qc")
             raise Exception("Error: ref_mov_coor_dict is missing for qc")
-            return (False, 0)
+
         if self.tform is None:
             log.error("Error: tform is missing for qc")
             raise Exception("Error: tform is missing for qc")
-            return (False, 0)
+
         if self.reference is None:
             log.error("Error: reference raw image is missing for qc")
             raise Exception("Error: reference raw image is missing for qc")
-            return (False, 0)
 
         transform_qc = False
         mov_coors = list(self.ref_mov_coor_dict.values())
