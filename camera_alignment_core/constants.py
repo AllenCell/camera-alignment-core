@@ -13,6 +13,40 @@ class Channel(enum.Enum):
     RAW_561_NM = "Raw 561nm"
     RAW_638_NM = "Raw 638nm"
 
+    @staticmethod
+    def from_magnification(nominal_magnification: int) -> "Channel":
+        """Return canonical Channel enumeration corresponding to given nominal_magnification.
+
+        Notably, this method does not attempt to support brightfield: it only maps nominal magnifications to Channel instances.
+
+        Parameters
+        ----------
+        nominal_magnification : int
+
+        Returns
+        -------
+        Channel
+
+        Raises
+        ------
+        ValueError
+            If given nominal_magnification does not correspond to a known Channel.
+        """
+        mapping = {
+            405: Channel.RAW_405_NM,
+            488: Channel.RAW_488_NM,
+            561: Channel.RAW_561_NM,
+            638: Channel.RAW_638_NM,
+        }
+
+        channel = mapping.get(nominal_magnification)
+        if not channel:
+            raise ValueError(
+                f"Unsupported nominal_magnification: {nominal_magnification}. Supported values: {mapping.keys()}."
+            )
+
+        return channel
+
     def requires_alignment(self) -> bool:
         if self in (Channel.RAW_BRIGHTFIELD, Channel.RAW_638_NM):
             return True
