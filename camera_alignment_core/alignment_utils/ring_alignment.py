@@ -139,7 +139,6 @@ class RingAlignment:
             reference_seg=self.ref_seg_rings,
             moving_seg=self.mov_seg_rings,
             ref_mov_coor_dict=ref_mov_coor_dict,
-            rev_coor_dict=rev_coor_dict,
             tform=tform,
         )
 
