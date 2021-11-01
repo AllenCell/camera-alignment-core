@@ -6,7 +6,7 @@ from camera_alignment_core.constants import (
 
 
 @pytest.mark.parametrize(
-    ["nominal_magnification", "expected"],
+    ["wavelength", "expected"],
     [
         (405, Channel.RAW_405_NM),
         (488, Channel.RAW_488_NM),
@@ -15,11 +15,9 @@ from camera_alignment_core.constants import (
         pytest.param(999, None, marks=pytest.mark.xfail(raises=ValueError)),
     ],
 )
-def test_channel_from_magnification(
-    nominal_magnification: int, expected: Channel
-) -> None:
+def test_channel_from_wavelength(wavelength: int, expected: Channel) -> None:
     # Arrange / Act
-    actual = Channel.from_magnification(nominal_magnification)
+    actual = Channel.from_wavelength(wavelength)
 
     # Assert
     assert actual == expected
