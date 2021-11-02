@@ -396,6 +396,26 @@ is encountered, a warning is logged.</p>
 <span class="sig-name descname"><span class="pre">RAW_BRIGHTFIELD</span></span><em class="property"> <span class="pre">=</span> <span class="pre">'Raw</span> <span class="pre">brightfield'</span></em><a class="headerlink" href="#camera_alignment_core.constants.Channel.RAW_BRIGHTFIELD" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 <dl class="py method">
+<dt class="sig sig-object py" id="camera_alignment_core.constants.Channel.from_wavelength">
+<em class="property"><span class="pre">static</span> </em><span class="sig-name descname"><span class="pre">from_wavelength</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">wavelength</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><a class="reference internal" href="#camera_alignment_core.constants.Channel" title="camera_alignment_core.constants.Channel"><span class="pre">camera_alignment_core.constants.Channel</span></a></span></span><a class="headerlink" href="#camera_alignment_core.constants.Channel.from_wavelength" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return canonical Channel enumeration corresponding to given wavelength.</p>
+<p>Notably, this method does not attempt to support brightfield: it only maps wavelengths to Channel instances.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>wavelength</strong> (<em>int</em>) – </p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#camera_alignment_core.constants.Channel" title="camera_alignment_core.constants.Channel">Channel</a></p>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><strong>ValueError</strong> – If given wavelength does not correspond to a known Channel.</p>
+</dd>
+</dl>
+</dd></dl>
+<dl class="py method">
 <dt class="sig sig-object py" id="camera_alignment_core.constants.Channel.requires_alignment">
 <span class="sig-name descname"><span class="pre">requires_alignment</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="headerlink" href="#camera_alignment_core.constants.Channel.requires_alignment" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
@@ -538,6 +558,26 @@ returning the pathlib.Path to the file.</p>
 <dt class="sig sig-object py" id="camera_alignment_core.Channel.RAW_BRIGHTFIELD">
 <span class="sig-name descname"><span class="pre">RAW_BRIGHTFIELD</span></span><em class="property"> <span class="pre">=</span> <span class="pre">'Raw</span> <span class="pre">brightfield'</span></em><a class="headerlink" href="#camera_alignment_core.Channel.RAW_BRIGHTFIELD" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="camera_alignment_core.Channel.from_wavelength">
+<em class="property"><span class="pre">static</span> </em><span class="sig-name descname"><span class="pre">from_wavelength</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">wavelength</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><a class="reference internal" href="#camera_alignment_core.constants.Channel" title="camera_alignment_core.constants.Channel"><span class="pre">camera_alignment_core.constants.Channel</span></a></span></span><a class="headerlink" href="#camera_alignment_core.Channel.from_wavelength" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return canonical Channel enumeration corresponding to given wavelength.</p>
+<p>Notably, this method does not attempt to support brightfield: it only maps wavelengths to Channel instances.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>wavelength</strong> (<em>int</em>) – </p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#camera_alignment_core.Channel" title="camera_alignment_core.Channel">Channel</a></p>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><strong>ValueError</strong> – If given wavelength does not correspond to a known Channel.</p>
+</dd>
+</dl>
+</dd></dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="camera_alignment_core.Channel.requires_alignment">
 <span class="sig-name descname"><span class="pre">requires_alignment</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="headerlink" href="#camera_alignment_core.Channel.requires_alignment" title="Permalink to this definition">¶</a></dt>
