@@ -13,6 +13,40 @@ class Channel(enum.Enum):
     RAW_561_NM = "Raw 561nm"
     RAW_638_NM = "Raw 638nm"
 
+    @staticmethod
+    def from_wavelength(wavelength: int) -> "Channel":
+        """Return canonical Channel enumeration corresponding to given wavelength.
+
+        Notably, this method does not attempt to support brightfield: it only maps wavelengths to Channel instances.
+
+        Parameters
+        ----------
+        wavelength : int
+
+        Returns
+        -------
+        Channel
+
+        Raises
+        ------
+        ValueError
+            If given wavelength does not correspond to a known Channel.
+        """
+        mapping = {
+            405: Channel.RAW_405_NM,
+            488: Channel.RAW_488_NM,
+            561: Channel.RAW_561_NM,
+            638: Channel.RAW_638_NM,
+        }
+
+        channel = mapping.get(wavelength)
+        if not channel:
+            raise ValueError(
+                f"Unsupported wavelength: {wavelength}. Supported values: {mapping.keys()}."
+            )
+
+        return channel
+
     def requires_alignment(self) -> bool:
         if self in (Channel.RAW_BRIGHTFIELD, Channel.RAW_638_NM):
             return True
