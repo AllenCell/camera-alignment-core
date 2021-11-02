@@ -114,10 +114,25 @@ class AlignmentQC:
     ):
         self.reference = reference
         self.moving_source = moving
+        return
 
-        self.ref_origin = get_center_z(self.reference)
-        self.mov_origin = get_center_z(self.moving_source)
+    def set_centers(
+        self,
+        ref_center: Optional[int] = None,
+        mov_center: Optional[int] = None,
+        threshold: Tuple[float, float] = (0.2, 99.8),
+    ):
+        if ref_center is None:
+            assert self.reference is not None
+            self.ref_origin = get_center_z(self.reference, threshold)
+        else:
+            self.ref_origin = ref_center
 
+        if mov_center is None:
+            assert self.moving_source is not None
+            self.mov_origin = get_center_z(self.moving_source, threshold)
+        else:
+            self.mov_origin = mov_center
         return
 
     def set_seg_images(
@@ -144,8 +159,11 @@ class AlignmentQC:
         if self.moving_source is not None:
             log.info("Applying transform to current source image")
             self.moving_transformed = tf.warp(
-                self.moving_source[self.mov_origin], inverse_map=tform, order=3
-            )
+                self.moving_source[self.mov_origin],
+                inverse_map=tform,
+                order=3,
+                preserve_range=True,
+            ).astype(np.uint16)
         else:
             log.warning(
                 "Moving source is not yet defined. Please define and run apply_transform() before qc"
@@ -154,7 +172,7 @@ class AlignmentQC:
             log.info("Applying transform to current source image")
             self.moving_seg_transformed = tf.warp(
                 self.moving_seg, inverse_map=tform, order=0, preserve_range=True
-            )
+            ).astype(np.uint16)
         else:
             log.warning(
                 "Moving seg is not yet defined. Please define and run apply_transform() before qc"
