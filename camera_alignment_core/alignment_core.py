@@ -195,15 +195,15 @@ def get_channel_info(image: AICSImage) -> ChannelInfo:
     channels = image.channel_names
     channel_info_dict = dict()
     for channel in channels:
-        if channel in ["Bright", "Bright_2", "TL_100x"]:
+        if channel in ["Bright", "Bright_2", "Bright_3", "TL_100x"]:
             channel_info_dict.update({Channel.RAW_BRIGHTFIELD: channels.index(channel)})
-        elif channel in ["EGFP"]:
+        elif channel in ["EGFP", "EGFP_2"]:
             channel_info_dict.update({Channel.RAW_488_NM: channels.index(channel)})
         elif channel in ["CMDRP"]:
             channel_info_dict.update({Channel.RAW_638_NM: channels.index(channel)})
         elif channel in ["H3342"]:
             channel_info_dict.update({Channel.RAW_405_NM: channels.index(channel)})
-        elif channel in ["TaRFP", "TagRFP"]:
+        elif channel in ["TaRFP", "TaRFP_2", "TagRFP"]:
             channel_info_dict.update({Channel.RAW_561_NM: channels.index(channel)})
         else:
             log.warning("Encountered unknown channel: %s", channel)
