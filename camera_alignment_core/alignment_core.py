@@ -1,5 +1,5 @@
 import logging
-from typing import Tuple
+from typing import List, Tuple
 
 from aicsimageio import AICSImage
 import numpy
@@ -14,7 +14,6 @@ from .alignment_utils import (
     SegmentRings,
     get_center_z,
 )
-from .channel_info import ChannelInfo
 from .constants import (
     LOGGER_NAME,
     Channel,
@@ -133,7 +132,7 @@ def apply_alignment_matrix(
 def align_image(
     alignment_matrix: numpy.typing.NDArray[numpy.float16],
     image: numpy.typing.NDArray[numpy.uint16],
-    channel_info: ChannelInfo,
+    channels: List[Channel],
     magnification: int,
 ) -> numpy.typing.NDArray[numpy.uint16]:
     """
@@ -154,26 +153,26 @@ def align_image(
             f"Cannot perform image alignment for magnification {str(magnification)}."
         )
 
-    if not channel_info:
+    if not channels:
         raise ValueError(
-            "Passed an empty channel_info `align_image`. Cannot determine which channels to align."
+            "Passed an empty list of channels to `align_image`. Cannot determine which channels to align."
         )
 
     # If no channel within the image is known to require alignment, fail.
-    if not any([channel.requires_alignment() for channel, _ in channel_info]):
+    if not any([channel.requires_alignment() for channel in channels]):
         raise IncompatibleImageException(
-            f"No channels within image require alignment. Channel info: {channel_info}"
+            f"No channels within image require alignment. Channels: {channels}"
         )
 
     # Build up the aligned image by iterating over the input image and aligning the channels
     # that require alignment
     aligned_image = numpy.empty(image.shape, dtype=numpy.uint16)
-    channels, *_ = image.shape
-    for index in range(0, channels):
+    number_of_channels, *_ = image.shape
+    for index in range(0, number_of_channels):
         try:
-            channel = channel_info.channel_at_index(index)
+            channel = channels[index]
         except IndexError:
-            log.warning("Encountered an unknown channel at index %s", index)
+            log.warning("Missing reference to Channel at index %s", index)
             aligned_image[index] = image[index]
         else:
             if channel.requires_alignment():
@@ -187,28 +186,29 @@ def align_image(
     return aligned_image
 
 
-def get_channel_info(image: AICSImage) -> ChannelInfo:
+def get_channels(image: AICSImage) -> List[Channel]:
     """
-    Map channel names to their corresponding index position within image data. If an unknown channel name
+    Map channel names to their corresponding Channel enumerations. If an unknown channel name
     is encountered, a warning is logged.
     """
-    channels = image.channel_names
-    channel_info_dict = dict()
-    for channel in channels:
+    channel_names = image.channel_names
+    channels = list()
+    for channel in channel_names:
         if channel in ["Bright", "Bright_2", "Bright_3", "TL_100x"]:
-            channel_info_dict.update({Channel.RAW_BRIGHTFIELD: channels.index(channel)})
+            channels.append(Channel.RAW_BRIGHTFIELD)
         elif channel in ["EGFP", "EGFP_2"]:
-            channel_info_dict.update({Channel.RAW_488_NM: channels.index(channel)})
+            channels.append(Channel.RAW_488_NM)
         elif channel in ["CMDRP"]:
-            channel_info_dict.update({Channel.RAW_638_NM: channels.index(channel)})
+            channels.append(Channel.RAW_638_NM)
         elif channel in ["H3342"]:
-            channel_info_dict.update({Channel.RAW_405_NM: channels.index(channel)})
+            channels.append(Channel.RAW_405_NM)
         elif channel in ["TaRFP", "TaRFP_2", "TagRFP"]:
-            channel_info_dict.update({Channel.RAW_561_NM: channels.index(channel)})
+            channels.append(Channel.RAW_561_NM)
         else:
             log.warning("Encountered unknown channel: %s", channel)
+            channels.append(Channel.UNKNOWN)
 
-    return ChannelInfo(channel_info_dict)
+    return channels
 
 
 def crop(
