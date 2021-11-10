@@ -1,5 +1,5 @@
 import logging
-from typing import Dict, Optional, Tuple
+from typing import Dict, List, Optional, Tuple
 
 import numpy as np
 from numpy.typing import NDArray
@@ -192,7 +192,7 @@ class AlignmentQC:
         else:
             log.error("Error: tform is not yet defined")
 
-    def check_all_defined(self) -> list[str]:
+    def check_all_defined(self) -> List[str]:
         missing = []
 
         if self.reference is None:
