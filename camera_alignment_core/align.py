@@ -12,7 +12,7 @@ from .alignment_core import (
     align_image,
     crop,
     generate_alignment_matrix,
-    get_channel_info,
+    get_channels,
 )
 from .alignment_utils import AlignmentInfo
 from .constants import (
@@ -100,7 +100,7 @@ class Align:
         Get the similarity matrix and camera_alignment_core.utils.AlignmentInfo used to perform camera alignment.
         """
         if self._alignment_matrix is None or self._alignment_info is None:
-            control_image_channel_info = get_channel_info(self._optical_control)
+            control_image_channels = get_channels(self._optical_control)
 
             assert (
                 self._optical_control.physical_pixel_sizes.X
@@ -110,12 +110,8 @@ class Align:
             control_image_data = self._optical_control.get_image_data("CZYX", T=0)
             alignment_matrix, alignment_info = generate_alignment_matrix(
                 control_image_data,
-                reference_channel=control_image_channel_info.index_of_channel(
-                    self._reference_channel
-                ),
-                shift_channel=control_image_channel_info.index_of_channel(
-                    self._alignment_channel
-                ),
+                reference_channel=control_image_channels.index(self._reference_channel),
+                shift_channel=control_image_channels.index(self._alignment_channel),
                 magnification=self._magnification.value,
                 px_size_xy=self._optical_control.physical_pixel_sizes.X,
             )
@@ -147,7 +143,7 @@ class Align:
         aligned_control = align_image(
             self.alignment_transform.matrix,
             self._optical_control.get_image_data("CZYX", T=0),
-            get_channel_info(self._optical_control),
+            get_channels(self._optical_control),
             self._magnification.value,
         )
 
@@ -210,7 +206,7 @@ class Align:
             # Operate on current scene
             aics_image.set_scene(scene)
 
-            channel_info = get_channel_info(aics_image)
+            channel_info = get_channels(aics_image)
 
             # Align timepoints within scene
             processed_timepoints: typing.List[

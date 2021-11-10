@@ -12,6 +12,7 @@ class Channel(enum.Enum):
     RAW_488_NM = "Raw 488nm"
     RAW_561_NM = "Raw 561nm"
     RAW_638_NM = "Raw 638nm"
+    UNKNOWN = "UNKNOWN"  # Sentinel value
 
     @staticmethod
     def from_wavelength(wavelength: int) -> "Channel":
