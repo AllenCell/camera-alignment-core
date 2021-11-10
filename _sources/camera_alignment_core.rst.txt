@@ -29,14 +29,6 @@ camera\_alignment\_core.alignment\_core module
    :undoc-members:
    :show-inheritance:
 
-camera\_alignment\_core.channel\_info module
---------------------------------------------
-
-.. automodule:: camera_alignment_core.channel_info
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
 camera\_alignment\_core.constants module
 ----------------------------------------
 
