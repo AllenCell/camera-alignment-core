@@ -72,7 +72,7 @@ class AlignmentQC:
         """
 
         missing = self.check_all_defined()
-        if missing is not None:
+        if len(missing) > 0:
             msg = "Error: the following variables have not been set - " + ",".join(
                 missing
             )
@@ -192,7 +192,7 @@ class AlignmentQC:
         else:
             log.error("Error: tform is not yet defined")
 
-    def check_all_defined(self) -> Optional[list[str]]:
+    def check_all_defined(self) -> list[str]:
         missing = []
 
         if self.reference is None:
@@ -212,10 +212,7 @@ class AlignmentQC:
         if self.tform is None:
             missing.append("transformation")
 
-        if len(missing) == 0:
-            return None
-        else:
-            return missing
+        return missing
 
     # QC Functions ############################################################
 
