@@ -1,6 +1,6 @@
 import math
 from random import randint
-from typing import Any, Tuple
+from typing import Any, List, Tuple
 
 import numpy
 from numpy.typing import NDArray
@@ -16,7 +16,7 @@ from camera_alignment_core.alignment_utils.alignment_qc import (
 
 def create_test_img_set(
     img_shape: Tuple[int, int] = (405, 611),
-    offset: list[int] = [0, 0, 0],
+    offset: List[int] = [0, 0, 0],
     ref_intensity: int = 6000,
     moving_intensity: int = 6000,
     blur: bool = True,
@@ -167,7 +167,7 @@ class TestAlignmentQC:
         ],
     )
     def test_report_change_fov_intensity_parameters(
-        self, moving_intensity: int, offset: list[int]
+        self, moving_intensity: int, offset: List[int]
     ):
         # Arrange
         ref_raw, moving_raw, ref_seg, moving_seg = create_test_img_set(
@@ -223,7 +223,7 @@ class TestAlignmentQC:
         ],
     )
     def test_report_changes_in_coordinate_mapping(
-        self, img_shape: Tuple[int, int], offset: list[int]
+        self, img_shape: Tuple[int, int], offset: List[int]
     ):
         # Arrange
         beads = {}
@@ -272,7 +272,7 @@ class TestAlignmentQC:
             ),
         ],
     )
-    def report_changes_in_mse(self, img_shape: Tuple[int, int], offset: list[int]):
+    def report_changes_in_mse(self, img_shape: Tuple[int, int], offset: List[int]):
         # Arrange
         ref_raw, moving_raw, ref_seg, moving_seg = create_test_img_set(
             img_shape=img_shape, blur=False
