@@ -141,10 +141,9 @@ class Align:
         returning the pathlib.Path to the file.
         """
         aligned_control = align_image(
-            self.alignment_transform.matrix,
             self._optical_control.get_image_data("CZYX", T=0),
-            get_channels(self._optical_control),
-            self._magnification.value,
+            self.alignment_transform.matrix,
+            [],  # TODO
         )
 
         if crop_output:
@@ -206,8 +205,6 @@ class Align:
             # Operate on current scene
             aics_image.set_scene(scene)
 
-            channel_info = get_channels(aics_image)
-
             # Align timepoints within scene
             processed_timepoints: typing.List[
                 numpy.typing.NDArray[numpy.uint16]
@@ -220,10 +217,7 @@ class Align:
 
                 image_slice = aics_image.get_image_data("CZYX", T=timepoint)
                 processed = align_image(
-                    self.alignment_transform.matrix,
-                    image_slice,
-                    channel_info,
-                    self._magnification.value,
+                    image_slice, self.alignment_transform.matrix, []  # TODO
                 )
                 if crop_output:
                     processed_timepoints.append(crop(processed, self._magnification))

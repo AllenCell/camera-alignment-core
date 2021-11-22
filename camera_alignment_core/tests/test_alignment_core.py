@@ -19,7 +19,6 @@ from camera_alignment_core.constants import (
 )
 from camera_alignment_core.exception import (
     IncompatibleImageException,
-    UnsupportedMagnification,
 )
 
 from . import (
@@ -165,16 +164,11 @@ class TestAlignmentCore:
             px_size_xy=optical_control_image.physical_pixel_sizes.X,
         )
 
-        image_channels = get_channels(image)
-
         expectation_image, _ = get_test_image(expectation_image_path)
 
         # Act
         result = align_image(
-            alignment_matrix=alignment_matrix,
-            image=image.get_image_data("CZYX", T=0),
-            channels=image_channels,
-            magnification=magnification.value,
+            image.get_image_data("CZYX", T=0), alignment_matrix, []  # TODO
         )
 
         # expected image is cropped
@@ -197,35 +191,14 @@ class TestAlignmentCore:
             (
                 numpy.random.rand(1, 1, 1, 1, 1),  # Wrong dimensions
                 numpy.eye(3, 3),
-                [Channel.RAW_BRIGHTFIELD],
-                Magnification.ONE_HUNDRED.value,
+                [0],
                 IncompatibleImageException,
             ),
             (
                 numpy.random.rand(1, 1, 1, 1),
                 numpy.eye(3, 3),
                 [],  # Empty channels
-                Magnification.ONE_HUNDRED.value,
                 ValueError,
-            ),
-            (
-                numpy.random.rand(1, 1, 1, 1),
-                numpy.eye(3, 3),
-                # No alignable channels
-                [
-                    Channel.RAW_405_NM,
-                    Channel.RAW_488_NM,
-                    Channel.RAW_561_NM,
-                ],
-                Magnification.ONE_HUNDRED.value,
-                IncompatibleImageException,
-            ),
-            (
-                numpy.random.rand(1, 1, 1, 1),
-                numpy.eye(3, 3),
-                [Channel.RAW_BRIGHTFIELD],
-                33,  # Unsupported magnification
-                UnsupportedMagnification,
             ),
         ],
     )
@@ -233,13 +206,12 @@ class TestAlignmentCore:
         self,
         image: numpy.typing.NDArray[numpy.uint16],
         alignment_matrix: numpy.typing.NDArray[numpy.float16],
-        channels: typing.List[Channel],
-        magnification: int,
+        channels: typing.List[int],
         expected_exception: typing.Type[Exception],
     ):
         # Act / Assert
         with pytest.raises(expected_exception):
-            align_image(alignment_matrix, image, channels, magnification)
+            align_image(image, alignment_matrix, channels)
 
     # TODO: Add 63x and 20x images to test
     @pytest.mark.parametrize(
