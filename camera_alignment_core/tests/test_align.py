@@ -11,7 +11,7 @@ import pytest
 from camera_alignment_core import Align
 from camera_alignment_core.channel_info import (
     CameraPosition,
-    create_channel_info,
+    channel_info_factory,
 )
 from camera_alignment_core.constants import (
     Magnification,
@@ -86,7 +86,7 @@ class TestAlign:
         microscopy_image, microscopy_image_path = get_test_image(
             UNALIGNED_ZSD1_IMAGE_URL
         )
-        channel_info = create_channel_info(microscopy_image_path)
+        channel_info = channel_info_factory(microscopy_image_path)
         back_camera_channels = [
             channel.channel_index
             for channel in channel_info.channels
@@ -100,7 +100,7 @@ class TestAlign:
 
         # Act
         aligned_scenes = align.align_image(
-            microscopy_image_path, channels_to_align=back_camera_channels
+            microscopy_image_path, channels_to_shift=back_camera_channels
         )
 
         # Assert
@@ -122,7 +122,7 @@ class TestAlign:
         microscopy_image, microscopy_image_path = get_test_image(
             UNALIGNED_ZSD1_IMAGE_URL
         )
-        channel_info = create_channel_info(microscopy_image_path)
+        channel_info = channel_info_factory(microscopy_image_path)
         back_camera_channels = [
             channel.channel_index
             for channel in channel_info.channels
@@ -137,7 +137,7 @@ class TestAlign:
         # Act
         aligned_scenes = align.align_image(
             microscopy_image_path,
-            channels_to_align=back_camera_channels,
+            channels_to_shift=back_camera_channels,
             crop_output=False,
         )
 
@@ -190,7 +190,7 @@ class TestAlign:
 
         # Act
         aligned_scenes = align.align_image(
-            multi_scene_image, channels_to_align=[0, 2], scenes=scene_selection_spec
+            multi_scene_image, channels_to_shift=[0, 2], scenes=scene_selection_spec
         )
 
         # Assert
@@ -228,7 +228,7 @@ class TestAlign:
         # Act
         aligned_scenes = align.align_image(
             multi_timepoint_image,
-            channels_to_align=[0, 2],
+            channels_to_shift=[0, 2],
             timepoints=timepoint_selection_spec,
         )
 

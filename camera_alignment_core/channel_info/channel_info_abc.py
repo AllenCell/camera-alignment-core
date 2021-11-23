@@ -70,6 +70,23 @@ class ChannelInfo(abc.ABC):
         """List of channels, in order, within `image`."""
         pass
 
+    def channels_from_camera_position(
+        self, camera_position: CameraPosition
+    ) -> typing.List[Channel]:
+        """Return listing of Channels that were acquired on the camera with position `camera_position`.
+
+        Example
+        -------
+        Get list of all back-camera channels
+        >>> channel_info = channel_info_factory("/path/to/image.czi")
+        >>> back_camera_channels = channel_info.channels_from_camera_position(CameraPosition.BACK)
+        """
+        return [
+            channel
+            for channel in self.channels
+            if channel.camera_position == camera_position
+        ]
+
     def find_channels_closest_in_emission_wavelength_between_cameras(
         self,
     ) -> typing.Tuple[Channel, Channel]:

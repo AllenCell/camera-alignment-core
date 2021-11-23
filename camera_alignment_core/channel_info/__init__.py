@@ -12,7 +12,7 @@ from .channel_info_abc import (
 from .czi_channel_info import CziChannelInfo
 
 
-def create_channel_info(image_path: typing.Union[str, pathlib.Path]) -> ChannelInfo:
+def channel_info_factory(image_path: typing.Union[str, pathlib.Path]) -> ChannelInfo:
     if CziChannelInfo.is_czi_file(image_path):
         return CziChannelInfo(AICSImage(image_path))
 
@@ -23,4 +23,4 @@ def create_channel_info(image_path: typing.Union[str, pathlib.Path]) -> ChannelI
     raise IncompatibleImageException(error_msg)
 
 
-__all__ = ("create_channel_info", "CameraPosition", "Channel", "ChannelInfo")
+__all__ = ("channel_info_factory", "CameraPosition", "Channel", "ChannelInfo")

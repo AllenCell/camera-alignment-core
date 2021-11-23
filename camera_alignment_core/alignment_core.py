@@ -109,11 +109,11 @@ def generate_alignment_matrix(
 def align_image(
     image: numpy.typing.NDArray[numpy.uint16],
     alignment_matrix: numpy.typing.NDArray[numpy.float16],
-    channels_to_align: List[int],
+    channels_to_shift: List[int],
 ) -> numpy.typing.NDArray[numpy.uint16]:
     """Align a CZYX `image` using `alignment_matrix`.
     Will only apply the `alignment_matrix` to image slices within the channels specified in
-    `channels_requiring_alignment`.
+    `channels_to_shift`.
 
     Parameters
     ----------
@@ -121,25 +121,25 @@ def align_image(
         Must be a 4 dimensional image in following dimensional order: 'CZYX'
     alignment_matrix : numpy.typing.NDArray[numpy.float16]
         3x3 matrix that can be used by skimage.transform.warp to transform a single z-slice of an image.
-    channels_to_align : List[int]
-        Index positions of channels within `image` that should be aligned. N.b.: indices start at 0.
-        E.g.: Specify [0, 3] to align the channels at index positions 0 and 3 within `image`.
+    channels_to_shift : List[int]
+        Index positions of channels within `image` that should be shifted. N.b.: indices start at 0.
+        E.g.: Specify [0, 2] to apply the alignment transform to channels at index positions 0 and 2 within `image`.
     """
     if not image.ndim == 4:
         raise IncompatibleImageException(
             f"Expected image to be 4 dimensional ('CZYX'). Got: {image.shape}"
         )
 
-    if not channels_to_align:
+    if not channels_to_shift:
         raise ValueError(
-            "Passed an empty list of channels to `align_image`. Cannot determine which channels to align."
+            "channels_to_shift: passed an empty list to `align_image`. Cannot determine which channels to shift."
         )
 
     aligned_image = numpy.empty(image.shape, dtype=numpy.uint16)
     number_of_channels, *_ = image.shape
     for channel_index in range(0, number_of_channels):
         unaligned_channel = image[channel_index]
-        if channel_index in channels_to_align:
+        if channel_index in channels_to_shift:
             log.debug("Applying alignment to %s channel", channel_index)
             aligned_channel = numpy.empty(unaligned_channel.shape, dtype=numpy.double)
             for z_index in range(0, aligned_channel.shape[0]):

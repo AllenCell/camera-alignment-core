@@ -13,7 +13,7 @@ from camera_alignment_core.alignment_core import (
 )
 from camera_alignment_core.channel_info import (
     CameraPosition,
-    create_channel_info,
+    channel_info_factory,
 )
 from camera_alignment_core.constants import (
     LOGGER_NAME,
@@ -118,7 +118,7 @@ class TestAlignmentCore:
 
         # Arrange
         image, local_image_path = get_test_image(image_path)
-        channel_info = create_channel_info(local_image_path)
+        channel_info = channel_info_factory(local_image_path)
         back_camera_channels = [
             channel.channel_index
             for channel in channel_info.channels

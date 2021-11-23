@@ -5,7 +5,7 @@ import pytest
 from camera_alignment_core.channel_info import (
     CameraPosition,
     Channel,
-    create_channel_info,
+    channel_info_factory,
 )
 
 from . import (
@@ -49,6 +49,33 @@ def test_camera_position_from_czi_detector_name(
 
     # Assert
     assert actual == expected
+
+
+@pytest.mark.parametrize(
+    ["image_url", "camera_position"],
+    [
+        (UNALIGNED_ZSD1_IMAGE_URL, CameraPosition.BACK),
+        (UNALIGNED_ZSD1_IMAGE_URL, CameraPosition.LEFT),
+    ],
+)
+def test_channel_info_channels_from_camera_position(
+    image_url: str, camera_position: CameraPosition
+) -> None:
+    # Arrange
+    _, image_path = get_test_image(image_url)
+    channel_info = channel_info_factory(image_path)
+
+    # Act
+    channels_from_position = channel_info.channels_from_camera_position(camera_position)
+
+    # Assert
+    assert channels_from_position  # assert non-empty
+    assert all(
+        [
+            channel.camera_position == camera_position
+            for channel in channels_from_position
+        ]
+    )
 
 
 @pytest.mark.parametrize(
@@ -133,7 +160,7 @@ def test_channels(image_url: str, expected: typing.List[Channel]):
     # Arrange
     _, image_path = get_test_image(image_url)
 
-    channel_info = create_channel_info(image_path)
+    channel_info = channel_info_factory(image_path)
 
     # Act / Assert
     assert channel_info.channels == expected
@@ -188,7 +215,7 @@ def test_channel_info_find_channels_closest_in_emission_wavelength_between_camer
     # Arrange
     _, image_path = get_test_image(image_url)
 
-    channel_info = create_channel_info(image_path)
+    channel_info = channel_info_factory(image_path)
 
     # Act / Assert
     assert (

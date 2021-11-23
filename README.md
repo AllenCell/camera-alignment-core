@@ -8,7 +8,7 @@ Core algorithms for aligning two-camera microscopy imagery
 
 ## Installation
 
-**Stable Release:** `pip install camera_alignment_core`<br>
+`pip install camera_alignment_core==1.0.0.dev4`<br>
 
 This library is published to a private PyPI server ("Artifactory") accessible within the Allen Institute network or over VPN. This has downstream effects for how this library is installed into other Python packages.
 
@@ -20,18 +20,30 @@ Having trouble installing? Start here: http://confluence.corp.alleninstitute.org
 The primary export of this package is the [Align](https://aics-int.github.io/camera-alignment-core/camera_alignment_core.html#camera_alignment_core.align.Align) class.
 It provides a convenient abstraction over what is expected to be the most common usage of this package. Example use:
 ```python
-from camera_alignment_core import Align, Channel, Magnification
+from camera_alignment_core import Align, Magnification
+from camera_alignment_core.channel_info import channel_info_factory, CameraPosition
 
+
+biological_data_to_align_path = "/some/path/to/an/image.czi"
+optical_control_path = "/some/path/to/an/argolight-field-of-rings.czi"
 
 align = Align(
-    optical_control="/some/path/to/an/argolight-field-of-rings.czi",
+    optical_control=optical_control_path,
     magnification=Magnification(20),
-    reference_channel=Channel.RAW_561_NM,
-    alignment_channel=Channel.RAW_638_NM,
     out_dir="/tmp/whereever",
 )
-aligned_scenes = align.align_image("/some/path/to/an/image.czi")
-aligned_optical_control = align.align_optical_control()
+
+biological_data_channel_info = channel_info_factory(biological_data_to_align_path)
+aligned_scenes = align.align_image(
+    image_to_align_path,
+    channels_to_shift=biological_data_channel_info.channels_from_camera_position(CameraPosition.BACK)
+)
+
+optical_control_channel_info = channel_info_factory(optical_control_path)
+aligned_optical_control = align.align_optical_control(
+    channels_to_shift=optical_control_channel_info.channels_from_camera_position(CameraPosition.BACK)
+)
+
 alignment_matrix = align.alignment_transform.matrix
 alignment_info = align.alignment_transform.info
 ```
@@ -42,7 +54,6 @@ In addition, the lower-level functional building blocks used internally by [Alig
 1. [apply_alignment_matrix](https://aics-int.github.io/camera-alignment-core/camera_alignment_core.html#camera_alignment_core.alignment_core.apply_alignment_matrix)
 1. [crop](https://aics-int.github.io/camera-alignment-core/camera_alignment_core.html#camera_alignment_core.alignment_core.crop)
 1. [generate_alignment_matrix](https://aics-int.github.io/camera-alignment-core/camera_alignment_core.html#camera_alignment_core.alignment_core.generate_alignment_matrix)
-1. [get_channel_info](https://aics-int.github.io/camera-alignment-core/camera_alignment_core.html#camera_alignment_core.alignment_core.get_channel_info)
 
 
 ## Development
