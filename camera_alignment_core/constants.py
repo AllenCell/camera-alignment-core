@@ -4,54 +4,34 @@ import typing
 LOGGER_NAME = "camera_alignment_core"
 
 
-class Channel(enum.Enum):
-    """Standardized channel names"""
-
-    RAW_BRIGHTFIELD = "Raw brightfield"
-    RAW_405_NM = "Raw 405nm"
-    RAW_488_NM = "Raw 488nm"
-    RAW_561_NM = "Raw 561nm"
-    RAW_638_NM = "Raw 638nm"
-    UNKNOWN = "UNKNOWN"  # Sentinel value
+class CameraPosition(enum.Enum):
+    LEFT = "Left"
+    BACK = "Back"
 
     @staticmethod
-    def from_wavelength(wavelength: int) -> "Channel":
-        """Return canonical Channel enumeration corresponding to given wavelength.
+    def from_czi_detector_name(detector_name: str) -> "CameraPosition":
+        """Given a detector name like 'Detector:Camera 2 (Left)' and 'Detector:Camera 1 (Back)',
+        return CameraPosition that best matches.
 
-        Notably, this method does not attempt to support brightfield: it only maps wavelengths to Channel instances.
+        This is incredibly heuristic driven, but holds up reliably across tests of CZI images.
 
         Parameters
         ----------
-        wavelength : int
-
-        Returns
-        -------
-        Channel
-
-        Raises
-        ------
-        ValueError
-            If given wavelength does not correspond to a known Channel.
+        detector_name : str
+            This corresponds to the "Id" attribute from `InstrumentDetector` XML elements from
+            embedded metadata within CZI images. Example XML path:
+                Directly: "Metadata/Information/Instrument/Detectors"
+                Via channels: "Metadata/Information/Image/Dimensions/Channels/DetectorSettings/Detector"
         """
-        mapping = {
-            405: Channel.RAW_405_NM,
-            488: Channel.RAW_488_NM,
-            561: Channel.RAW_561_NM,
-            638: Channel.RAW_638_NM,
-        }
+        lower_cased_detector = detector_name.lower()
+        if CameraPosition.LEFT.value.lower() in lower_cased_detector:
+            return CameraPosition.LEFT
+        if CameraPosition.BACK.value.lower() in lower_cased_detector:
+            return CameraPosition.BACK
 
-        channel = mapping.get(wavelength)
-        if not channel:
-            raise ValueError(
-                f"Unsupported wavelength: {wavelength}. Supported values: {mapping.keys()}."
-            )
-
-        return channel
-
-    def requires_alignment(self) -> bool:
-        if self in (Channel.RAW_BRIGHTFIELD, Channel.RAW_638_NM):
-            return True
-        return False
+        raise ValueError(
+            f"Cannot find appropriate CameraPosition for detector: {detector_name}"
+        )
 
 
 class CroppingDimension(typing.NamedTuple):

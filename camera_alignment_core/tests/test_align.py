@@ -8,9 +8,12 @@ from aicsimageio.writers import OmeTiffWriter
 import numpy
 import pytest
 
-from camera_alignment_core import Align
+from camera_alignment_core import (
+    Align,
+    ChannelInfo,
+)
 from camera_alignment_core.constants import (
-    Channel,
+    CameraPosition,
     Magnification,
 )
 
@@ -83,16 +86,22 @@ class TestAlign:
         microscopy_image, microscopy_image_path = get_test_image(
             UNALIGNED_ZSD1_IMAGE_URL
         )
+        channel_info = ChannelInfo(microscopy_image, microscopy_image_path)
+        back_camera_channels = [
+            channel.channel_index
+            for channel in channel_info.channels
+            if channel.camera_position == CameraPosition.BACK
+        ]
         align = Align(
             optical_control_image_path,
             Magnification.ONE_HUNDRED,
-            reference_channel=Channel.RAW_561_NM,
-            alignment_channel=Channel.RAW_638_NM,
             out_dir=auto_clean_tmp_dir,
         )
 
         # Act
-        aligned_scenes = align.align_image(microscopy_image_path)
+        aligned_scenes = align.align_image(
+            microscopy_image_path, channels_to_align=back_camera_channels
+        )
 
         # Assert
         assert len(aligned_scenes) == len(microscopy_image.scenes)
@@ -113,16 +122,24 @@ class TestAlign:
         microscopy_image, microscopy_image_path = get_test_image(
             UNALIGNED_ZSD1_IMAGE_URL
         )
+        channel_info = ChannelInfo(microscopy_image, microscopy_image_path)
+        back_camera_channels = [
+            channel.channel_index
+            for channel in channel_info.channels
+            if channel.camera_position == CameraPosition.BACK
+        ]
         align = Align(
             optical_control_image_path,
             Magnification.ONE_HUNDRED,
-            reference_channel=Channel.RAW_561_NM,
-            alignment_channel=Channel.RAW_638_NM,
             out_dir=auto_clean_tmp_dir,
         )
 
         # Act
-        aligned_scenes = align.align_image(microscopy_image_path, crop_output=False)
+        aligned_scenes = align.align_image(
+            microscopy_image_path,
+            channels_to_align=back_camera_channels,
+            crop_output=False,
+        )
 
         # Assert
         first_scene = AICSImage(aligned_scenes[0].path)
@@ -168,14 +185,12 @@ class TestAlign:
         align = Align(
             optical_control_image_path,
             Magnification.ONE_HUNDRED,
-            reference_channel=Channel.RAW_561_NM,
-            alignment_channel=Channel.RAW_638_NM,
             out_dir=auto_clean_tmp_dir,
         )
 
         # Act
         aligned_scenes = align.align_image(
-            multi_scene_image, scenes=scene_selection_spec
+            multi_scene_image, channels_to_align=[0, 2], scenes=scene_selection_spec
         )
 
         # Assert
@@ -207,14 +222,14 @@ class TestAlign:
         align = Align(
             optical_control_image_path,
             Magnification.ONE_HUNDRED,
-            reference_channel=Channel.RAW_561_NM,
-            alignment_channel=Channel.RAW_638_NM,
             out_dir=auto_clean_tmp_dir,
         )
 
         # Act
         aligned_scenes = align.align_image(
-            multi_timepoint_image, timepoints=timepoint_selection_spec
+            multi_timepoint_image,
+            channels_to_align=[0, 2],
+            timepoints=timepoint_selection_spec,
         )
 
         # Assert

@@ -1,7 +1,6 @@
 import logging
 from typing import List, Tuple
 
-from aicsimageio import AICSImage
 import numpy
 import numpy.typing
 import skimage
@@ -14,11 +13,7 @@ from .alignment_utils import (
     SegmentRings,
     get_center_z,
 )
-from .constants import (
-    LOGGER_NAME,
-    Channel,
-    Magnification,
-)
+from .constants import LOGGER_NAME, Magnification
 from .exception import (
     IncompatibleImageException,
     UnsupportedMagnification,
@@ -114,7 +109,7 @@ def generate_alignment_matrix(
 def align_image(
     image: numpy.typing.NDArray[numpy.uint16],
     alignment_matrix: numpy.typing.NDArray[numpy.float16],
-    channels_requiring_alignment: List[int],
+    channels_to_align: List[int],
 ) -> numpy.typing.NDArray[numpy.uint16]:
     """Align a CZYX `image` using `alignment_matrix`.
     Will only apply the `alignment_matrix` to image slices within the channels specified in
@@ -126,7 +121,7 @@ def align_image(
         Must be a 4 dimensional image in following dimensional order: 'CZYX'
     alignment_matrix : numpy.typing.NDArray[numpy.float16]
         3x3 matrix that can be used by skimage.transform.warp to transform a single z-slice of an image.
-    channels_requiring_alignment : List[int]
+    channels_to_align : List[int]
         Index positions of channels within `image` that should be aligned. N.b.: indices start at 0.
         E.g.: Specify [0, 3] to align the channels at index positions 0 and 3 within `image`.
     """
@@ -135,7 +130,7 @@ def align_image(
             f"Expected image to be 4 dimensional ('CZYX'). Got: {image.shape}"
         )
 
-    if not channels_requiring_alignment:
+    if not channels_to_align:
         raise ValueError(
             "Passed an empty list of channels to `align_image`. Cannot determine which channels to align."
         )
@@ -144,7 +139,7 @@ def align_image(
     number_of_channels, *_ = image.shape
     for channel_index in range(0, number_of_channels):
         unaligned_channel = image[channel_index]
-        if channel_index in channels_requiring_alignment:
+        if channel_index in channels_to_align:
             log.debug("Applying alignment to %s channel", channel_index)
             aligned_channel = numpy.empty(unaligned_channel.shape, dtype=numpy.double)
             for z_index in range(0, aligned_channel.shape[0]):
@@ -162,31 +157,6 @@ def align_image(
             aligned_image[channel_index] = unaligned_channel
 
     return aligned_image
-
-
-def get_channels(image: AICSImage) -> List[Channel]:
-    """
-    Map channel names to their corresponding Channel enumerations. If an unknown channel name
-    is encountered, a warning is logged.
-    """
-    channel_names = image.channel_names
-    channels = list()
-    for channel in channel_names:
-        if channel in ["Bright", "Bright_2", "Bright_3", "TL_100x"]:
-            channels.append(Channel.RAW_BRIGHTFIELD)
-        elif channel in ["EGFP", "EGFP_2"]:
-            channels.append(Channel.RAW_488_NM)
-        elif channel in ["CMDRP"]:
-            channels.append(Channel.RAW_638_NM)
-        elif channel in ["H3342"]:
-            channels.append(Channel.RAW_405_NM)
-        elif channel in ["TaRFP", "TaRFP_2", "TagRFP"]:
-            channels.append(Channel.RAW_561_NM)
-        else:
-            log.warning("Encountered unknown channel: %s", channel)
-            channels.append(Channel.UNKNOWN)
-
-    return channels
 
 
 def crop(
