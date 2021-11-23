@@ -17,7 +17,8 @@ class CameraPosition(enum.Enum):
         """Given a detector name like 'Detector:Camera 2 (Left)' and 'Detector:Camera 1 (Back)',
         return CameraPosition that best matches.
 
-        This is incredibly heuristic driven, but holds up reliably across tests of CZI images.
+        This is incredibly heuristic driven, but holds up reliably across tests of CZI images
+        acquired at AICS since 2018/2019ish.
 
         Parameters
         ----------
@@ -50,8 +51,11 @@ class Channel:
 
 
 class ChannelInfo(abc.ABC):
-    """
-    This value object encapsulates behavior for querying for channels within an image.
+    """This value object encapsulates behavior for querying for channels within an image.
+
+    Create a ChannelInfo using the `create_channel_info` factory function exported from
+    the channel_info module. That factory will provide a concrete class implementing this
+    interface that is appropriate for a given image format.
     """
 
     def __init__(
@@ -117,17 +121,11 @@ class ChannelInfo(abc.ABC):
 
             return abs(channel_a.emission_wavelength - channel_b.emission_wavelength)
 
-        min_pairing = min(
-            channel_pairs,
-            key=lambda pair: comparator(
-                # typing.cast(typing.Tuple[Channel, Channel], pair)
-                pair
-            ),
-        )
+        min_pairing = min(channel_pairs, key=comparator)
         channel_a, channel_b = sorted(
             min_pairing,
             key=lambda channel: channel.emission_wavelength
-            if channel.emission_wavelength
+            if channel.emission_wavelength is not None
             else math.inf,
         )
         return (channel_a, channel_b)

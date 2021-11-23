@@ -117,8 +117,8 @@ class TestAlignmentCore:
     ):
 
         # Arrange
-        image, _ = get_test_image(image_path)
-        channel_info = create_channel_info(image_path)
+        image, local_image_path = get_test_image(image_path)
+        channel_info = create_channel_info(local_image_path)
         back_camera_channels = [
             channel.channel_index
             for channel in channel_info.channels

@@ -1,16 +1,44 @@
+import typing
+
 import pytest
 
 from camera_alignment_core.channel_info import (
     CameraPosition,
+    Channel,
+    create_channel_info,
+)
+
+from . import (
+    ARGOLIGHT_OPTICAL_CONTROL_IMAGE_URL,
+    UNALIGNED_ZSD1_IMAGE_URL,
+    get_test_image,
 )
 
 
 @pytest.mark.parametrize(
     ["detector_name", "expected"],
+    # GM: All of the detector names were taken from a sampling of real
+    # data stored in FMS (1153 CZI images sampled Nov. 2021)
     [
-        ("", CameraPosition.LEFT),
-        ("", CameraPosition.BACK),
-        pytest.param("Fake", None, marks=pytest.mark.xfail(raises=ValueError)),
+        ("Detector:Camera 2 (Left)", CameraPosition.LEFT),
+        ("Detector:Camera 2 (left)", CameraPosition.LEFT),
+        ("Detector:Camera 2 Left", CameraPosition.LEFT),
+        ("Detector:Hammamatsu Left", CameraPosition.LEFT),
+        ("Detector:ORCA left", CameraPosition.LEFT),
+        ("Detector:Orca Left", CameraPosition.LEFT),
+        ("Detector:Camera 1 (Back)", CameraPosition.BACK),
+        ("Detector:Camera 1 (back)", CameraPosition.BACK),
+        pytest.param("Detector:0:1", None, marks=pytest.mark.xfail(raises=ValueError)),
+        pytest.param(
+            "Detector: LSM800 GaAsP-Pmt1",
+            None,
+            marks=pytest.mark.xfail(raises=ValueError),
+        ),
+        pytest.param(
+            "Detector:Hamamatsu Camera",
+            None,
+            marks=pytest.mark.xfail(raises=ValueError),
+        ),
     ],
 )
 def test_camera_position_from_czi_detector_name(
@@ -21,3 +49,149 @@ def test_camera_position_from_czi_detector_name(
 
     # Assert
     assert actual == expected
+
+
+@pytest.mark.parametrize(
+    ["image_url", "expected"],
+    [
+        (
+            UNALIGNED_ZSD1_IMAGE_URL,
+            [
+                Channel(
+                    channel_index=0,
+                    channel_name="Bright_2",
+                    emission_wavelength=None,
+                    camera_name="Detector:Camera 1 (Back)",
+                    camera_position=CameraPosition.BACK,
+                ),
+                Channel(
+                    channel_index=1,
+                    channel_name="EGFP",
+                    emission_wavelength=509.0,
+                    camera_name="Detector:Camera 2 (Left)",
+                    camera_position=CameraPosition.LEFT,
+                ),
+                Channel(
+                    channel_index=2,
+                    channel_name="CMDRP",
+                    emission_wavelength=676.0,
+                    camera_name="Detector:Camera 1 (Back)",
+                    camera_position=CameraPosition.BACK,
+                ),
+                Channel(
+                    channel_index=3,
+                    channel_name="H3342",
+                    emission_wavelength=455.0,
+                    camera_name="Detector:Camera 2 (Left)",
+                    camera_position=CameraPosition.LEFT,
+                ),
+            ],
+        ),
+        (
+            ARGOLIGHT_OPTICAL_CONTROL_IMAGE_URL,
+            [
+                Channel(
+                    channel_index=0,
+                    channel_name="Bright_2",
+                    emission_wavelength=None,
+                    camera_name="Detector:Camera 1 (Back)",
+                    camera_position=CameraPosition.BACK,
+                ),
+                Channel(
+                    channel_index=1,
+                    channel_name="EGFP",
+                    emission_wavelength=509.0,
+                    camera_name="Detector:Camera 2 (Left)",
+                    camera_position=CameraPosition.LEFT,
+                ),
+                Channel(
+                    channel_index=2,
+                    channel_name="TaRFP",
+                    emission_wavelength=583.0,
+                    camera_name="Detector:Camera 2 (Left)",
+                    camera_position=CameraPosition.LEFT,
+                ),
+                Channel(
+                    channel_index=3,
+                    channel_name="CMDRP",
+                    emission_wavelength=676.0,
+                    camera_name="Detector:Camera 1 (Back)",
+                    camera_position=CameraPosition.BACK,
+                ),
+                Channel(
+                    channel_index=4,
+                    channel_name="H3342",
+                    emission_wavelength=455.0,
+                    camera_name="Detector:Camera 2 (Left)",
+                    camera_position=CameraPosition.LEFT,
+                ),
+            ],
+        ),
+    ],
+)
+def test_channels(image_url: str, expected: typing.List[Channel]):
+    # Arrange
+    _, image_path = get_test_image(image_url)
+
+    channel_info = create_channel_info(image_path)
+
+    # Act / Assert
+    assert channel_info.channels == expected
+
+
+@pytest.mark.parametrize(
+    ["image_url", "expected"],
+    [
+        (
+            UNALIGNED_ZSD1_IMAGE_URL,
+            (
+                Channel(
+                    channel_index=1,
+                    channel_name="EGFP",
+                    emission_wavelength=509.0,
+                    camera_name="Detector:Camera 2 (Left)",
+                    camera_position=CameraPosition.LEFT,
+                ),
+                Channel(
+                    channel_index=2,
+                    channel_name="CMDRP",
+                    emission_wavelength=676.0,
+                    camera_name="Detector:Camera 1 (Back)",
+                    camera_position=CameraPosition.BACK,
+                ),
+            ),
+        ),
+        (
+            ARGOLIGHT_OPTICAL_CONTROL_IMAGE_URL,
+            (
+                Channel(
+                    channel_index=2,
+                    channel_name="TaRFP",
+                    emission_wavelength=583.0,
+                    camera_name="Detector:Camera 2 (Left)",
+                    camera_position=CameraPosition.LEFT,
+                ),
+                Channel(
+                    channel_index=3,
+                    channel_name="CMDRP",
+                    emission_wavelength=676.0,
+                    camera_name="Detector:Camera 1 (Back)",
+                    camera_position=CameraPosition.BACK,
+                ),
+            ),
+        ),
+    ],
+)
+def test_channel_info_find_channels_closest_in_emission_wavelength_between_cameras(
+    image_url: str, expected: typing.Tuple[Channel, Channel]
+):
+    # Arrange
+    _, image_path = get_test_image(image_url)
+
+    channel_info = create_channel_info(image_path)
+
+    # Act / Assert
+    assert (
+        channel_info.find_channels_closest_in_emission_wavelength_between_cameras()
+        == expected
+    )

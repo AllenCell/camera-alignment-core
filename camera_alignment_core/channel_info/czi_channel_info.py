@@ -9,7 +9,7 @@ from .channel_info_abc import (
 
 
 class CziChannelInfo(ChannelInfo):
-    """ChannelInfo value object specific to CZI images. See docstrings in ChannelInfo.
+    """ChannelInfo value object specific to CZI images. See docstrings in channel_info_abc.py.
 
     Notes
     -----
@@ -36,15 +36,19 @@ class CziChannelInfo(ChannelInfo):
                 detector = channel.find("DetectorSettings/Detector")
                 detector_name = detector.attrib.get("Id")
                 parsed_wavelength = (
-                    float(emission_wavelength.text) if emission_wavelength else None
+                    float(emission_wavelength.text)
+                    if emission_wavelength is not None
+                    else None
                 )
                 channels.append(
                     Channel(
-                        channel_index,
-                        channel.attrib.get("Name"),
-                        parsed_wavelength,
-                        detector_name,
-                        CameraPosition.from_czi_detector_name(detector_name),
+                        channel_index=channel_index,
+                        channel_name=channel.attrib.get("Name"),
+                        emission_wavelength=parsed_wavelength,
+                        camera_name=detector_name,
+                        camera_position=CameraPosition.from_czi_detector_name(
+                            detector_name
+                        ),
                     )
                 )
 
