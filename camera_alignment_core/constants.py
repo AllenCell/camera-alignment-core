@@ -4,36 +4,6 @@ import typing
 LOGGER_NAME = "camera_alignment_core"
 
 
-class CameraPosition(enum.Enum):
-    LEFT = "Left"
-    BACK = "Back"
-
-    @staticmethod
-    def from_czi_detector_name(detector_name: str) -> "CameraPosition":
-        """Given a detector name like 'Detector:Camera 2 (Left)' and 'Detector:Camera 1 (Back)',
-        return CameraPosition that best matches.
-
-        This is incredibly heuristic driven, but holds up reliably across tests of CZI images.
-
-        Parameters
-        ----------
-        detector_name : str
-            This corresponds to the "Id" attribute from `InstrumentDetector` XML elements from
-            embedded metadata within CZI images. Example XML path:
-                Directly: "Metadata/Information/Instrument/Detectors"
-                Via channels: "Metadata/Information/Image/Dimensions/Channels/DetectorSettings/Detector"
-        """
-        lower_cased_detector = detector_name.lower()
-        if CameraPosition.LEFT.value.lower() in lower_cased_detector:
-            return CameraPosition.LEFT
-        if CameraPosition.BACK.value.lower() in lower_cased_detector:
-            return CameraPosition.BACK
-
-        raise ValueError(
-            f"Cannot find appropriate CameraPosition for detector: {detector_name}"
-        )
-
-
 class CroppingDimension(typing.NamedTuple):
     x: int
     y: int

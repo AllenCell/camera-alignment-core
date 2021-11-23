@@ -8,12 +8,12 @@ from aicsimageio.writers import OmeTiffWriter
 import numpy
 import pytest
 
-from camera_alignment_core import (
-    Align,
-    ChannelInfo,
+from camera_alignment_core import Align
+from camera_alignment_core.channel_info import (
+    CameraPosition,
+    create_channel_info,
 )
 from camera_alignment_core.constants import (
-    CameraPosition,
     Magnification,
 )
 
@@ -86,7 +86,7 @@ class TestAlign:
         microscopy_image, microscopy_image_path = get_test_image(
             UNALIGNED_ZSD1_IMAGE_URL
         )
-        channel_info = ChannelInfo(microscopy_image, microscopy_image_path)
+        channel_info = create_channel_info(microscopy_image_path)
         back_camera_channels = [
             channel.channel_index
             for channel in channel_info.channels
@@ -122,7 +122,7 @@ class TestAlign:
         microscopy_image, microscopy_image_path = get_test_image(
             UNALIGNED_ZSD1_IMAGE_URL
         )
-        channel_info = ChannelInfo(microscopy_image, microscopy_image_path)
+        channel_info = create_channel_info(microscopy_image_path)
         back_camera_channels = [
             channel.channel_index
             for channel in channel_info.channels

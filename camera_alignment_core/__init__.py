@@ -10,7 +10,6 @@ def get_module_version():
 
 
 from .align import Align
-from .channel_info import ChannelInfo
 from .constants import Magnification
 
-__all__ = ("Align", "ChannelInfo", "get_module_version", "Magnification")
+__all__ = ("Align", "get_module_version", "Magnification")

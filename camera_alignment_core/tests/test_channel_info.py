@@ -1,6 +1,6 @@
 import pytest
 
-from camera_alignment_core.constants import (
+from camera_alignment_core.channel_info import (
     CameraPosition,
 )
 

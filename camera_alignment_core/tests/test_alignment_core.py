@@ -12,11 +12,11 @@ from camera_alignment_core.alignment_core import (
     generate_alignment_matrix,
 )
 from camera_alignment_core.channel_info import (
-    ChannelInfo,
+    CameraPosition,
+    create_channel_info,
 )
 from camera_alignment_core.constants import (
     LOGGER_NAME,
-    CameraPosition,
     Magnification,
 )
 from camera_alignment_core.exception import (
@@ -26,8 +26,6 @@ from camera_alignment_core.exception import (
 from . import (
     ALIGNED_ZSD1_IMAGE_URL,
     ARGOLIGHT_OPTICAL_CONTROL_IMAGE_URL,
-    GENERIC_CZI_URL,
-    GENERIC_OME_TIFF_URL,
     UNALIGNED_ZSD1_IMAGE_URL,
     ZSD_100x_OPTICAL_CONTROL_IMAGE_URL,
     get_test_image,
@@ -120,7 +118,7 @@ class TestAlignmentCore:
 
         # Arrange
         image, _ = get_test_image(image_path)
-        channel_info = ChannelInfo(image, image_path)
+        channel_info = create_channel_info(image_path)
         back_camera_channels = [
             channel.channel_index
             for channel in channel_info.channels

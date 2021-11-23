@@ -1,6 +1,5 @@
 import logging
 import pathlib
-import time
 import typing
 
 from aicsimageio import AICSImage
@@ -14,7 +13,7 @@ from .alignment_core import (
     generate_alignment_matrix,
 )
 from .alignment_utils import AlignmentInfo
-from .channel_info import ChannelInfo
+from .channel_info import create_channel_info
 from .constants import LOGGER_NAME, Magnification
 
 log = logging.getLogger(LOGGER_NAME)
@@ -55,7 +54,7 @@ class Align:
         magnification: Magnification,
         out_dir: typing.Union[str, pathlib.Path],
         reference_channel_index: typing.Optional[int] = None,
-        alignment_channel_index: typing.Optional[int] = None,
+        shift_channel_index: typing.Optional[int] = None,
     ) -> None:
         """Constructor.
 
@@ -71,12 +70,14 @@ class Align:
 
         Keyword Arguments
         -----------------
-        reference_channel_index : int
-            Which channel of `optical_control` to treat as the 'reference' for alignment. I.e., the 'static' channel.
-            Defined in terms of the wavelength used in that channel.
-        alignment_channel_index : int
-            Which channel of `optical_control` to align, relative to 'reference.' I.e., the 'moving' channel.
-            Defined in terms of the wavelength used in that channel.
+        reference_channel_index : Optional[int]
+            Which channel of `optical_control` to treat as the 'reference' for generation of the alignment matrix.
+            I.e., the 'static' channel. If either is not specified, both `reference_channel_index` and `shift_channel_index` will be provided with
+            dynamically determined default values, using the two channels from `optical_control` from separate cameras that are closest in their
+            emission wavelength.
+        shift_channel_index : Optional[int]
+            Which channel of `optical_control` to shift, relative to 'reference,' for generation of the alignment matrix. See `reference_channel_index`
+            description for detail on what happens if this argument is not provided.
         """
         self._optical_control_path = pathlib.Path(optical_control)
         self._optical_control = AICSImage(optical_control)
@@ -85,7 +86,7 @@ class Align:
         self._out_dir = pathlib.Path(out_dir)
 
         self._reference_channel_index = reference_channel_index
-        self._alignment_channel_index = alignment_channel_index
+        self._shift_channel_index = shift_channel_index
 
         self._alignment_matrix: typing.Optional[
             numpy.typing.NDArray[numpy.float16]
@@ -107,25 +108,22 @@ class Align:
             # query the image metadata to find the channels closest in their emission wavelength
             # between the two cameras. According to Nathalie (2021-11), it doesn't matter
             # which is set as the reference and which is set as the alignment.
-            if not self._reference_channel_index or not self._alignment_channel_index:
-                channel_info = ChannelInfo(
-                    self._optical_control, self._optical_control_path
+            if not self._reference_channel_index or not self._shift_channel_index:
+                channel_info = create_channel_info(self._optical_control_path)
+                (
+                    reference_channel,
+                    shift_channel,
+                ) = (
+                    channel_info.find_channels_closest_in_emission_wavelength_between_cameras()
                 )
-                channels_close_in_emission_wavelength = (
-                    channel_info.find_channels_closest_in_emission_wavelength_across_cameras()
-                )
-                self._reference_channel_index = channels_close_in_emission_wavelength[
-                    0
-                ].channel_index
-                self._alignment_channel_index = channels_close_in_emission_wavelength[
-                    1
-                ].channel_index
+                self._reference_channel_index = reference_channel.channel_index
+                self._shift_channel_index = shift_channel.channel_index
 
             control_image_data = self._optical_control.get_image_data("CZYX", T=0)
             alignment_matrix, alignment_info = generate_alignment_matrix(
                 control_image_data,
                 reference_channel=self._reference_channel_index,
-                shift_channel=self._alignment_channel_index,
+                shift_channel=self._shift_channel_index,
                 magnification=self._magnification.value,
                 px_size_xy=self._optical_control.physical_pixel_sizes.X,
             )
@@ -247,10 +245,6 @@ class Align:
                     processed_timepoints.append(crop(processed, self._magnification))
                 else:
                     processed_timepoints.append(processed)
-
-                log.debug(f"END TIMEPOINT: aligned timepoint {timepoint}")
-
-            log.debug(f"END SCENE: aligned scene {scene}")
 
             # Collect all newly aligned timepoints for this scene into one file and save output
             # In general, expect multi-scene images as input. Input may, however, be single scene image.
