@@ -155,7 +155,6 @@ class TestAlignmentCore:
             "image",
             "alignment_matrix",
             "channels",
-            "magnification",
             "expected_exception",
         ],
         [
