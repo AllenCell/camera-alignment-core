@@ -9,13 +9,13 @@ from .channel_info_abc import (
 
 
 class CziChannelInfo(ChannelInfo):
-    """ChannelInfo value object specific to CZI images. See docstrings in channel_info_abc.py.
+    """ChannelInfo implementation specific to CZI images. See docstrings in channel_info_abc.py.
 
     Notes
     -----
-    This specialization of ChannelInfo is required because the CZI -> OME metadata conversion is
+    This implementation of ChannelInfo is required because the CZI -> OME metadata conversion is
     not yet (as of 2021-11) reliable. Once that conversion is production-ready and Channels can be
-    reliably constituted from OME metadata, this specialization can be safely deleted.
+    reliably constituted from OME metadata, this can be safely deleted.
     """
 
     @staticmethod

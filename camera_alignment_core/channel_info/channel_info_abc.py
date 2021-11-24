@@ -51,7 +51,7 @@ class Channel:
 
 
 class ChannelInfo(abc.ABC):
-    """This value object encapsulates behavior for querying for channels within an image.
+    """This utility encapsulates behavior for querying for channels within an image.
 
     Create a ChannelInfo using the `channel_info_factory` factory function exported from
     the channel_info module. That factory will provide a concrete class implementing this

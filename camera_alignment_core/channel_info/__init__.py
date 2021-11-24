@@ -13,6 +13,11 @@ from .czi_channel_info import CziChannelInfo
 
 
 def channel_info_factory(image_path: typing.Union[str, pathlib.Path]) -> ChannelInfo:
+    """Construct a concrete `ChannelInfo` instance that is type-appropriate for a given image.
+
+    Current concrete `ChannelInfo` implementations:
+        1. CziChannelInfo, supporting CZI images.
+    """
     if CziChannelInfo.is_czi_file(image_path):
         return CziChannelInfo(AICSImage(image_path))
 

@@ -31,7 +31,8 @@ optical_control_path = "/some/path/to/an/argolight-field-of-rings.czi"
 #   1. Generate a similarity transformation matrix;
 #   2. Apply that matrix to a (potentially) multi-scene, (potentially) multi-timepoint biological image;
 #   3. Apply that matrix to the optical_control itself
-#       (to produce a reference alignment that can be consulted to check on alignment quality).
+#       (e.g., to produce a reference alignment that can be consulted to assess alignment quality).
+#
 # This snippet shows using only the required parameters, but `Align` also takes optional keyword arguments
 # for specifying which channels within `optical_control` to treat as the
 # reference and the shift for the purpose of producing the similarity transformation matrix.
@@ -44,7 +45,9 @@ align = Align(
 )
 
 # If you don't already have a list of channel indices that you know should be shifted
-# during alignment, consider using the `ChannelInfo` utility.
+# during alignment, consider using the `ChannelInfo` utility. Note:
+#   1. You must construct a `ChannelInfo` using the `channel_info_factory`.
+#   2. Currently, only CZI files are supported by this utility.
 biological_data_channel_info = channel_info_factory(biological_data_to_align_path)
 
 # ...`ChannelInfo` offers convenience methods for identifying an image's channels.
@@ -64,9 +67,9 @@ aligned_scenes = align.align_image(
     channels_to_shift=[channel.channel_index for channel in biological_data_back_channels]
 )
 
-# (Right now in the script would be a great time to iterate over `aligned_scenes` and
+# ...(Right now in the script would be a great time to iterate over `aligned_scenes` and
 # upload each aligned scene to FMS and delete the now unnecessary versions saved in `out_dir`.
-# Refer to aicsfiles documentation should you need help with uploading.)
+# Refer to aicsfiles documentation should you need help with uploading.)...
 
 # You can also use `Align` to create a reference alignment by aligning the optical control
 # image itself. This may be helpful, for example, to spot check alignnment quality.
