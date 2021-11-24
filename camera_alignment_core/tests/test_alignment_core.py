@@ -119,10 +119,11 @@ class TestAlignmentCore:
         # Arrange
         image, local_image_path = get_test_image(image_path)
         channel_info = channel_info_factory(local_image_path)
-        back_camera_channels = [
+        back_camera_channel_indices = [
             channel.channel_index
-            for channel in channel_info.channels
-            if channel.camera_position == CameraPosition.BACK
+            for channel in channel_info.channels_from_camera_position(
+                CameraPosition.BACK
+            )
         ]
         optical_control_image, _ = get_test_image(alignment_image_path)
         optical_control_image_data = optical_control_image.get_image_data("CZYX", T=0)
@@ -140,7 +141,9 @@ class TestAlignmentCore:
 
         # Act
         result = align_image(
-            image.get_image_data("CZYX", T=0), alignment_matrix, back_camera_channels
+            image.get_image_data("CZYX", T=0),
+            alignment_matrix,
+            back_camera_channel_indices,
         )
 
         # expected image is cropped

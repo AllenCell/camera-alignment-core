@@ -84,6 +84,7 @@ class Align:
 
         self._magnification = magnification
         self._out_dir = pathlib.Path(out_dir)
+        self._out_dir.mkdir(exist_ok=True, parents=True)
 
         self._reference_channel_index = reference_channel_index
         self._shift_channel_index = shift_channel_index

@@ -87,10 +87,11 @@ class TestAlign:
             UNALIGNED_ZSD1_IMAGE_URL
         )
         channel_info = channel_info_factory(microscopy_image_path)
-        back_camera_channels = [
+        back_camera_channel_indices = [
             channel.channel_index
-            for channel in channel_info.channels
-            if channel.camera_position == CameraPosition.BACK
+            for channel in channel_info.channels_from_camera_position(
+                CameraPosition.BACK
+            )
         ]
         align = Align(
             optical_control_image_path,
@@ -100,7 +101,7 @@ class TestAlign:
 
         # Act
         aligned_scenes = align.align_image(
-            microscopy_image_path, channels_to_shift=back_camera_channels
+            microscopy_image_path, channels_to_shift=back_camera_channel_indices
         )
 
         # Assert
@@ -123,10 +124,11 @@ class TestAlign:
             UNALIGNED_ZSD1_IMAGE_URL
         )
         channel_info = channel_info_factory(microscopy_image_path)
-        back_camera_channels = [
+        back_camera_channel_indices = [
             channel.channel_index
-            for channel in channel_info.channels
-            if channel.camera_position == CameraPosition.BACK
+            for channel in channel_info.channels_from_camera_position(
+                CameraPosition.BACK
+            )
         ]
         align = Align(
             optical_control_image_path,
@@ -137,7 +139,7 @@ class TestAlign:
         # Act
         aligned_scenes = align.align_image(
             microscopy_image_path,
-            channels_to_shift=back_camera_channels,
+            channels_to_shift=back_camera_channel_indices,
             crop_output=False,
         )
 

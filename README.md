@@ -34,14 +34,23 @@ align = Align(
 )
 
 biological_data_channel_info = channel_info_factory(biological_data_to_align_path)
+
+# Convenience for querying for the channels acquired on the back camera (e.g.: Brightfield, CMDRP)
+# It is not necessary to use this convenience if you know the indices of the channels you want to shift.
+biological_data_back_channel_indices = [
+    channel.channel_index for channel in biological_data_channel_info.channels_from_camera_position(CameraPosition.BACK)
+]
 aligned_scenes = align.align_image(
     image_to_align_path,
-    channels_to_shift=biological_data_channel_info.channels_from_camera_position(CameraPosition.BACK)
+    channels_to_shift=biological_data_back_channel_indices
 )
 
 optical_control_channel_info = channel_info_factory(optical_control_path)
+optical_control_back_channel_indices = [
+    channel.channel_index for channel in optical_control_channel_info.channels_from_camera_position(CameraPosition.BACK)
+]
 aligned_optical_control = align.align_optical_control(
-    channels_to_shift=optical_control_channel_info.channels_from_camera_position(CameraPosition.BACK)
+    channels_to_shift=optical_control_back_channel_indices
 )
 
 alignment_matrix = align.alignment_transform.matrix
