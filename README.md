@@ -53,11 +53,23 @@ biological_data_back_channels = biological_data_channel_info.channels_from_camer
     CameraPosition.BACK
 )
 
+# `Align::align_image` returns a list of info objects (`AlignedImage`) pointing at the output of the method.
+# These info objects have two properties:
+#   1. scene : the scene index from the image that this newly aligned image is from; and
+#   2. path : the filesystem path to the aligned scene. The base path is the `out_dir` you
+#       specified in the `Align` constructor.
+# If the image you're aligning is single-scene, this will be a list of one `AlignedImage`.
 aligned_scenes = align.align_image(
     image_to_align_path,
     channels_to_shift=[channel.channel_index for channel in biological_data_back_channels]
 )
 
+# (Right now in the script would be a great time to iterate over `aligned_scenes` and
+# upload each aligned scene to FMS and delete the now unnecessary versions saved in `out_dir`.
+# Refer to aicsfiles documentation should you need help with uploading.)
+
+# You can also use `Align` to create a reference alignment by aligning the optical control
+# image itself. This may be helpful, for example, to spot check alignnment quality.
 optical_control_channel_info = channel_info_factory(optical_control_path)
 optical_control_back_channels = optical_control_channel_info.channels_from_camera_position(
     CameraPosition.BACK
