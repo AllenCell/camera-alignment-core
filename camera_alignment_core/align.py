@@ -105,10 +105,15 @@ class Align:
                 == self._optical_control.physical_pixel_sizes.Y
             ), "Physical pixel sizes in X and Y dimensions do not match in optical control image"
 
-            # If the reference channel and/or alignment channel were not specified,
+            # If the reference channel and/or shift channel were not specified,
             # query the image metadata to find the channels closest in their emission wavelength
             # between the two cameras. According to Nathalie (2021-11), it doesn't matter
-            # which is set as the reference and which is set as the alignment.
+            # which is set as the ref channel and which is set as the shift channel for the purpose
+            # of generating the alignment matrix. By default, however, because
+            # ChannelInfo::find_channels_closest_in_emission_wavelength_between_cameras returns channels sorted (asc),
+            # this _should_ generally end up using TagRFP as the reference and CMDRP as the shift,
+            # assuming both of those channels exist in the optical control image.
+            # If you want full control over which channels are used, specify `reference_channel_index` and `shift_channel_index`.
             if not self._reference_channel_index or not self._shift_channel_index:
                 channel_info = channel_info_factory(self._optical_control_path)
                 (
