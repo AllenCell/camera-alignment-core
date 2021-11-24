@@ -92,6 +92,10 @@ class ChannelInfo(abc.ABC):
     ) -> typing.Tuple[Channel, Channel]:
         """Return pair of Channels from separate cameras that are closest in their emission wavelength.
 
+        This is intended to be used to dynamically choose the two channels of an optical control image
+        that should be used to generate an alignment matrix. As such, this method only has
+        expected utility if the image passed to `ChannelInfo` is an optical control.
+
         Returns
         -------
         Tuple[Channel, Channel] : A two-element tuple of Channel.
