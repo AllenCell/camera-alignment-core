@@ -27,32 +27,48 @@ from camera_alignment_core.channel_info import channel_info_factory, CameraPosit
 biological_data_to_align_path = "/some/path/to/an/image.czi"
 optical_control_path = "/some/path/to/an/argolight-field-of-rings.czi"
 
+# `Align` is the root, coordinating entity, that encapsulates all of the steps to:
+#   1. Generate a similarity transformation matrix;
+#   2. Apply that matrix to a (potentially) multi-scene, (potentially) multi-timepoint biological image;
+#   3. Apply that matrix to the optical_control itself
+#       (to produce a reference alignment that can be consulted to check on alignment quality).
+# This snippet shows using only the required parameters, but `Align` also takes optional keyword arguments
+# for specifying which channels within `optical_control` to treat as the
+# reference and the shift for the purpose of producing the similarity transformation matrix.
+# See `Align`'s documentation for details on the default behavior if these optional arguments
+# are not provided.
 align = Align(
     optical_control=optical_control_path,
     magnification=Magnification(20),
     out_dir="/tmp/whereever",
 )
 
+# If you don't already have a list of channel indices that you know should be shifted
+# during alignment, consider using the `ChannelInfo` utility.
 biological_data_channel_info = channel_info_factory(biological_data_to_align_path)
 
-# Convenience for querying for the channels acquired on the back camera (e.g.: Brightfield, CMDRP)
-# It is not necessary to use this convenience if you know the indices of the channels you want to shift.
-biological_data_back_channel_indices = [
-    channel.channel_index for channel in biological_data_channel_info.channels_from_camera_position(CameraPosition.BACK)
-]
+# ...`ChannelInfo` offers convenience methods for identifying an image's channels.
+# For example, identifying which were acquired on the back camera (e.g.: Brightfield, CMDRP).
+biological_data_back_channels = biological_data_channel_info.channels_from_camera_position(
+    CameraPosition.BACK
+)
+
 aligned_scenes = align.align_image(
     image_to_align_path,
-    channels_to_shift=biological_data_back_channel_indices
+    channels_to_shift=[channel.channel_index for channel in biological_data_back_channels]
 )
 
 optical_control_channel_info = channel_info_factory(optical_control_path)
-optical_control_back_channel_indices = [
-    channel.channel_index for channel in optical_control_channel_info.channels_from_camera_position(CameraPosition.BACK)
-]
+optical_control_back_channels = optical_control_channel_info.channels_from_camera_position(
+    CameraPosition.BACK
+)
 aligned_optical_control = align.align_optical_control(
-    channels_to_shift=optical_control_back_channel_indices
+    channels_to_shift=[channel.channel_index for channel in optical_control_back_channels]
 )
 
+# `Align` also provides access to certain details from the alignment process,
+# including the similarity transformation matrix itself, as well as summary information
+# gathered while producing that matrix (see documentation for `AlignmentInfo` for more details).
 alignment_matrix = align.alignment_transform.matrix
 alignment_info = align.alignment_transform.info
 ```
