@@ -138,15 +138,22 @@ class ChannelInfo(abc.ABC):
             channels_grouped_by_camera[0], channels_grouped_by_camera[1]
         )
 
-        # Determine pair of channels from separate cameras that have the minimum distance in their emission wavelengths
-        def comparator(channel_tuple: typing.Tuple[Channel, Channel]) -> float:
-            channel_a, channel_b = channel_tuple
-            if not channel_a.emission_wavelength or not channel_b.emission_wavelength:
+        # Determine pair of Channels from separate cameras that have the minimum distance in their emission wavelengths
+        def absolute_emission_wavelength_difference(
+            channel_pair: typing.Tuple[Channel, Channel]
+        ) -> float:
+            channel_a, channel_b = channel_pair
+            if (
+                channel_a.emission_wavelength is None
+                or channel_b.emission_wavelength is None
+            ):
                 return math.inf
 
             return abs(channel_a.emission_wavelength - channel_b.emission_wavelength)
 
-        min_pairing = min(channel_pairs, key=comparator)
+        min_pairing = min(channel_pairs, key=absolute_emission_wavelength_difference)
+
+        # Sort channels in ascending order by their emission wavelength
         channel_a, channel_b = sorted(
             min_pairing,
             key=lambda channel: channel.emission_wavelength
