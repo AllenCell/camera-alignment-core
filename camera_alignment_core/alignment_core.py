@@ -1,7 +1,6 @@
 import logging
 from typing import List, Tuple
 
-from aicsimageio import AICSImage
 import numpy
 import numpy.typing
 import skimage
@@ -14,11 +13,7 @@ from .alignment_utils import (
     SegmentRings,
     get_center_z,
 )
-from .constants import (
-    LOGGER_NAME,
-    Channel,
-    Magnification,
-)
+from .constants import LOGGER_NAME, Magnification
 from .exception import (
     IncompatibleImageException,
     UnsupportedMagnification,
@@ -42,6 +37,13 @@ def generate_alignment_matrix(
         magnification,
         px_size_xy,
     )
+
+    if magnification not in [
+        supported_magnification.value for supported_magnification in list(Magnification)
+    ]:
+        raise UnsupportedMagnification(
+            f"Cannot perform image alignment for magnification {str(magnification)}."
+        )
 
     if not optical_control_image.ndim == 4:
         raise IncompatibleImageException(
@@ -104,111 +106,57 @@ def generate_alignment_matrix(
     return similarity_transform.params, align_info
 
 
-def apply_alignment_matrix(
-    alignment_matrix: numpy.typing.NDArray[numpy.float16],
-    image_slice: numpy.typing.NDArray[numpy.uint16],
-) -> numpy.typing.NDArray[numpy.uint16]:
-    """
-    Applies an affine transformation matrix to a 3D (ZYX) slice of a multi-channel image.
-    """
-    if not image_slice.ndim == 3:
-        raise IncompatibleImageException(
-            f"Cannot perform similarity matrix transform: invalid image dimensions. \
-            Image must be 3D but detected {len(image_slice.shape)} dimensions"
-        )
-
-    after_transform = numpy.empty(image_slice.shape, dtype=numpy.double)
-    for z in range(0, after_transform.shape[0]):
-        after_transform[z, :, :] = skimage.transform.warp(
-            image_slice[z, :, :],
-            inverse_map=alignment_matrix,
-            order=3,
-        )
-
-    # skimage.transform.warp converts input image to the float range (0..1), so rescale to uint16
-    return (after_transform * numpy.iinfo(numpy.uint16).max).astype(numpy.uint16)
-
-
 def align_image(
-    alignment_matrix: numpy.typing.NDArray[numpy.float16],
     image: numpy.typing.NDArray[numpy.uint16],
-    channels: List[Channel],
-    magnification: int,
+    alignment_matrix: numpy.typing.NDArray[numpy.float16],
+    channels_to_shift: List[int],
 ) -> numpy.typing.NDArray[numpy.uint16]:
-    """
-    Align a CZYX `image` using `alignment_matrix`.
-    Uses `channel_info` to know which channels within `image` to align.
-    Uses `magnification` to know how to crop the resulting aligned image.
-    Does not crop aligned image if crop=False.
+    """Align a CZYX `image` using `alignment_matrix`.
+    Will only apply the `alignment_matrix` to image slices within the channels specified in
+    `channels_to_shift`.
+
+    Parameters
+    ----------
+    image : numpy.typing.NDArray[numpy.uint16]
+        Must be a 4 dimensional image in following dimensional order: 'CZYX'
+    alignment_matrix : numpy.typing.NDArray[numpy.float16]
+        3x3 matrix that can be used by skimage.transform.warp to transform a single z-slice of an image.
+    channels_to_shift : List[int]
+        Index positions of channels within `image` that should be shifted. N.b.: indices start at 0.
+        E.g.: Specify [0, 2] to apply the alignment transform to channels at index positions 0 and 2 within `image`.
     """
     if not image.ndim == 4:
         raise IncompatibleImageException(
             f"Expected image to be 4 dimensional ('CZYX'). Got: {image.shape}"
         )
 
-    if magnification not in [
-        supported_magnification.value for supported_magnification in list(Magnification)
-    ]:
-        raise UnsupportedMagnification(
-            f"Cannot perform image alignment for magnification {str(magnification)}."
-        )
-
-    if not channels:
+    if not channels_to_shift:
         raise ValueError(
-            "Passed an empty list of channels to `align_image`. Cannot determine which channels to align."
+            "channels_to_shift: passed an empty list to `align_image`. Cannot determine which channels to shift."
         )
 
-    # If no channel within the image is known to require alignment, fail.
-    if not any([channel.requires_alignment() for channel in channels]):
-        raise IncompatibleImageException(
-            f"No channels within image require alignment. Channels: {channels}"
-        )
-
-    # Build up the aligned image by iterating over the input image and aligning the channels
-    # that require alignment
     aligned_image = numpy.empty(image.shape, dtype=numpy.uint16)
     number_of_channels, *_ = image.shape
-    for index in range(0, number_of_channels):
-        try:
-            channel = channels[index]
-        except IndexError:
-            log.warning("Missing reference to Channel at index %s", index)
-            aligned_image[index] = image[index]
+    for channel_index in range(0, number_of_channels):
+        unaligned_channel = image[channel_index]
+        if channel_index in channels_to_shift:
+            log.debug("Applying alignment to %s channel", channel_index)
+            aligned_channel = numpy.empty(unaligned_channel.shape, dtype=numpy.double)
+            for z_index in range(0, aligned_channel.shape[0]):
+                aligned_channel[z_index, :, :] = skimage.transform.warp(
+                    unaligned_channel[z_index, :, :],
+                    inverse_map=alignment_matrix,
+                    order=3,
+                )
+            # skimage.transform.warp converts input image to the float range (0..1), so rescale to uint16
+            aligned_image[channel_index] = (
+                aligned_channel * numpy.iinfo(numpy.uint16).max
+            ).astype(numpy.uint16)
         else:
-            if channel.requires_alignment():
-                log.debug("Applying alignment to %s channel", channel.value)
-                aligned_slice = apply_alignment_matrix(alignment_matrix, image[index])
-                aligned_image[index] = aligned_slice
-            else:
-                log.debug("Skipping alignment for %s channel", channel.value)
-                aligned_image[index] = image[index]
+            log.debug("Skipping alignment for %s channel", channel_index)
+            aligned_image[channel_index] = unaligned_channel
 
     return aligned_image
-
-
-def get_channels(image: AICSImage) -> List[Channel]:
-    """
-    Map channel names to their corresponding Channel enumerations. If an unknown channel name
-    is encountered, a warning is logged.
-    """
-    channel_names = image.channel_names
-    channels = list()
-    for channel in channel_names:
-        if channel in ["Bright", "Bright_2", "Bright_3", "TL_100x"]:
-            channels.append(Channel.RAW_BRIGHTFIELD)
-        elif channel in ["EGFP", "EGFP_2"]:
-            channels.append(Channel.RAW_488_NM)
-        elif channel in ["CMDRP"]:
-            channels.append(Channel.RAW_638_NM)
-        elif channel in ["H3342"]:
-            channels.append(Channel.RAW_405_NM)
-        elif channel in ["TaRFP", "TaRFP_2", "TagRFP"]:
-            channels.append(Channel.RAW_561_NM)
-        else:
-            log.warning("Encountered unknown channel: %s", channel)
-            channels.append(Channel.UNKNOWN)
-
-    return channels
 
 
 def crop(

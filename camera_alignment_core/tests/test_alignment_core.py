@@ -10,23 +10,22 @@ from camera_alignment_core.alignment_core import (
     align_image,
     crop,
     generate_alignment_matrix,
-    get_channels,
+)
+from camera_alignment_core.channel_info import (
+    CameraPosition,
+    channel_info_factory,
 )
 from camera_alignment_core.constants import (
     LOGGER_NAME,
-    Channel,
     Magnification,
 )
 from camera_alignment_core.exception import (
     IncompatibleImageException,
-    UnsupportedMagnification,
 )
 
 from . import (
     ALIGNED_ZSD1_IMAGE_URL,
     ARGOLIGHT_OPTICAL_CONTROL_IMAGE_URL,
-    GENERIC_CZI_URL,
-    GENERIC_OME_TIFF_URL,
     UNALIGNED_ZSD1_IMAGE_URL,
     ZSD_100x_OPTICAL_CONTROL_IMAGE_URL,
     get_test_image,
@@ -39,7 +38,6 @@ class TestAlignmentCore:
     def test_generate_alignment_matrix(self):
         # Arrange
         optical_control_image, _ = get_test_image(ZSD_100x_OPTICAL_CONTROL_IMAGE_URL)
-        control_image_channels = get_channels(optical_control_image)
         optical_control_image_data = optical_control_image.get_image_data("CZYX", T=0)
 
         expected_matrix = numpy.array(
@@ -53,8 +51,8 @@ class TestAlignmentCore:
         # Act
         (actual_alignment_matrix, _,) = generate_alignment_matrix(
             optical_control_image_data,
-            reference_channel=control_image_channels.index(Channel.RAW_561_NM),
-            shift_channel=control_image_channels.index(Channel.RAW_638_NM),
+            reference_channel=2,  # TaRFP
+            shift_channel=3,  # CMDRP
             magnification=Magnification.ONE_HUNDRED.value,
             px_size_xy=optical_control_image.physical_pixel_sizes.X,
         )
@@ -72,61 +70,27 @@ class TestAlignmentCore:
         # Arrange
         optical_control_image, _ = get_test_image(ZSD_100x_OPTICAL_CONTROL_IMAGE_URL)
         optical_control_image_data = optical_control_image.get_image_data("CZYX")
-        control_image_channels = get_channels(optical_control_image)
-        reference_channel = control_image_channels.index(Channel.RAW_561_NM)
-        shift_channel = control_image_channels.index(Channel.RAW_638_NM)
+
         magnification = Magnification.ONE_HUNDRED.value
         pixel_size_xy = optical_control_image.physical_pixel_sizes.X
 
         # Act
         (alignment_matrix_1, _,) = generate_alignment_matrix(
             optical_control_image_data,
-            reference_channel,
-            shift_channel,
-            magnification,
-            pixel_size_xy,
+            reference_channel=2,  # TaRFP
+            shift_channel=3,  # CMDRP
+            magnification=magnification,
+            px_size_xy=pixel_size_xy,
         )
         (alignment_matrix_2, _,) = generate_alignment_matrix(
             optical_control_image_data,
-            reference_channel,
-            shift_channel,
-            magnification,
-            pixel_size_xy,
+            reference_channel=2,  # TaRFP
+            shift_channel=3,  # CMDRP
+            magnification=magnification,
+            px_size_xy=pixel_size_xy,
         )
 
         assert numpy.array_equal(alignment_matrix_1, alignment_matrix_2)
-
-    @pytest.mark.parametrize(
-        ["image_path", "expectation"],
-        [
-            (
-                GENERIC_OME_TIFF_URL,
-                [
-                    Channel.RAW_BRIGHTFIELD,
-                    Channel.RAW_488_NM,
-                    Channel.RAW_638_NM,
-                    Channel.RAW_405_NM,
-                ],
-            ),
-            (
-                GENERIC_CZI_URL,
-                [Channel.RAW_BRIGHTFIELD, Channel.RAW_561_NM],
-            ),
-        ],
-    )
-    def test_get_channels(
-        self,
-        image_path,
-        expectation,
-    ):
-        # Arrange
-        image, _ = get_test_image(image_path)
-
-        # Act
-        result = get_channels(image)
-
-        # Assert
-        assert result == expectation
 
     @pytest.mark.parametrize(
         [
@@ -153,28 +117,33 @@ class TestAlignmentCore:
     ):
 
         # Arrange
-        image, _ = get_test_image(image_path)
+        image, local_image_path = get_test_image(image_path)
+        channel_info = channel_info_factory(local_image_path)
+        back_camera_channel_indices = [
+            channel.channel_index
+            for channel in channel_info.channels_from_camera_position(
+                CameraPosition.BACK
+            )
+        ]
         optical_control_image, _ = get_test_image(alignment_image_path)
         optical_control_image_data = optical_control_image.get_image_data("CZYX", T=0)
-        optical_control_channels = get_channels(optical_control_image)
+
         (alignment_matrix, _,) = generate_alignment_matrix(
             optical_control_image=optical_control_image_data,
-            shift_channel=optical_control_channels.index(Channel.RAW_638_NM),
-            reference_channel=optical_control_channels.index(Channel.RAW_405_NM),
+            # TaRFP should have been used instead, but H3342 was used as ref channel when ALIGNED_ZSD1_IMAGE_URL was created
+            reference_channel=4,  # H3342
+            shift_channel=3,  # CMDRP
             magnification=magnification.value,
             px_size_xy=optical_control_image.physical_pixel_sizes.X,
         )
-
-        image_channels = get_channels(image)
 
         expectation_image, _ = get_test_image(expectation_image_path)
 
         # Act
         result = align_image(
-            alignment_matrix=alignment_matrix,
-            image=image.get_image_data("CZYX", T=0),
-            channels=image_channels,
-            magnification=magnification.value,
+            image.get_image_data("CZYX", T=0),
+            alignment_matrix,
+            back_camera_channel_indices,
         )
 
         # expected image is cropped
@@ -190,42 +159,20 @@ class TestAlignmentCore:
             "image",
             "alignment_matrix",
             "channels",
-            "magnification",
             "expected_exception",
         ],
         [
             (
                 numpy.random.rand(1, 1, 1, 1, 1),  # Wrong dimensions
                 numpy.eye(3, 3),
-                [Channel.RAW_BRIGHTFIELD],
-                Magnification.ONE_HUNDRED.value,
+                [0],
                 IncompatibleImageException,
             ),
             (
                 numpy.random.rand(1, 1, 1, 1),
                 numpy.eye(3, 3),
                 [],  # Empty channels
-                Magnification.ONE_HUNDRED.value,
                 ValueError,
-            ),
-            (
-                numpy.random.rand(1, 1, 1, 1),
-                numpy.eye(3, 3),
-                # No alignable channels
-                [
-                    Channel.RAW_405_NM,
-                    Channel.RAW_488_NM,
-                    Channel.RAW_561_NM,
-                ],
-                Magnification.ONE_HUNDRED.value,
-                IncompatibleImageException,
-            ),
-            (
-                numpy.random.rand(1, 1, 1, 1),
-                numpy.eye(3, 3),
-                [Channel.RAW_BRIGHTFIELD],
-                33,  # Unsupported magnification
-                UnsupportedMagnification,
             ),
         ],
     )
@@ -233,13 +180,12 @@ class TestAlignmentCore:
         self,
         image: numpy.typing.NDArray[numpy.uint16],
         alignment_matrix: numpy.typing.NDArray[numpy.float16],
-        channels: typing.List[Channel],
-        magnification: int,
+        channels: typing.List[int],
         expected_exception: typing.Type[Exception],
     ):
         # Act / Assert
         with pytest.raises(expected_exception):
-            align_image(alignment_matrix, image, channels, magnification)
+            align_image(image, alignment_matrix, channels)
 
     # TODO: Add 63x and 20x images to test
     @pytest.mark.parametrize(
@@ -257,10 +203,8 @@ class TestAlignmentCore:
         image_path,
         magnification,
         expected_shape,
-        caplog: pytest.LogCaptureFixture,
     ):
         # Arrange
-        caplog.set_level(logging.DEBUG, logger=LOGGER_NAME)
         image, _ = get_test_image(image_path)
         image_data = image.get_image_data("CZYX", T=0)
 

@@ -1,6 +1,5 @@
 import logging
 import pathlib
-import time
 import typing
 
 from aicsimageio import AICSImage
@@ -12,14 +11,10 @@ from .alignment_core import (
     align_image,
     crop,
     generate_alignment_matrix,
-    get_channels,
 )
 from .alignment_utils import AlignmentInfo
-from .constants import (
-    LOGGER_NAME,
-    Channel,
-    Magnification,
-)
+from .channel_info import channel_info_factory
+from .constants import LOGGER_NAME, Magnification
 
 log = logging.getLogger(LOGGER_NAME)
 
@@ -45,12 +40,10 @@ class Align:
     >>> align = Align(
     >>>     optical_control="/some/path/to/an/argolight-field-of-rings.czi",
     >>>     magnification=Magnification(20),
-    >>>     reference_channel=Channel.RAW_561_NM,
-    >>>     alignment_channel=Channel.RAW_638_NM,
     >>>     out_dir="/tmp/whereever",
     >>> )
-    >>> aligned_scenes = align.align_image("/some/path/to/an/image.czi")
-    >>> aligned_optical_control = align.align_optical_control()
+    >>> aligned_scenes = align.align_image("/some/path/to/an/image.czi", channels_to_shift=[0, 2])
+    >>> aligned_optical_control = align.align_optical_control(channels_to_shift=[0, 2])
     >>> alignment_matrix = align.alignment_transform.matrix
     >>> alignment_info = align.alignment_transform.info
     """
@@ -59,9 +52,9 @@ class Align:
         self,
         optical_control: typing.Union[str, pathlib.Path],
         magnification: Magnification,
-        reference_channel: Channel,
-        alignment_channel: Channel,
-        out_dir: pathlib.Path,
+        out_dir: typing.Union[str, pathlib.Path],
+        reference_channel_index: typing.Optional[int] = None,
+        shift_channel_index: typing.Optional[int] = None,
     ) -> None:
         """Constructor.
 
@@ -71,23 +64,30 @@ class Align:
             Optical control image that will be used to generate an alignment matrix. Passed as-is to aicsimageio.AICSImage constructor.
         magnification : Magnification
             Magnification at which `optical_control` (and any images to be aligned using `optical_control`) was acquired.
-        reference_channel : Channel
-            Which channel of `optical_control` to treat as the 'reference' for alignment. I.e., the 'static' channel.
-            Defined in terms of the wavelength used in that channel.
-        alignment_channel : Channel
-            Which channel of `optical_control` to align, relative to 'reference.' I.e., the 'moving' channel.
-            Defined in terms of the wavelength used in that channel.
-        out_dir : pathlib.Path
+        out_dir : Union[str, Path]
             Path to directory in which to save file output of alignment. Neither the directory nor its parents
             need to exist prior to running (though it's OK if they do); directories will be created if not.
+
+        Keyword Arguments
+        -----------------
+        reference_channel_index : Optional[int]
+            Which channel of `optical_control` to treat as the 'reference' for generation of the alignment matrix.
+            I.e., the 'static' channel. If either is not specified, both `reference_channel_index` and `shift_channel_index` will be provided with
+            dynamically determined default values, using the two channels from `optical_control` from separate cameras that are closest in their
+            emission wavelength.
+        shift_channel_index : Optional[int]
+            Which channel of `optical_control` to shift, relative to 'reference,' for generation of the alignment matrix. See `reference_channel_index`
+            description for detail on what happens if this argument is not provided.
         """
         self._optical_control_path = pathlib.Path(optical_control)
         self._optical_control = AICSImage(optical_control)
 
         self._magnification = magnification
-        self._reference_channel = reference_channel
-        self._alignment_channel = alignment_channel
-        self._out_dir = out_dir
+        self._out_dir = pathlib.Path(out_dir)
+        self._out_dir.mkdir(exist_ok=True, parents=True)
+
+        self._reference_channel_index = reference_channel_index
+        self._shift_channel_index = shift_channel_index
 
         self._alignment_matrix: typing.Optional[
             numpy.typing.NDArray[numpy.float16]
@@ -100,18 +100,36 @@ class Align:
         Get the similarity matrix and camera_alignment_core.utils.AlignmentInfo used to perform camera alignment.
         """
         if self._alignment_matrix is None or self._alignment_info is None:
-            control_image_channels = get_channels(self._optical_control)
-
             assert (
                 self._optical_control.physical_pixel_sizes.X
                 == self._optical_control.physical_pixel_sizes.Y
             ), "Physical pixel sizes in X and Y dimensions do not match in optical control image"
 
+            # If the reference channel and/or shift channel were not specified,
+            # query the image metadata to find the channels closest in their emission wavelength
+            # between the two cameras. According to Nathalie (2021-11), it doesn't matter
+            # which is set as the ref channel and which is set as the shift channel for the purpose
+            # of generating the alignment matrix. By default, however, because
+            # ChannelInfo::find_channels_closest_in_emission_wavelength_between_cameras returns channels sorted (asc),
+            # this _should_ generally end up using TagRFP as the reference and CMDRP as the shift,
+            # assuming both of those channels exist in the optical control image.
+            # If you want full control over which channels are used, specify `reference_channel_index` and `shift_channel_index`.
+            if not self._reference_channel_index or not self._shift_channel_index:
+                channel_info = channel_info_factory(self._optical_control_path)
+                (
+                    reference_channel,
+                    shift_channel,
+                ) = (
+                    channel_info.find_channels_closest_in_emission_wavelength_between_cameras()
+                )
+                self._reference_channel_index = reference_channel.channel_index
+                self._shift_channel_index = shift_channel.channel_index
+
             control_image_data = self._optical_control.get_image_data("CZYX", T=0)
             alignment_matrix, alignment_info = generate_alignment_matrix(
                 control_image_data,
-                reference_channel=control_image_channels.index(self._reference_channel),
-                shift_channel=control_image_channels.index(self._alignment_channel),
+                reference_channel=self._reference_channel_index,
+                shift_channel=self._shift_channel_index,
                 magnification=self._magnification.value,
                 px_size_xy=self._optical_control.physical_pixel_sizes.X,
             )
@@ -121,15 +139,24 @@ class Align:
 
         return AlignmentTransform(self._alignment_matrix, self._alignment_info)
 
-    def align_optical_control(self, crop_output: bool = True) -> pathlib.Path:
+    def align_optical_control(
+        self, channels_to_shift: typing.List[int], crop_output: bool = True
+    ) -> pathlib.Path:
         """Align the optical control image using the similarity matrix generated from
         the optical control itself. Useful as a reference for judging the quality of the alignment.
+
+        Parameters
+        ----------
+        channels_to_shift : List[int]
+            Index positions of channels within `image` that should be shifted. N.b.: indices start at 0.
+            E.g.: Specify [0, 2] to apply the alignment transform to channels at index positions 0 and 2 within `image`.
 
         Keyword Arguments
         ----------
         crop_output : Optional[bool]
-            Optionally do not crop aligned image according to standard dimensions
-            for the magnification at which the image was acquired. Defaults to cropping.
+            Optional flag for toggling whether to crop aligned image according to standard dimensions
+            for the magnification at which the image was acquired. Defaults to `True`, which means,
+            "yes, crop the image."
 
         Returns
         -------
@@ -141,10 +168,9 @@ class Align:
         returning the pathlib.Path to the file.
         """
         aligned_control = align_image(
-            self.alignment_transform.matrix,
             self._optical_control.get_image_data("CZYX", T=0),
-            get_channels(self._optical_control),
-            self._magnification.value,
+            self.alignment_transform.matrix,
+            channels_to_shift,
         )
 
         if crop_output:
@@ -165,29 +191,34 @@ class Align:
     def align_image(
         self,
         image: typing.Union[str, pathlib.Path],
+        channels_to_shift: typing.List[int],
         scenes: typing.List[int] = [],
         timepoints: typing.List[int] = [],
         crop_output: bool = True,
     ) -> typing.List[AlignedImage]:
-        """Align `image` using similarity transform generated from the optical control image passed to
-        this instance at construction.
+        """Align channels within `image` using similarity transform generated from the optical control image passed to
+        this instance at construction. Scenes within `image` will be saved to their own image files once aligned.
 
         Parameters
         ----------
         image : Union[str, Path]
             Microscopy image that requires alignment. Passed as-is to aicsimageio.AICSImage constructor.
+        channels_to_shift : List[int]
+            Index positions of channels within `image` that should be shifted. N.b.: indices start at 0.
+            E.g.: Specify [0, 2] to apply the alignment transform to channels at index positions 0 and 2 within `image`.
 
         Keyword Arguments
         -----------------
         scenes : Optional[List[int]]
-            On which scene or scenes within `image` to align. If not specified, will align all scenes within `image`.
+            Which scene or scenes within `image` to align. If not specified, will align all scenes within `image`.
             Specify as list of 0-index scene indices within `image`.
         timepoints : Optional[List[int]]
-            On which timepoint or timepoints within `image` to perform the alignment. If not specified, will align all timepoints within `image`.
+            Which timepoint or timepoints within `image` to perform the alignment. If not specified, will align all timepoints within `image`.
             Specify as list of 0-index timepoint indices within `image`.
         crop_output : Optional[bool]
-            Optionally do not crop aligned image according to standard dimensions
-            for the magnification at which the image was acquired. Defaults to cropping.
+            Optional flag for toggling whether to crop aligned image according to standard dimensions
+            for the magnification at which the image was acquired. Defaults to `True`, which means,
+            "yes, crop the image."
 
         Returns
         -------
@@ -201,12 +232,8 @@ class Align:
         # Iterate over scenes to align
         scene_indices = scenes if scenes else range(len(aics_image.scenes))
         for scene in scene_indices:
-            start_time_scene = time.perf_counter()
-
             # Operate on current scene
             aics_image.set_scene(scene)
-
-            channel_info = get_channels(aics_image)
 
             # Align timepoints within scene
             processed_timepoints: typing.List[
@@ -216,29 +243,14 @@ class Align:
                 timepoints if timepoints else range(0, aics_image.dims.T)
             )
             for timepoint in timepoint_indices:
-                start_time_timepoint = time.perf_counter()
-
                 image_slice = aics_image.get_image_data("CZYX", T=timepoint)
                 processed = align_image(
-                    self.alignment_transform.matrix,
-                    image_slice,
-                    channel_info,
-                    self._magnification.value,
+                    image_slice, self.alignment_transform.matrix, channels_to_shift
                 )
                 if crop_output:
                     processed_timepoints.append(crop(processed, self._magnification))
                 else:
                     processed_timepoints.append(processed)
-
-                end_time_timepoint = time.perf_counter()
-                log.debug(
-                    f"END TIMEPOINT: aligned timepoint {timepoint} in {end_time_timepoint - start_time_timepoint:0.4f} seconds"
-                )
-
-            end_time_scene = time.perf_counter()
-            log.debug(
-                f"END SCENE: aligned scene {scene} in {end_time_scene - start_time_scene:0.4f} seconds"
-            )
 
             # Collect all newly aligned timepoints for this scene into one file and save output
             # In general, expect multi-scene images as input. Input may, however, be single scene image.
