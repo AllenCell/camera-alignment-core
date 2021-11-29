@@ -8,6 +8,7 @@ Subpackages
    :maxdepth: 4
 
    camera_alignment_core.alignment_utils
+   camera_alignment_core.channel_info
    camera_alignment_core.exception
 
 Submodules
