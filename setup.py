@@ -55,13 +55,12 @@ extra_requirements = {
 
 setup(
     author="AICS Software",
-    author_email="aditya.nath@alleninstitute.org",
+    author_email="!AICS_SW@alleninstitute.org",
     classifiers=[
         "Development Status :: 2 - Pre-Alpha",
         "Intended Audience :: Developers",
         "License :: Free for non-commercial use",
         "Natural Language :: English",
-        "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
     ],
