@@ -46,11 +46,11 @@ from . import (
         ),
     ],
 )
-def test_camera_position_from_czi_detector_name(
+def test_camera_position_parse_position_from_detector_name(
     detector_name: str, expected: CameraPosition
 ) -> None:
     # Arrange / Act
-    actual = CameraPosition.from_czi_detector_name(detector_name)
+    actual = CameraPosition.parse_position_from_detector_name(detector_name)
 
     # Assert
     assert actual == expected

@@ -46,7 +46,7 @@ class CziChannelInfo(ChannelInfo):
                         channel_name=channel.attrib.get("Name"),
                         emission_wavelength=parsed_wavelength,
                         camera_name=detector_name,
-                        camera_position=CameraPosition.from_czi_detector_name(
+                        camera_position=CameraPosition.parse_position_from_detector_name(
                             detector_name
                         ),
                     )

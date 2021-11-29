@@ -13,14 +13,15 @@ class CameraPosition(enum.Enum):
     BACK = "back"
 
     @staticmethod
-    def from_czi_detector_name(detector_name: str) -> "CameraPosition":
+    def parse_position_from_detector_name(detector_name: str) -> "CameraPosition":
         """Given a detector name like 'Detector:Camera 2 (Left)' and 'Detector:Camera 1 (Back)',
-        return CameraPosition that best matches.
+        return CameraPosition that best matches. This is done by naively searching for a
+        CameraPosition value anywhere within the detector name.
 
-        This logic is heuristic driven, but holds up reliably across tests of CZI images
+        This procedure is heuristic driven, but as of 2021-11, it holds up reliably across tests of CZI images
         acquired at AICS since 2018/2019ish. Detector names are specific to the hardware configuration
         of our Zeiss spinning disk microscopes. Configured otherwise (e.g., at another lab,
-        or at AICS at some future point in time), the heuristic shouldn't be expected to hold up
+        or at AICS at another point in time), the heuristic shouldn't be expected to hold up
         and this approach will require refactoring.
 
         Parameters
