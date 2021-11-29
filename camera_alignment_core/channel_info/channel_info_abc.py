@@ -9,16 +9,19 @@ from aicsimageio import AICSImage
 
 
 class CameraPosition(enum.Enum):
-    LEFT = "Left"
-    BACK = "Back"
+    LEFT = "left"
+    BACK = "back"
 
     @staticmethod
     def from_czi_detector_name(detector_name: str) -> "CameraPosition":
         """Given a detector name like 'Detector:Camera 2 (Left)' and 'Detector:Camera 1 (Back)',
         return CameraPosition that best matches.
 
-        This is incredibly heuristic driven, but holds up reliably across tests of CZI images
-        acquired at AICS since 2018/2019ish.
+        This logic is heuristic driven, but holds up reliably across tests of CZI images
+        acquired at AICS since 2018/2019ish. Detector names are specific to the hardware configuration
+        of our Zeiss spinning disk microscopes. Configured otherwise (e.g., at another lab,
+        or at AICS at some future point in time), the heuristic shouldn't be expected to hold up
+        and this approach will require refactoring.
 
         Parameters
         ----------
@@ -29,9 +32,9 @@ class CameraPosition(enum.Enum):
                 Via channels: "Metadata/Information/Image/Dimensions/Channels/DetectorSettings/Detector"
         """
         lower_cased_detector = detector_name.lower()
-        if CameraPosition.LEFT.value.lower() in lower_cased_detector:
+        if CameraPosition.LEFT.value in lower_cased_detector:
             return CameraPosition.LEFT
-        if CameraPosition.BACK.value.lower() in lower_cased_detector:
+        if CameraPosition.BACK.value in lower_cased_detector:
             return CameraPosition.BACK
 
         raise ValueError(
