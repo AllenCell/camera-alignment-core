@@ -11,6 +11,7 @@ from skimage import transform as tf
 
 from ..constants import LOGGER_NAME
 from .alignment_info import AlignmentInfo
+from .alignment_qc import AlignmentQC
 
 log = logging.getLogger(LOGGER_NAME)
 
@@ -112,7 +113,7 @@ class RingAlignment:
 
     def run(
         self,
-    ) -> Tuple[tf.SimilarityTransform, AlignmentInfo]:
+    ) -> Tuple[tf.SimilarityTransform, AlignmentInfo, AlignmentQC]:
         # get coordinate dictionaries
         ref_centroid_dict = self.rings_coor_dict(
             self.ref_rings_props, self.ref_cross_label
@@ -134,6 +135,13 @@ class RingAlignment:
             np.asarray(list(rev_coor_dict.values())),
         )
 
+        qc_controller = AlignmentQC(
+            reference_seg=self.ref_seg_rings,
+            moving_seg=self.mov_seg_rings,
+            ref_mov_coor_dict=ref_mov_coor_dict,
+            tform=tform,
+        )
+
         # create alignment info
         align_info = AlignmentInfo(
             rotation=tform.rotation,
@@ -141,6 +149,7 @@ class RingAlignment:
             shift_y=tform.translation[0],
             z_offset=0,
             scaling=tform.scale,
+            qc_metrics=None,
         )
 
-        return tform, align_info
+        return tform, align_info, qc_controller
