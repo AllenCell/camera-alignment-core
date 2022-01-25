@@ -20,8 +20,7 @@ ACTIVATE = $(VENV_BIN)/activate
 PYTHON = $(VENV_BIN)/python3
 
 $(PYTHON):
-> test -d $(VENV_NAME) || $(PYTHON_VERSION) -m venv $(VENV_NAME)
-> $(PYTHON) -m pip install -U pip
+> test -d $(VENV_NAME) || $(PYTHON_VERSION) -m venv --upgrade-deps $(VENV_NAME)
 
 venv: $(PYTHON)
 
@@ -30,7 +29,7 @@ install: venv requirements.txt setup.py
 > $(VENV_BIN)/pre-commit install
 
 lint:
-> $(PYTHON) -m flake8 --count --count --show-source --statistics camera_alignment_core
+> $(PYTHON) -m flake8 --count --show-source --statistics camera_alignment_core
 .PHONY: lint
 
 type-check:
@@ -54,7 +53,7 @@ test-exclude-slow:
 .PHONY: test-exclude-slow
 
 clean:  # Clear proj dir of all .gitignored files
-> git clean -xfd -e .vscode
+> git clean -Xfd -e "!.vscode"
 .PHONY: clean
 
 docs:
@@ -66,16 +65,17 @@ docs-serve:
 > $(PYTHON) -m http.server --directory docs/build 8080
 .PHONY: docs-serve
 
-build: clean install
-> $(PYTHON) setup.py bdist_wheel
+build: install
+> rm -rf dist/
+> $(PYTHON) -m build
 .PHONY: build
 
 publish: build
-> $(PYTHON) -m twine upload --verbose -r release-local --cert /etc/ssl/certs/aics-ca.pem dist/*.whl
+> $(PYTHON) -m twine upload --verbose -r release-local dist/*
 .PHONY: publish
 
 publish-snapshot: build
-> $(PYTHON) -m twine upload --verbose -r snapshot-local --cert /etc/ssl/certs/aics-ca.pem dist/*.whl
+> $(PYTHON) -m twine upload --verbose -r snapshot-local dist/*
 .PHONY: publish-snapshot
 
 bumpversion-release:
