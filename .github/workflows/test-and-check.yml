@@ -27,10 +27,11 @@ jobs:
         python-version: ${{ matrix.python-version }}
     - name: Install dependencies
       run: |
-        make install
+        python -m pip install --upgrade pip setuptools
+        pip install .[dev]
     - name: Test with pytest
       run: |
-        make test
+        python -m pytest camera_alignment_core/tests/
 
   check:
     runs-on: ubuntu-latest
@@ -43,16 +44,17 @@ jobs:
         python-version: 3.9
     - name: Install dependencies
       run: |
-        make install
+        python -m pip install --upgrade pip setuptools
+        pip install .[dev]
     - name: Type check
       run: |
-        make type-check
+        python -m mypy --ignore-missing-imports camera_alignment_core
     - name: Lint
       run: |
-        make lint
+        python -m flake8 camera_alignment_core --count --verbose --show-source --statistics
     - name: Check for code format compatibility
       run: |
-        venv/bin/python -m black --check camera_alignment_core
+        python -m black --check camera_alignment_core
     - name: Check for proper import sort order
       run: |
-        venv/bin/python -m isort --check --diff camera_alignment_core
+        python -m isort --check --diff camera_alignment_core
