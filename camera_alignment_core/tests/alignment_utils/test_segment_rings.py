@@ -63,12 +63,8 @@ class TestSegmentRings:
             seg_centroids[i] = obj.centroid
 
         coor_dict = RingAlignment(
-            numpy.zeros((1)),
-            numpy.zeros((1)),
             pandas.DataFrame(),
             0,
-            numpy.zeros((1)),
-            numpy.zeros((1)),
             pandas.DataFrame(),
             0,
         ).assign_ref_to_mov(GT_centroids, seg_centroids)
