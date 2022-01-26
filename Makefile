@@ -13,7 +13,7 @@ endif
 
 ##############################################
 
-PYTHON_VERSION = python3.9
+PYTHON_VERSION = python3
 VENV_NAME := venv
 VENV_BIN := $(VENV_NAME)/bin
 ACTIVATE = $(VENV_BIN)/activate
