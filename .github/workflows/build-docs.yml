@@ -9,11 +9,11 @@ jobs:
   docs:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2.3.1
+    - uses: actions/checkout@ec3a7ce113134d7a93b817d10a8272cb61118579  # v2.4.0
       with:
         persist-credentials: false
     - name: Set up Python
-      uses: actions/setup-python@v1
+      uses: actions/setup-python@f38219332975fe8f9c04cca981d674bf22aea1d3  # v2.3.1
       with:
         python-version: 3.9
     - name: Install dependencies
@@ -26,8 +26,6 @@ jobs:
     - name: Publish docs
       uses: JamesIves/github-pages-deploy-action@3.7.1
       with:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        BASE_BRANCH: main # The branch the action should deploy from.
-        BRANCH: gh-pages # The branch the action should deploy to.
-        FOLDER: docs/build/ # The folder the action should deploy.
+        branch: gh-pages # The branch the action should deploy to.
+        folder: docs/build/ # The folder the action should deploy.
 
