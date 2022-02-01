@@ -75,8 +75,8 @@ def generate_alignment_matrix(
     # segment rings on reference image
     log.debug("segment rings in ref")
     (
-        ref_seg_rings,
-        ref_seg_rings_label,
+        _ref_seg_rings,
+        _ref_seg_rings_label,
         ref_props_df,
         ref_cross_label,
     ) = SegmentRings(ref_crop, px_size_xy, magnification, thresh=None).run()
@@ -84,8 +84,8 @@ def generate_alignment_matrix(
     # segment rings on moving image
     log.debug("segment rings in moving")
     (
-        mov_seg_rings,
-        mov_seg_rings_label,
+        _mov_seg_rings,
+        _mov_seg_rings_label,
         mov_props_df,
         mov_cross_label,
     ) = SegmentRings(mov_crop, px_size_xy, magnification, thresh=None).run()
@@ -93,12 +93,8 @@ def generate_alignment_matrix(
     # Create alignment from segmentation
     log.debug("Creating alignment matrix")
     similarity_transform, align_info = RingAlignment(
-        ref_seg_rings,
-        ref_seg_rings_label,
         ref_props_df,
         ref_cross_label,
-        mov_seg_rings,
-        mov_seg_rings_label,
         mov_props_df,
         mov_cross_label,
     ).run()

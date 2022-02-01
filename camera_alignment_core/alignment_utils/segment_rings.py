@@ -143,7 +143,7 @@ class SegmentRings:
         img: np.typing.NDArray[np.uint16],
         filter_px_size=50,
         mult_factor=2.5,
-    ) -> Tuple[np.typing.NDArray[np.uint16], np.typing.NDArray[np.uint16]]:
+    ) -> Tuple[np.typing.NDArray[np.bool_], np.typing.NDArray[np.uint16]]:
         """
         Segments rings using intensity-thresholded method
         Parameters
@@ -159,11 +159,11 @@ class SegmentRings:
         filtered_label: labelled mask of ring segmentation
         """
         thresh = np.median(img) + mult_factor * np.std(img)
-        seg = np.zeros(img.shape)
+        seg = np.zeros(img.shape, dtype=np.bool_)
         seg[img >= thresh] = True
 
         seg = remove_small_objects(seg > 0, int(filter_px_size))
-        labelled_seg = measure.label(seg)
+        labelled_seg = measure.label(seg).astype(np.uint16)
 
         return seg, labelled_seg
 
@@ -176,7 +176,7 @@ class SegmentRings:
         search_range: Tuple[float, float] = (0, 0.75),
         size_param: float = 2.5,
     ) -> Tuple[
-        np.typing.NDArray[np.uint16], np.typing.NDArray[np.uint16], Optional[float]
+        np.typing.NDArray[np.bool_], np.typing.NDArray[np.uint16], Optional[float]
     ]:
         """
         Segments rings using 2D dot filter from aics-segmenter. The method loops through a possible range of parameters
@@ -197,7 +197,7 @@ class SegmentRings:
         thresh: filter parameter after optimization
 
         """
-        img = np.zeros((1, img_2d.shape[0], img_2d.shape[1]))
+        img = np.zeros((1, img_2d.shape[0], img_2d.shape[1]), dtype=np.uint16)
         img[0, :, :] = img_2d
 
         thresh = None
@@ -295,7 +295,7 @@ class SegmentRings:
     def run(
         self,
     ) -> Tuple[
-        np.typing.NDArray[np.uint16], np.typing.NDArray[np.uint16], pd.DataFrame, int
+        np.typing.NDArray[np.bool_], np.typing.NDArray[np.uint16], pd.DataFrame, int
     ]:
         img_preprocessed = self.preprocess_img()
 

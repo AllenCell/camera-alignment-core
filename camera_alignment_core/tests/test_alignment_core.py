@@ -130,7 +130,8 @@ class TestAlignmentCore:
 
         (alignment_matrix, _,) = generate_alignment_matrix(
             optical_control_image=optical_control_image_data,
-            # TaRFP should have been used instead, but H3342 was used as ref channel when ALIGNED_ZSD1_IMAGE_URL was created
+            # TaRFP should have been used instead,
+            # but H3342 was used as ref channel when ALIGNED_ZSD1_IMAGE_URL was created
             reference_channel=4,  # H3342
             shift_channel=3,  # CMDRP
             magnification=magnification.value,

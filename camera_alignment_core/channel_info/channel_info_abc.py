@@ -104,15 +104,15 @@ class ChannelInfo(abc.ABC):
         -------
         Tuple[Channel, Channel] : A two-element tuple of Channel.
             Each Channel was acquired on a different camera, and among all the channels taken on each of the cameras,
-            these are the channels that are closest in their emission wavelengths. Returned Channels are sorted in ascending
-            order by their emission wavelength.
+            these are the channels that are closest in their emission wavelengths. Returned Channels are sorted in
+            ascending order by their emission wavelength.
 
         Raises
         ------
         ValueError :
             If `image` was acquired using only one camera, its Channel(s) will be from the same camera, and therefore
-            calling this method does not make sense. If somehow more than two cameras are used, the core logic of this method would break,
-            and is likewise not supported.
+            calling this method does not make sense. If somehow more than two cameras are used, the core logic of this
+            method would break, and is likewise not supported.
         """
         channels_sorted_by_camera = sorted(
             self.channels, key=lambda channel: channel.camera_name

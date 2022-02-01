@@ -1,6 +1,5 @@
 import typing
 
-import numpy
 import pandas
 import pytest
 
@@ -38,12 +37,8 @@ class TestRingAlign:
         # Act
         # dummy init parameters
         ref_mov_coor_dict = RingAlignment(
-            numpy.zeros((1)),
-            numpy.zeros((1)),
             pandas.DataFrame(),
             0,
-            numpy.zeros((1)),
-            numpy.zeros((1)),
             pandas.DataFrame(),
             0,
         ).assign_ref_to_mov(ref_dict, mov_dict)

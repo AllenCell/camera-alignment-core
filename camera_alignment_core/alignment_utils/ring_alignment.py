@@ -3,7 +3,6 @@ import logging
 from typing import Dict, Tuple
 
 import numpy as np
-from numpy.typing import NDArray
 import pandas as pd
 from scipy.optimize import linear_sum_assignment
 from scipy.spatial import distance
@@ -18,21 +17,13 @@ log = logging.getLogger(LOGGER_NAME)
 class RingAlignment:
     def __init__(
         self,
-        ref_seg_rings: NDArray[np.uint16],
-        ref_label_rings: NDArray[np.uint16],
         ref_rings_props: pd.DataFrame,
         ref_cross_label: int,
-        mov_seg_rings: NDArray[np.uint16],
-        mov_label_rings: NDArray[np.uint16],
         mov_rings_props: pd.DataFrame,
         mov_cross_label: int,
     ):
-        self.ref_seg_rings = ref_seg_rings
-        self.mov_label_rings = ref_label_rings
         self.ref_rings_props = ref_rings_props
         self.ref_cross_label = ref_cross_label
-        self.mov_seg_rings = mov_seg_rings
-        self.mov_label_rings = mov_label_rings
         self.mov_rings_props = mov_rings_props
         self.mov_cross_label = mov_cross_label
 
