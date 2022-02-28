@@ -62,6 +62,6 @@ setup(
     url="https://github.com/aics-int/camera_alignment_core",
     # Do not edit this string manually, always use bumpversion
     # Details in CONTRIBUTING.rst
-    version="1.0.0",
+    version="1.0.1",
     zip_safe=False,
 )
