@@ -2,7 +2,8 @@ from setuptools import find_packages, setup
 
 
 requirements = [
-    "aicsimageio[czi] ~= 4.4",
+    "aicsimageio ~= 4.4",
+    "aicspylibczi ~= 3.0.0",
     "numpy ~= 1.21",
     "scikit-image ~= 0.18"
 ]
