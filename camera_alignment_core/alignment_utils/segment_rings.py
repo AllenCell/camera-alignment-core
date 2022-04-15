@@ -197,7 +197,7 @@ class SegmentRings:
         thresh: filter parameter after optimization
 
         """
-        img = np.zeros((1, img_2d.shape[0], img_2d.shape[1]), dtype=np.uint16)
+        img = np.zeros((1, img_2d.shape[0], img_2d.shape[1]))
         img[0, :, :] = img_2d
 
         thresh = None
@@ -308,7 +308,6 @@ class SegmentRings:
             )
         else:
             seg_cross, _ = self.segment_cross(img=img_preprocessed)
-
             seg_rings, label_rings, _ = self.segment_rings_dot_filter(
                 img_2d=img_preprocessed,
                 seg_cross=seg_cross,
