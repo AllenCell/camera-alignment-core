@@ -10,7 +10,7 @@ requirements = [
 
 dev_requirements = [
     # Test
-    "black == 21.7b0",
+    "black ~= 22.3.0",
     "flake8 ~= 4.0.1",
     "isort ~= 5.10.1",
     "mypy ~= 0.910",

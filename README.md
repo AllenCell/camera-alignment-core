@@ -97,20 +97,37 @@ In addition, the lower-level functional building blocks used internally by [Alig
 
 
 ## Development
+This repository uses `make` as a task runner. Various `make` commands/targets have been written to automate
+the setup of a local development environment, run quality assurance tests, build and distribute the
+library. The following are notable `make` targets;
+see `Makefile` for others or to inspect the underlying scripts run as part of these targets:
 
-1. `make install`
+1. `make install`:
 
     This will setup a virtual environment local to this project and install all of the
     project's dependencies into it. The virtual env will be located in `camera-alignment-core/venv`.
 
-2. `make test`, `make fmt`, `make lint`, `make type-check`, `make import-sort`
+2. Quality assurance `make` tasks:
 
-    Quality assurance
+    After running `make install`, a `git` pre-commit hook will be installed in your local `.git/hooks`.
+    This pre-commit hook is managed by `pre-commit`, configured in `.pre-commit-config.yaml`.
+    These commit hooks will ensure QA is run on your code before you commit it.
+    The code formatters that are run on pre-commit have side-effects;
+    if they don't exit successfully, they will modify your staged files, and you will need to stage the new changes.
 
-3. `make clean`
+    1. `make lint`: Linting using `flake8`
+    2. `make type-check`: Static analysis using `mypy`
+    3. `make fmt`: Auto-code formatting using `black`
+    4. `make import-sort`: Auto-import sorting using `isort`
+    5. `make test`: Programmatic tests, run with `pytest`
+
+    Code is not ready to merge until all of these QA tests pass.
+
+3. `make clean`:
 
     This will clean up various Python and build generated files so that you can ensure
-    that you are working in a clean workspace.
+    that you are working in a clean workspace. This, in combination with `make install`,
+    should be the first thing you do if your branch is building locally but failing in CI.
 
 
 **Allen Institute Software License**

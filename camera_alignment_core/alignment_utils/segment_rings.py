@@ -16,8 +16,8 @@ from ..constants import LOGGER_NAME
 log = logging.getLogger(LOGGER_NAME)
 
 BEAD_DISTANCE_UM = 15
-CROSS_SIZE_UM = 7.5 * 6 * 10 ** -6
-RING_RADIUS_UM = 0.7 * 10 ** -6
+CROSS_SIZE_UM = 7.5 * 6 * 10**-6
+RING_RADIUS_UM = 0.7 * 10**-6
 
 
 class SegmentRings:
@@ -75,7 +75,7 @@ class SegmentRings:
             for zz in range(struct_img.shape[0]):
                 responce[zz, :, :] = (
                     -1
-                    * (log_sigma ** 2)
+                    * (log_sigma**2)
                     * ndi.filters.gaussian_laplace(struct_img[zz, :, :], log_sigma)
                 )
             bw = np.logical_or(bw, responce > s2_param[fid][1])
