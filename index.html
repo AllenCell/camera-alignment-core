@@ -289,22 +289,42 @@ It provides a convenient abstraction over what is expected to be the most common
 </section>
 <section id="development">
 <h2>Development<a class="headerlink" href="#development" title="Permalink to this headline">¶</a></h2>
+<p>This repository uses <code class="docutils literal notranslate"><span class="pre">make</span></code> as a task runner. Various <code class="docutils literal notranslate"><span class="pre">make</span></code> commands/targets have been written to automate
+the setup of a local development environment, run quality assurance tests, build and distribute the
+library. The following are notable <code class="docutils literal notranslate"><span class="pre">make</span></code> targets;
+see <code class="docutils literal notranslate"><span class="pre">Makefile</span></code> for others or to inspect the underlying scripts run as part of these targets:</p>
 <ol class="arabic">
-<li><p><code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">install</span></code></p>
+<li><p><code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">install</span></code>:</p>
 <blockquote>
 <div><p>This will setup a virtual environment local to this project and install all of the
 project’s dependencies into it. The virtual env will be located in <code class="docutils literal notranslate"><span class="pre">camera-alignment-core/venv</span></code>.</p>
 </div></blockquote>
 </li>
-<li><p><code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">test</span></code>, <code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">fmt</span></code>, <code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">lint</span></code>, <code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">type-check</span></code>, <code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">import-sort</span></code></p>
+<li><p>Quality assurance <code class="docutils literal notranslate"><span class="pre">make</span></code> tasks:</p>
 <blockquote>
-<div><p>Quality assurance</p>
+<div><p>After running <code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">install</span></code>, a <code class="docutils literal notranslate"><span class="pre">git</span></code> pre-commit hook will be installed in your local <code class="docutils literal notranslate"><span class="pre">.git/hooks</span></code>.
+This pre-commit hook is managed by <code class="docutils literal notranslate"><span class="pre">pre-commit</span></code>, configured in <code class="docutils literal notranslate"><span class="pre">.pre-commit-config.yaml</span></code>.
+These commit hooks will ensure QA is run on your code before you commit it.
+The code formatters that are run on pre-commit have side-effects;
+if they don’t exit successfully, they will modify your staged files, and you will need to stage the new changes.</p>
+</div></blockquote>
+<ol class="arabic simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">lint</span></code>: Linting using <code class="docutils literal notranslate"><span class="pre">flake8</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">type-check</span></code>: Static analysis using <code class="docutils literal notranslate"><span class="pre">mypy</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">fmt</span></code>: Auto-code formatting using <code class="docutils literal notranslate"><span class="pre">black</span></code></p></li>
+</ol>
+<p>#. <code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">import-sort</span></code>: Auto-import sorting using <code class="docutils literal notranslate"><span class="pre">isort</span></code>
+#.</p>
+<blockquote>
+<div><p><code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">test</span></code>: Programmatic tests, run with <code class="docutils literal notranslate"><span class="pre">pytest</span></code></p>
+<p>Code is not ready to merge until all of these QA tests pass.</p>
 </div></blockquote>
 </li>
-<li><p><code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">clean</span></code></p>
+<li><p><code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">clean</span></code>:</p>
 <blockquote>
 <div><p>This will clean up various Python and build generated files so that you can ensure
-that you are working in a clean workspace.</p>
+that you are working in a clean workspace. This, in combination with <code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">install</span></code>,
+should be the first thing you do if your branch is building locally but failing in CI.</p>
 </div></blockquote>
 </li>
 </ol>
