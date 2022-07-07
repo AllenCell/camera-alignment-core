@@ -104,6 +104,7 @@ class Align:
         Get the similarity matrix and camera_alignment_core.utils.AlignmentInfo used to perform camera alignment.
         """
         if self._alignment_matrix is None or self._alignment_info is None:
+            assert self._optical_control.physical_pixel_sizes.X is not None
             assert (
                 self._optical_control.physical_pixel_sizes.X
                 == self._optical_control.physical_pixel_sizes.Y
