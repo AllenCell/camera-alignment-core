@@ -8,7 +8,9 @@ requirements = [
     "aicsimageio ~= 4.7.0",
     "aicspylibczi ~= 3.0.0",
     "numpy ~= 1.21",
-    "scikit-image ~= 0.18"
+
+    # v0.19.3 causes test failure for TestAlignmentCore::test_align_image
+    "scikit-image == 0.19.2"
 ]
 
 dev_requirements = [
