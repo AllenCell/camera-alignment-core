@@ -47,7 +47,7 @@ class SegmentRings:
             self.thresh = (0.5, 99.5)
 
     def dot_2d_slice_by_slice_wrapper(
-        self, struct_img: np.typing.NDArray[np.uint16], s2_param: List
+        self, struct_img: np.typing.NDArray[np.float32], s2_param: List
     ) -> np.typing.NDArray[np.bool_]:
         """
         https://github.com/AllenCell/aics-segmentation/blob/main/aicssegmentation/core/seg_dot.py
@@ -197,7 +197,7 @@ class SegmentRings:
         thresh: filter parameter after optimization
 
         """
-        img = np.zeros((1, img_2d.shape[0], img_2d.shape[1]), dtype=np.uint16)
+        img = np.zeros((1, img_2d.shape[0], img_2d.shape[1]), dtype=np.float32)
         img[0, :, :] = img_2d
 
         thresh = None
