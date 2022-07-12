@@ -29,7 +29,7 @@ dev_requirements = [
     "build == 0.7.0",
 
     # Version
-    "bump2version ~= 1.0.2",
+    "bump2version ~= 1.0.1",
 
     # Publish
     "twine ~= 3.7.1",
