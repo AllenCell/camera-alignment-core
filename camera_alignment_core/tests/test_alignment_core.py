@@ -128,6 +128,10 @@ class TestAlignmentCore:
         optical_control_image, _ = get_test_image(alignment_image_path)
         optical_control_image_data = optical_control_image.get_image_data("CZYX", T=0)
 
+        # Properties of aicsimageio's PhysicalPixelSizes are typed as Optional,
+        # so assert the `X` property `is not None` before use in `generate_alignment_matrix`
+        assert optical_control_image.physical_pixel_sizes.X is not None
+
         (alignment_matrix, _,) = generate_alignment_matrix(
             optical_control_image=optical_control_image_data,
             # TaRFP should have been used instead,
