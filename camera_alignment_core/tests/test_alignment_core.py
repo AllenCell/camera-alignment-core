@@ -27,6 +27,7 @@ from . import (
     ALIGNED_ZSD1_IMAGE_URL,
     ARGOLIGHT_OPTICAL_CONTROL_IMAGE_URL,
     UNALIGNED_ZSD1_IMAGE_URL,
+    ZSD_20x_OPTICAL_CONTROL_IMAGE_URL,
     ZSD_100x_OPTICAL_CONTROL_IMAGE_URL,
     get_test_image,
 )
@@ -54,6 +55,37 @@ class TestAlignmentCore:
             reference_channel=2,  # TaRFP
             shift_channel=3,  # CMDRP
             magnification=Magnification.ONE_HUNDRED.value,
+            px_size_xy=optical_control_image.physical_pixel_sizes.X,
+        )
+
+        # Assert
+        assert actual_alignment_matrix.shape == expected_matrix.shape
+
+        # Due to inherent challenges with floating point precision across different environments,
+        # compare actual vs expected elementwise with a (very) small epsilon (i.e., allowed error margin)
+        assert numpy.allclose(actual_alignment_matrix, expected_matrix, atol=1e-14), (
+            actual_alignment_matrix - expected_matrix
+        )
+
+    def test_generate_alignment_matrix_20x(self):
+        # Arrange
+        optical_control_image, _ = get_test_image(ZSD_20x_OPTICAL_CONTROL_IMAGE_URL)
+        optical_control_image_data = optical_control_image.get_image_data("CZYX", T=0)
+
+        expected_matrix = numpy.array(
+            [
+                [1.00122588e00, -3.02161488e-03, 1.91048540e00],
+                [3.02161488e-03, 1.00122588e00, -4.75823245e00],
+                [0.00000000e00, 0.00000000e00, 1.00000000e00],
+            ]
+        )
+
+        # Act
+        (actual_alignment_matrix, _,) = generate_alignment_matrix(
+            optical_control_image_data,
+            reference_channel=2,  # TaRFP
+            shift_channel=3,  # CMDRP
+            magnification=Magnification.TWENTY.value,
             px_size_xy=optical_control_image.physical_pixel_sizes.X,
         )
 
