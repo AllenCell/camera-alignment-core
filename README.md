@@ -8,7 +8,7 @@ Core algorithms for aligning two-camera microscopy imagery
 
 ## Installation
 
-`pip install camera_alignment_core==1.0.4`<br>
+`pip install camera_alignment_core==1.0.5`<br>
 
 This library is published to a private PyPI server ("Artifactory") accessible within the Allen Institute network or over VPN. This has downstream effects for how this library is installed into other Python packages.
 
