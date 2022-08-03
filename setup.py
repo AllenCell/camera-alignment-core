@@ -2,10 +2,7 @@ from setuptools import find_packages, setup
 
 
 requirements = [
-    # Ideally, would specify `aicsimageio ~= 4.7` or similar (note no match on patch version),
-    # but the Dimensions object is not properly typed and > 4.7 ships with a `py.typed` file.
-    # Once this is fixed in aicsimageio, this restrictive version-range can be loosened.
-    "aicsimageio ~= 4.7.0",
+    "aicsimageio ~= 4.7",
     "aicspylibczi ~= 3.0.0",
     "numpy ~= 1.21",
 
