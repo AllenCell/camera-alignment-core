@@ -48,31 +48,37 @@ class RingAlignment:
         :param updated_mov_peak_dict:  A dictionary
             ({bead_number: (coor_y, coor_x)}) from moving beads
         :return:
-            ref_mov_coor_dict: A dictionary mapping the reference bead coordinates and moving bead coordinates
+            ref_mov_coor_dict: A dictionary mapping the reference bead coordinates
+                and moving bead coordinates
         """
-        # calculate potential bead matches using nearest neighbors
+        # find potential matches for beads
         match_dict, cost_dict, max_cost = self.pos_bead_matches(
             updated_ref_peak_dict, updated_mov_peak_dict
         )
         num_ref = int(max(updated_ref_peak_dict.keys()))
         num_mov = int(max(updated_mov_peak_dict.keys()))
 
-        # construct cost map for linear sum assignment
+        # generate cost matrix for optimization problem
         C = np.ones((num_ref, num_ref + num_mov)) * (max_cost * 5)
         for ref_bead in updated_ref_peak_dict.keys():
             if ref_bead in match_dict.keys():
                 for mov_bead, cost in zip(match_dict[ref_bead], cost_dict[ref_bead]):
                     C[int(ref_bead) - 1, int(mov_bead) - 1] = cost
+            # for each reference bead add a "false" bead for if it's missing in moving image segmetnation
             C[int(ref_bead) - 1, int(ref_bead + num_mov - 1)] = max_cost * 1.1
 
-        # perform optimization
+        # match beads and output coordinate dictionary
         ref_matches, mov_matches = linsum(C)
-
-        # assign matched beads to output dictionary
         ref_mov_coor_dict = {}
         for ref_bead, mov_bead in zip(ref_matches, mov_matches):
+            # reject beads that are matched to 'false' beads or outside threshold
             if mov_bead >= num_mov or C[ref_bead, mov_bead] > max_cost:
                 continue
+            if ref_bead + 1 not in updated_ref_peak_dict.keys():
+                continue
+            if mov_bead + 1 not in updated_mov_peak_dict.keys():
+                continue
+
             ref_mov_coor_dict.update(
                 {
                     updated_ref_peak_dict[ref_bead + 1]: updated_mov_peak_dict[
@@ -86,7 +92,7 @@ class RingAlignment:
         self,
         ref_peak_dict: Dict[int, Tuple[int, int]],
         mov_peak_dict: Dict[int, Tuple[int, int]],
-    ) -> Tuple[Dict[int, List[int]], Dict[int, int], int]:
+    ) -> Tuple[Dict[int, List[int]], Dict[int, int], Dict[int, int], int]:
         """
         Constrain ring matching problem by identifying which rings in the
         moving image are closer to a given reference image ring than the
@@ -105,8 +111,7 @@ class RingAlignment:
                 reference bead numbers and matching moving beads
             thresh_dist: The threshold distance calculated
         """
-        # determine threshold distance using median distance to nearest
-        # four neighbours
+        # calculate threshold distance with mean distance to nearest neighbors
         neigh = NearestNeighbors(n_neighbors=4)
         neigh.fit([coors for coors in ref_peak_dict.values()])
         mean_dist = []
@@ -116,12 +121,12 @@ class RingAlignment:
 
         thresh_dist = np.median(mean_dist) * 0.8
 
-        # calculate bead neighborhoods
+        # generate bead neighborhood
         tree_ref = KDTree(np.array([coors for coors in ref_peak_dict.values()]))
         tree_mov = KDTree(np.array([coors for coors in mov_peak_dict.values()]))
         neigh = tree_ref.query_ball_tree(tree_mov, thresh_dist)
 
-        # assign matching moving beads and distances to each reference bead
+        # match reference beads to moving beads within threshold distance
         match_dict = {}
         cost_dict = {}
         ref_beads = list(ref_peak_dict.keys())
@@ -135,6 +140,8 @@ class RingAlignment:
                     ref_peak_dict[ref_beads[idx_ref]], mov_peak_dict[mov_beads[idx_mov]]
                 )
                 costs.append(dist + 0.001)
+
+            match_dict[ref_beads[idx_ref]] = matches
             cost_dict[ref_beads[idx_ref]] = costs
 
         return match_dict, cost_dict, thresh_dist
