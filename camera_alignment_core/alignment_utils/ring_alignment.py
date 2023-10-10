@@ -74,10 +74,10 @@ class RingAlignment:
             # reject beads that are matched to 'false' beads or outside threshold
             if mov_bead >= num_mov or C[ref_bead, mov_bead] > max_cost:
                 continue
-            if ref_bead + 1 not in updated_ref_peak_dict.keys():
-                continue
-            if mov_bead + 1 not in updated_mov_peak_dict.keys():
-                continue
+            # if ref_bead + 1 not in updated_ref_peak_dict.keys():
+            #     continue
+            # if mov_bead + 1 not in updated_mov_peak_dict.keys():
+            #     continue
 
             ref_mov_coor_dict.update(
                 {
