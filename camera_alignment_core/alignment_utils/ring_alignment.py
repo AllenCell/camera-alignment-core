@@ -116,6 +116,8 @@ class RingAlignment:
             mean_dist.append(dist)
 
         thresh_dist = np.median(mean_dist) * 0.8
+        
+        offset = self.calc_cross_offset()
 
         # generate bead neighborhood
         tree_ref = KDTree(np.array([coors for coors in ref_peak_dict.values()]))
@@ -133,7 +135,8 @@ class RingAlignment:
             for idx_mov in idxs_mov:
                 matches.append(ref_beads[idx_mov])
                 dist = distance.euclidean(
-                    ref_peak_dict[ref_beads[idx_ref]], mov_peak_dict[mov_beads[idx_mov]]
+                    ref_peak_dict[ref_beads[idx_ref]], 
+                    mov_peak_dict[mov_beads[idx_mov]] + offset
                 )
                 costs.append(dist + 0.001)
 
@@ -141,6 +144,21 @@ class RingAlignment:
             cost_dict[ref_beads[idx_ref]] = costs
 
         return match_dict, cost_dict, thresh_dist
+    
+    def calc_cross_offset(self):
+        """
+        Estimate image offset by calculating the distance between the centroids
+        of the cross in the reference and moving images.
+        """
+        ref_cross = self.ref_rings_props[self.ref_rings_props["label"] == self.ref_cross_label]
+        mov_cross = self.mov_rings_props[self.mov_rings_props["label"] == self.mov_cross_label]
+        
+        offset = np.array([
+            ref_cross["centroid-0"].values[0] - mov_cross["centroid-0"].values[0],
+            ref_cross["centroid-1"].values[0] - mov_cross["centroid-1"].values[0]
+        ])
+        
+        return offset
 
     def rings_coor_dict(
         self, props: pd.DataFrame, cross_label: int
