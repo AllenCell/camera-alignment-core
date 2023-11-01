@@ -2,6 +2,7 @@ from collections import OrderedDict
 from distutils import dist
 import logging
 from typing import Dict, Tuple, List
+from math import sqrt
 
 import numpy as np
 import pandas as pd
@@ -65,14 +66,14 @@ class RingAlignment:
                 for mov_bead, cost in zip(match_dict[ref_bead], cost_dict[ref_bead]):
                     C[int(ref_bead) - 1, int(mov_bead) - 1] = cost
             # for each reference bead add a "false" bead for if it's missing in moving image segmetnation
-            C[int(ref_bead) - 1, int(ref_bead + num_mov - 1)] = max_cost * 1.1
+            C[int(ref_bead) - 1, int(ref_bead + num_mov) - 1] = max_cost * 1.1
 
         # match beads and output coordinate dictionary
         ref_matches, mov_matches = linsum(C)
         ref_mov_coor_dict = {}
         for ref_bead, mov_bead in zip(ref_matches, mov_matches):
             # reject beads that are matched to 'false' beads or outside threshold
-            if mov_bead >= num_mov or C[ref_bead, mov_bead] > max_cost:
+            if mov_bead >= num_mov or C[ref_bead, mov_bead] >= max_cost * 4:
                 continue
 
             ref_mov_coor_dict.update(
@@ -115,9 +116,12 @@ class RingAlignment:
             dist, _ = neigh.kneighbors([coor], n_neighbors=4)
             mean_dist.append(dist)
 
-        thresh_dist = np.median(mean_dist) * 0.8
+        thresh_dist = np.median(mean_dist) * 0.9
         
         offset = self.calc_cross_offset()
+        offset_mag = sqrt(offset[0]**2 + offset[1]**2)
+        if offset_mag > thresh_dist:
+            offset = (0, 0)
 
         # generate bead neighborhood
         tree_ref = KDTree(np.array([coors for coors in ref_peak_dict.values()]))
@@ -133,10 +137,10 @@ class RingAlignment:
             matches = []
             costs = []
             for idx_mov in idxs_mov:
-                matches.append(ref_beads[idx_mov])
+                matches.append(mov_beads[idx_mov])
                 dist = distance.euclidean(
                     ref_peak_dict[ref_beads[idx_ref]], 
-                    mov_peak_dict[mov_beads[idx_mov]] + offset
+                    tuple([m-o for m, o in zip(mov_peak_dict[mov_beads[idx_mov]],offset)])
                 )
                 costs.append(dist + 0.001)
 
@@ -154,8 +158,8 @@ class RingAlignment:
         mov_cross = self.mov_rings_props[self.mov_rings_props["label"] == self.mov_cross_label]
         
         offset = np.array([
-            ref_cross["centroid-0"].values[0] - mov_cross["centroid-0"].values[0],
-            ref_cross["centroid-1"].values[0] - mov_cross["centroid-1"].values[0]
+            mov_cross["centroid-0"].values[0] - ref_cross["centroid-0"].values[0],
+            mov_cross["centroid-1"].values[0] - ref_cross["centroid-1"].values[0]
         ])
         
         return offset
