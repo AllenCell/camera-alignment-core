@@ -139,7 +139,6 @@ class SegmentRings:
         #     from skimage.io import imsave
         #     import pdb; pdb.set_trace()
 
-        
         seg_cross = label_for_cross == cross_label
 
         return seg_cross, props
@@ -249,7 +248,7 @@ class SegmentRings:
             label_seg, properties=["label", "area", "centroid"]
         )
         props_df = pd.DataFrame(props)
-        
+
         cross_label = props_df.loc[
             (props_df["area"] == props_df["area"].max()), "label"
         ].values.tolist()[0]
@@ -322,7 +321,7 @@ class SegmentRings:
                 num_beads=num_beads,
                 minArea=minArea,
             )
-            
+
         # try:
         _, props_df, cross_label = self.filter_center_cross(label_rings)
         # except:

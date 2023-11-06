@@ -29,7 +29,6 @@ def generate_alignment_matrix(
     magnification: int,
     px_size_xy: float,
 ) -> Tuple[numpy.typing.NDArray[numpy.float16], AlignmentInfo]:
-
     log.debug(
         "Params -- reference_channel: %s; shift_channel: %s; magnification: %s; px_size_xy: %s",
         reference_channel,

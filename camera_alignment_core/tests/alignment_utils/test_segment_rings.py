@@ -71,7 +71,6 @@ class TestSegmentRings:
 
         square_error = []
         for GT_coor, seg_coor in coor_dict.items():
-
             square_error.append(
                 math.sqrt(
                     (GT_coor[0] - seg_coor[0]) ** 2 + (GT_coor[1] - seg_coor[1]) ** 2

@@ -117,9 +117,9 @@ class RingAlignment:
             mean_dist.append(dist)
 
         thresh_dist = np.median(mean_dist) * 0.9
-        
+
         offset = self.calc_cross_offset()
-        offset_mag = sqrt(offset[0]**2 + offset[1]**2)
+        offset_mag = sqrt(offset[0] ** 2 + offset[1] ** 2)
         if offset_mag > thresh_dist:
             offset = (0, 0)
 
@@ -139,8 +139,13 @@ class RingAlignment:
             for idx_mov in idxs_mov:
                 matches.append(mov_beads[idx_mov])
                 dist = distance.euclidean(
-                    ref_peak_dict[ref_beads[idx_ref]], 
-                    tuple([m-o for m, o in zip(mov_peak_dict[mov_beads[idx_mov]],offset)])
+                    ref_peak_dict[ref_beads[idx_ref]],
+                    tuple(
+                        [
+                            m - o
+                            for m, o in zip(mov_peak_dict[mov_beads[idx_mov]], offset)
+                        ]
+                    ),
                 )
                 costs.append(dist + 0.001)
 
@@ -148,20 +153,26 @@ class RingAlignment:
             cost_dict[ref_beads[idx_ref]] = costs
 
         return match_dict, cost_dict, thresh_dist
-    
+
     def calc_cross_offset(self):
         """
         Estimate image offset by calculating the distance between the centroids
         of the cross in the reference and moving images.
         """
-        ref_cross = self.ref_rings_props[self.ref_rings_props["label"] == self.ref_cross_label]
-        mov_cross = self.mov_rings_props[self.mov_rings_props["label"] == self.mov_cross_label]
-        
-        offset = np.array([
-            mov_cross["centroid-0"].values[0] - ref_cross["centroid-0"].values[0],
-            mov_cross["centroid-1"].values[0] - ref_cross["centroid-1"].values[0]
-        ])
-        
+        ref_cross = self.ref_rings_props[
+            self.ref_rings_props["label"] == self.ref_cross_label
+        ]
+        mov_cross = self.mov_rings_props[
+            self.mov_rings_props["label"] == self.mov_cross_label
+        ]
+
+        offset = np.array(
+            [
+                mov_cross["centroid-0"].values[0] - ref_cross["centroid-0"].values[0],
+                mov_cross["centroid-1"].values[0] - ref_cross["centroid-1"].values[0],
+            ]
+        )
+
         return offset
 
     def rings_coor_dict(

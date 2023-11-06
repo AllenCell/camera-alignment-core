@@ -59,7 +59,6 @@ class AlignmentQC:
     def report_full_metrics(
         self,
     ) -> Dict[str, Optional[object]]:
-
         missing = self.check_all_defined()
         if missing is not None:
             log.error(
