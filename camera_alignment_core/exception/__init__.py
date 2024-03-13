@@ -4,3 +4,7 @@ class IncompatibleImageException(BaseException):
 
 class UnsupportedMagnification(BaseException):
     pass
+
+
+class AlignmentUnsuccessful(BaseException):
+    pass

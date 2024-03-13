@@ -50,7 +50,10 @@ class TestAlignmentCore:
         )
 
         # Act
-        (actual_alignment_matrix, _,) = generate_alignment_matrix(
+        (
+            actual_alignment_matrix,
+            _,
+        ) = generate_alignment_matrix(
             optical_control_image_data,
             reference_channel=2,  # TaRFP
             shift_channel=3,  # CMDRP
@@ -81,7 +84,10 @@ class TestAlignmentCore:
         )
 
         # Act
-        (actual_alignment_matrix, _,) = generate_alignment_matrix(
+        (
+            actual_alignment_matrix,
+            _,
+        ) = generate_alignment_matrix(
             optical_control_image_data,
             reference_channel=2,  # TaRFP
             shift_channel=3,  # CMDRP
@@ -107,14 +113,20 @@ class TestAlignmentCore:
         pixel_size_xy = optical_control_image.physical_pixel_sizes.X
 
         # Act
-        (alignment_matrix_1, _,) = generate_alignment_matrix(
+        (
+            alignment_matrix_1,
+            _,
+        ) = generate_alignment_matrix(
             optical_control_image_data,
             reference_channel=2,  # TaRFP
             shift_channel=3,  # CMDRP
             magnification=magnification,
             px_size_xy=pixel_size_xy,
         )
-        (alignment_matrix_2, _,) = generate_alignment_matrix(
+        (
+            alignment_matrix_2,
+            _,
+        ) = generate_alignment_matrix(
             optical_control_image_data,
             reference_channel=2,  # TaRFP
             shift_channel=3,  # CMDRP
@@ -147,7 +159,6 @@ class TestAlignmentCore:
         expectation_image_path: str,
         magnification: Magnification,
     ):
-
         # Arrange
         image, local_image_path = get_test_image(image_path)
         channel_info = channel_info_factory(local_image_path)
@@ -164,7 +175,10 @@ class TestAlignmentCore:
         # so assert the `X` property `is not None` before use in `generate_alignment_matrix`
         assert optical_control_image.physical_pixel_sizes.X is not None
 
-        (alignment_matrix, _,) = generate_alignment_matrix(
+        (
+            alignment_matrix,
+            _,
+        ) = generate_alignment_matrix(
             optical_control_image=optical_control_image_data,
             # TaRFP should have been used instead,
             # but H3342 was used as ref channel when ALIGNED_ZSD1_IMAGE_URL was created

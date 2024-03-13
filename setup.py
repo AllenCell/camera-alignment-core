@@ -5,9 +5,9 @@ requirements = [
     "aicsimageio ~= 4.7",
     "aicspylibczi ~= 3.0.0",
     "numpy ~= 1.21",
-
     # v0.19.3 causes test failure for TestAlignmentCore::test_align_image
-    "scikit-image == 0.19.2"
+    "scikit-image == 0.19.2",
+    "scikit-learn == 1.3.1",
 ]
 
 dev_requirements = [
@@ -18,19 +18,14 @@ dev_requirements = [
     "mypy ~= 0.910",
     "pytest ~= 6.2.5",
     "pytest-raises ~= 0.11",
-
     # Dev workflow
     "pre-commit ~= 2.17.0",
-
     # Build
     "build == 0.7.0",
-
     # Version
     "bump2version ~= 1.0.1",
-
     # Publish
     "twine ~= 3.7.1",
-
     # Documentation generation
     "Sphinx ~= 4.4.0",
     "furo == 2022.1.2",  # Third-party theme (https://pradyunsg.me/furo/quickstart/)

@@ -134,6 +134,7 @@ class SegmentRings:
                     break
 
         _, props, cross_label = self.filter_center_cross(label_for_cross)
+
         seg_cross = label_for_cross == cross_label
 
         return seg_cross, props
@@ -243,6 +244,7 @@ class SegmentRings:
             label_seg, properties=["label", "area", "centroid"]
         )
         props_df = pd.DataFrame(props)
+
         cross_label = props_df.loc[
             (props_df["area"] == props_df["area"].max()), "label"
         ].values.tolist()[0]
