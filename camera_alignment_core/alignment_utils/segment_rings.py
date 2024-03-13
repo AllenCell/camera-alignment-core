@@ -133,11 +133,7 @@ class SegmentRings:
                 ):
                     break
 
-        # try:
         _, props, cross_label = self.filter_center_cross(label_for_cross)
-        # except:
-        #     from skimage.io import imsave
-        #     import pdb; pdb.set_trace()
 
         seg_cross = label_for_cross == cross_label
 
@@ -322,10 +318,6 @@ class SegmentRings:
                 minArea=minArea,
             )
 
-        # try:
         _, props_df, cross_label = self.filter_center_cross(label_rings)
-        # except:
-        #     from skimage.io import imsave
-        #     import pdb; pdb.set_trace()
 
         return seg_rings, label_rings, props_df, cross_label
