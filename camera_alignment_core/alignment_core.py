@@ -141,12 +141,15 @@ def align_image(
                 aligned_channel[z_index, :, :] = skimage.transform.warp(
                     unaligned_channel[z_index, :, :],
                     inverse_map=alignment_matrix,
-                    order=3,
+                    order=0, #3
                 )
             # skimage.transform.warp converts input image to the float range (0..1), so rescale to uint16
-            aligned_image[channel_index] = (
-                aligned_channel * numpy.iinfo(numpy.uint16).max
+            aligned_image[channel_index] = skimage.exposure.rescale_intensity(
+                aligned_channel, in_range=(0, 1), out_range=(0, numpy.iinfo(numpy.uint16).max)
             ).astype(numpy.uint16)
+            # aligned_image[channel_index] = (
+            #     aligned_channel * numpy.iinfo(numpy.uint16).max
+            # ).astype(numpy.uint16)
         else:
             log.debug("Skipping alignment for %s channel", channel_index)
             aligned_image[channel_index] = unaligned_channel
