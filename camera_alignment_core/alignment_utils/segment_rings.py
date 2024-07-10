@@ -207,11 +207,11 @@ class SegmentRings:
             seg = self.dot_2d_slice_by_slice_wrapper(img, s2_param)[0, :, :]
 
             remove_small = remove_small_objects(
-                seg > 0, min_size=minArea, connectivity=1, in_place=False
+                seg > 0, min_size=minArea, connectivity=1
             )
 
-            dilate = morphology.binary_dilation(remove_small, selem=morphology.disk(2))
-            seg_rings = morphology.binary_erosion(dilate, selem=morphology.disk(2))
+            dilate = morphology.binary_dilation(remove_small, footprint=morphology.disk(2))
+            seg_rings = morphology.binary_erosion(dilate, footprint=morphology.disk(2))
 
             seg = np.logical_or(seg_cross, seg_rings).astype(np.bool_)
             label = measure.label(seg).astype(np.uint16)

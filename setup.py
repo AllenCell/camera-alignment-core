@@ -4,10 +4,10 @@ from setuptools import find_packages, setup
 requirements = [
     "aicsimageio ~= 4.7",
     "aicspylibczi ~= 3.0.0",
-    "numpy ~= 1.21",
+    "numpy",
     # v0.19.3 causes test failure for TestAlignmentCore::test_align_image
-    "scikit-image == 0.19.2",
-    "scikit-learn == 1.3.1",
+    "scikit-image ~= 0.21.0",
+    "scikit-learn ~= 1.3.1",
 ]
 
 dev_requirements = [

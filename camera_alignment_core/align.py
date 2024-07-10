@@ -55,6 +55,7 @@ class Align:
         out_dir: typing.Union[str, pathlib.Path],
         reference_channel_index: typing.Optional[int] = None,
         shift_channel_index: typing.Optional[int] = None,
+        alignment_transform: typing.Optional[AlignmentTransform] = None,
     ) -> None:
         """Constructor.
 
@@ -83,8 +84,10 @@ class Align:
             Relative to `reference_channel_index`.
             See `reference_channel_index` description for detail on what happens if this argument is not provided.
         """
-        self._optical_control_path = pathlib.Path(optical_control)
-        self._optical_control = AICSImage(optical_control)
+        if not alignment_transform:
+            self._optical_control_path = pathlib.Path(optical_control)
+            assert self._optical_control_path.exists(), f"File not found: {optical_control}. If no alignment transform is provided you must include a path to the optical control image."
+            self._optical_control = AICSImage(optical_control)
 
         self._magnification = magnification
         self._out_dir = pathlib.Path(out_dir)
@@ -93,10 +96,14 @@ class Align:
         self._reference_channel_index = reference_channel_index
         self._shift_channel_index = shift_channel_index
 
-        self._alignment_matrix: typing.Optional[
-            numpy.typing.NDArray[numpy.float16]
-        ] = None
-        self._alignment_info: typing.Optional[AlignmentInfo] = None
+        if alignment_transform:
+            self._alignment_matrix = alignment_transform.matrix
+            self._alignment_info = alignment_transform.info
+        else:
+            self._alignment_matrix: typing.Optional[
+                numpy.typing.NDArray[numpy.float16]
+            ] = None
+            self._alignment_info: typing.Optional[AlignmentInfo] = None
 
     @property
     def alignment_transform(self) -> AlignmentTransform:
