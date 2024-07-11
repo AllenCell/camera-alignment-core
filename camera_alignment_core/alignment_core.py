@@ -105,6 +105,7 @@ def align_image(
     image: numpy.typing.NDArray[numpy.uint16],
     alignment_matrix: numpy.typing.NDArray[numpy.float16],
     channels_to_shift: List[int],
+    interpolation: int = 0,
 ) -> numpy.typing.NDArray[numpy.uint16]:
     """Align a CZYX `image` using `alignment_matrix`.
     Will only apply the `alignment_matrix` to image slices within the channels specified in
@@ -119,6 +120,8 @@ def align_image(
     channels_to_shift : List[int]
         Index positions of channels within `image` that should be shifted. N.b.: indices start at 0.
         E.g.: Specify [0, 2] to apply the alignment transform to channels at index positions 0 and 2 within `image`.
+    interpolation : int
+        Interpolation order to use when applying the alignment transform. Default is 0.
     """
     if not image.ndim == 4:
         raise IncompatibleImageException(
@@ -141,7 +144,7 @@ def align_image(
                 aligned_channel[z_index, :, :] = skimage.transform.warp(
                     unaligned_channel[z_index, :, :],
                     inverse_map=alignment_matrix,
-                    order=0, #3
+                    order=interpolation, #3
                     preserve_range=True,
                 )
             
