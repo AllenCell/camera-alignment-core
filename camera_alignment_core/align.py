@@ -55,6 +55,7 @@ class Align:
         out_dir: typing.Union[str, pathlib.Path],
         reference_channel_index: typing.Optional[int] = None,
         shift_channel_index: typing.Optional[int] = None,
+        alignment_transform: typing.Optional[AlignmentTransform] = None,
     ) -> None:
         """Constructor.
 
@@ -82,9 +83,16 @@ class Align:
             Which channel of `optical_control` to shift for generation of the alignment matrix.
             Relative to `reference_channel_index`.
             See `reference_channel_index` description for detail on what happens if this argument is not provided.
+        alignment_transform : Optional[AlignmentTransform]
+            Precomputed alignment transform to use for aligning images.
+            If provided, `optical_control` will be ignored.
         """
-        self._optical_control_path = pathlib.Path(optical_control)
-        self._optical_control = AICSImage(optical_control)
+        if not alignment_transform:
+            self._optical_control_path = pathlib.Path(optical_control)
+            assert (
+                self._optical_control_path.exists()
+            ), f"File not found: {optical_control}. If no alignment transform is provided you must include a path to the optical control image."
+            self._optical_control = AICSImage(optical_control)
 
         self._magnification = magnification
         self._out_dir = pathlib.Path(out_dir)
@@ -93,10 +101,14 @@ class Align:
         self._reference_channel_index = reference_channel_index
         self._shift_channel_index = shift_channel_index
 
-        self._alignment_matrix: typing.Optional[
-            numpy.typing.NDArray[numpy.float16]
-        ] = None
-        self._alignment_info: typing.Optional[AlignmentInfo] = None
+        if alignment_transform:
+            self._alignment_matrix = alignment_transform.matrix
+            self._alignment_info = alignment_transform.info
+        else:
+            self._alignment_matrix: typing.Optional[
+                numpy.typing.NDArray[numpy.float16]
+            ] = None
+            self._alignment_info: typing.Optional[AlignmentInfo] = None
 
     @property
     def alignment_transform(self) -> AlignmentTransform:
@@ -201,6 +213,7 @@ class Align:
         scenes: typing.List[int] = [],
         timepoints: typing.List[int] = [],
         crop_output: bool = True,
+        interpolation: int = 0,
     ) -> typing.List[AlignedImage]:
         """Align channels within `image` using similarity transform generated from the optical control image passed to
         this instance at construction. Scenes within `image` will be saved to their own image files once aligned.
@@ -226,6 +239,8 @@ class Align:
             Optional flag for toggling whether to crop aligned image according to standard dimensions
             for the magnification at which the image was acquired. Defaults to `True`, which means,
             "yes, crop the image."
+        interpolation : Optional[int]
+            Interpolation order to use when applying the alignment transform. Default is 0.
 
         Returns
         -------
@@ -243,16 +258,16 @@ class Align:
             aics_image.set_scene(scene)
 
             # Align timepoints within scene
-            processed_timepoints: typing.List[
-                numpy.typing.NDArray[numpy.uint16]
-            ] = list()
+            processed_timepoints: typing.List[numpy.typing.NDArray[numpy.uint16]] = (
+                list()
+            )
             timepoint_indices = (
                 timepoints if timepoints else range(0, aics_image.dims.T)
             )
             for timepoint in timepoint_indices:
                 image_slice = aics_image.get_image_data("CZYX", T=timepoint)
                 processed = align_image(
-                    image_slice, self.alignment_transform.matrix, channels_to_shift
+                    image_slice, self.alignment_transform.matrix, channels_to_shift, interpolation
                 )
                 if crop_output:
                     processed_timepoints.append(crop(processed, self._magnification))
