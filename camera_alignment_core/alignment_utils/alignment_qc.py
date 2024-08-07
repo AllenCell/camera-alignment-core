@@ -16,13 +16,13 @@ log = logging.getLogger(LOGGER_NAME)
 class AlignmentQC:
     def __init__(
         self,
-        reference: NDArray[np.uint16] = None,
-        moving: NDArray[np.uint16] = None,
-        reference_seg: NDArray[np.uint16] = None,
-        moving_seg: NDArray[np.uint16] = None,
-        ref_mov_coor_dict: Dict[Tuple[int, int], Tuple[int, int]] = None,
-        rev_coor_dict: Dict[Tuple[int, int], Tuple[int, int]] = None,
-        tform: tf.SimilarityTransform = None,
+        reference: Optional[NDArray[np.uint16]] = None,
+        moving: Optional[NDArray[np.uint16]] = None,
+        reference_seg: Optional[NDArray[np.uint16]] = None,
+        moving_seg: Optional[NDArray[np.uint16]] = None,
+        ref_mov_coor_dict: Optional[Dict[Tuple[int, int], Tuple[int, int]]] = None,
+        rev_coor_dict: Optional[Dict[Tuple[int, int], Tuple[int, int]]] = None,
+        tform: Optional[tf.SimilarityTransform] = None,
     ):
         self.reference = reference
         self.moving_source = moving
@@ -276,10 +276,10 @@ class AlignmentQC:
 
     def report_changes_in_coordinates_mapping(self) -> Tuple[bool, float]:
         """
-        Report changes in beads (center of FOV) centroid coordinates before and after transform. A good transform will
-        reduce the difference in distances, or at least not increase too much (thresh=5), between transformed_mov_beads and
-        ref_beads than mov_beads and ref_beads. A bad transform will increase the difference in distances between
-        transformed_mov_beads and ref_beads.
+        Report changes in beads (center of FOV) centroid coordinates before and after transform. A good
+        transform will reduce the difference in distances, or at least not increase too much (thresh=5),
+        between transformed_mov_beads and ref_beads than mov_beads and ref_beads. A bad transform will
+        increase the difference in distances between transformed_mov_beads and ref_beads.
         """
 
         if self.ref_mov_coor_dict is None:

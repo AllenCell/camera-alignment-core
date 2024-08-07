@@ -91,7 +91,8 @@ class Align:
             self._optical_control_path = pathlib.Path(optical_control)
             assert (
                 self._optical_control_path.exists()
-            ), f"File not found: {optical_control}. If no alignment transform is provided you must include a path to the optical control image."
+            ), f"File not found: {optical_control}. If no alignment transform"
+            " is provided you must include a path to the optical control image."
             self._optical_control = AICSImage(optical_control)
 
         self._magnification = magnification
@@ -101,14 +102,14 @@ class Align:
         self._reference_channel_index = reference_channel_index
         self._shift_channel_index = shift_channel_index
 
+        self._alignment_matrix: typing.Optional[numpy.typing.NDArray[numpy.float16]]
+        self._alignment_info: typing.Optional[AlignmentInfo]
         if alignment_transform:
             self._alignment_matrix = alignment_transform.matrix
             self._alignment_info = alignment_transform.info
         else:
-            self._alignment_matrix: typing.Optional[
-                numpy.typing.NDArray[numpy.float16]
-            ] = None
-            self._alignment_info: typing.Optional[AlignmentInfo] = None
+            self._alignment_matrix = None
+            self._alignment_info = None
 
     @property
     def alignment_transform(self) -> AlignmentTransform:
@@ -258,16 +259,19 @@ class Align:
             aics_image.set_scene(scene)
 
             # Align timepoints within scene
-            processed_timepoints: typing.List[numpy.typing.NDArray[numpy.uint16]] = (
-                list()
-            )
+            processed_timepoints: typing.List[
+                numpy.typing.NDArray[numpy.uint16]
+            ] = list()
             timepoint_indices = (
                 timepoints if timepoints else range(0, aics_image.dims.T)
             )
             for timepoint in timepoint_indices:
                 image_slice = aics_image.get_image_data("CZYX", T=timepoint)
                 processed = align_image(
-                    image_slice, self.alignment_transform.matrix, channels_to_shift, interpolation
+                    image_slice,
+                    self.alignment_transform.matrix,
+                    channels_to_shift,
+                    interpolation,
                 )
                 if crop_output:
                     processed_timepoints.append(crop(processed, self._magnification))

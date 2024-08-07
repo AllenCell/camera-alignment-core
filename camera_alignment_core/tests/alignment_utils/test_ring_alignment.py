@@ -33,13 +33,19 @@ class TestRingAlign:
                 ref_dict[bead_num] = ref_coor
                 mov_dict[bead_num] = mov_coor
                 bead_num += 1
+        dummy_dict = {
+            "label": [0],
+            "area": [3],
+            "centroid-0": [0],
+            "centroid-1": [1],
+        }
 
         # Act
         # dummy init parameters
         ref_mov_coor_dict = RingAlignment(
-            pandas.DataFrame(),
+            pandas.DataFrame(dummy_dict),
             0,
-            pandas.DataFrame(),
+            pandas.DataFrame(dummy_dict),
             0,
         ).assign_ref_to_mov(ref_dict, mov_dict)
 

@@ -144,11 +144,11 @@ def align_image(
                 aligned_channel[z_index, :, :] = skimage.transform.warp(
                     unaligned_channel[z_index, :, :],
                     inverse_map=alignment_matrix,
-                    order=interpolation, #3
+                    order=interpolation,  # 3
                     preserve_range=True,
                 )
-            
-            aligned_image[channel_index] =  aligned_channel
+
+            aligned_image[channel_index] = aligned_channel
         else:
             log.debug("Skipping alignment for %s channel", channel_index)
             aligned_image[channel_index] = unaligned_channel
