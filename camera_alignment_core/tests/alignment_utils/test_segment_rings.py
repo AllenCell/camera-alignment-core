@@ -1,4 +1,5 @@
 import math
+from typing import Dict, List
 
 import numpy
 from numpy.core.fromnumeric import mean
@@ -17,7 +18,21 @@ class TestSegmentRings:
         # Arrange
         ball_radius = 3
 
+        ref_data_dict: Dict[str, List[int]] = {
+            "label": [],
+            "centroid-0": [],
+            "centroid-1": [],
+        }
+        mov_data_dict: Dict[str, List[int]] = {
+            "label": [],
+            "centroid-0": [],
+            "centroid-1": [],
+        }
+
+        # initialize to all zeros
         synthetic_GT = numpy.zeros((11, 405, 611), numpy.uint16)
+        count = 0
+        # insert 9 spheres of 1s within the zeros, centered at the x,y intersections, z=6
         for y in numpy.arange(10, 400, 30):
             for x in numpy.arange(10, 610, 30):
                 synthetic_GT[
@@ -25,15 +40,25 @@ class TestSegmentRings:
                     y - ball_radius : y + ball_radius + 1,
                     x - ball_radius : x + ball_radius + 1,
                 ] = ball(ball_radius)
+                ref_data_dict["label"].append(count)
+                ref_data_dict["centroid-0"].append(x)
+                ref_data_dict["centroid-1"].append(y)
+                mov_data_dict["label"].append(count)
+                mov_data_dict["centroid-0"].append(x + ball_radius)
+                mov_data_dict["centroid-1"].append(y + ball_radius)
+                count += 1
 
+        # compose a cross of '1' in a field of 0
         cross = numpy.zeros((11, 31, 31))
         cross[:, 13:20, :] = 1
         cross[:, :, 13:20] = 1
         cross[:2, :, :] = 0
         cross[-2:, :, :] = 0
 
+        # add the cross to the field of zeros
         synthetic_GT[:, 174:205, 294:325] = cross
         synthetic_image = (synthetic_GT * 20000) + 5000
+        # smooth out the image over the expanded pixels/array size
         synthetic_image += numpy.random.normal(
             loc=1, scale=0.2, size=synthetic_image.shape
         ).astype(numpy.uint16) * numpy.mean(synthetic_image.flatten()).astype(
@@ -59,13 +84,17 @@ class TestSegmentRings:
 
         for i, obj in enumerate(GT_props):
             GT_centroids[i] = obj.centroid
+            ref_data_dict["centroid-0"][i] = obj.centroid[0]
+            ref_data_dict["centroid-1"][i] = obj.centroid[1]
         for i, obj in enumerate(seg_props):
             seg_centroids[i] = obj.centroid
+            mov_data_dict["centroid-0"][i] = obj.centroid[0]
+            mov_data_dict["centroid-1"][i] = obj.centroid[1]
 
         coor_dict = RingAlignment(
-            pandas.DataFrame(),
+            pandas.DataFrame(ref_data_dict),
             0,
-            pandas.DataFrame(),
+            pandas.DataFrame(mov_data_dict),
             0,
         ).assign_ref_to_mov(GT_centroids, seg_centroids)
 

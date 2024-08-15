@@ -24,6 +24,7 @@ from camera_alignment_core.exception import (
 )
 
 from . import (
+    ALIGNED_20X_IMAGE_URL,
     ALIGNED_ZSD1_IMAGE_URL,
     ARGOLIGHT_OPTICAL_CONTROL_IMAGE_URL,
     UNALIGNED_ZSD1_IMAGE_URL,
@@ -72,10 +73,19 @@ class TestAlignmentCore:
         optical_control_image, _ = get_test_image(ZSD_20x_OPTICAL_CONTROL_IMAGE_URL)
         optical_control_image_data = optical_control_image.get_image_data("CZYX", T=0)
 
+        # original matrix output
+        # expected_matrix = numpy.array(
+        #     [
+        #         [1.00122588e00, -3.02161488e-03, 1.91048540e00],
+        #         [3.02161488e-03, 1.00122588e00, -4.75823245e00],
+        #         [0.00000000e00, 0.00000000e00, 1.00000000e00],
+        #     ]
+        # )
+        # after Filip's edits:
         expected_matrix = numpy.array(
             [
-                [1.00122588e00, -3.02161488e-03, 1.91048540e00],
-                [3.02161488e-03, 1.00122588e00, -4.75823245e00],
+                [1.00075731e00, -1.21992299e-03, 9.46469075e-01],
+                [1.21992299e-03, 1.00075731e00, -2.08301646e00],
                 [0.00000000e00, 0.00000000e00, 1.00000000e00],
             ]
         )
@@ -138,6 +148,12 @@ class TestAlignmentCore:
                 ALIGNED_ZSD1_IMAGE_URL,
                 Magnification.ONE_HUNDRED,
             ),
+            (  # test control image against itself
+                ZSD_20x_OPTICAL_CONTROL_IMAGE_URL,
+                ZSD_20x_OPTICAL_CONTROL_IMAGE_URL,
+                ALIGNED_20X_IMAGE_URL,
+                Magnification.TWENTY,
+            ),
         ],
     )
     def test_align_image(
@@ -148,6 +164,7 @@ class TestAlignmentCore:
         magnification: Magnification,
     ):
         # Arrange
+        expectation_image, _ = get_test_image(expectation_image_path)
         image, local_image_path = get_test_image(image_path)
         channel_info = channel_info_factory(local_image_path)
         back_camera_channel_indices = [
@@ -173,8 +190,6 @@ class TestAlignmentCore:
             px_size_xy=optical_control_image.physical_pixel_sizes.X,
         )
 
-        expectation_image, _ = get_test_image(expectation_image_path)
-
         # Act
         result = align_image(
             image.get_image_data("CZYX", T=0),
@@ -186,9 +201,9 @@ class TestAlignmentCore:
         cropped_result = crop(result, magnification)
 
         # Assert
-        assert numpy.array_equal(
-            cropped_result, expectation_image.get_image_data("CZYX", T=0)
-        )
+        expected_data = expectation_image.get_image_data("CZYX", T=0)
+        assert cropped_result.shape == expected_data.shape
+        assert numpy.allclose(cropped_result, expected_data, atol=1e-14)
 
     @pytest.mark.parametrize(
         [
