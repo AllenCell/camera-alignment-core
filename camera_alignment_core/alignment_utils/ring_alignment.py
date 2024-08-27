@@ -51,7 +51,7 @@ class RingAlignment:
                 and moving bead coordinates
         """
         # find potential matches for beads
-        # (thresh_dist-> max_cost)
+        # max_cost gets a value from thresh_dist in the function
         match_dict, cost_dict, max_cost = self.pos_bead_matches(
             updated_ref_peak_dict, updated_mov_peak_dict
         )
@@ -150,7 +150,6 @@ class RingAlignment:
 
             match_dict[ref_beads[idx_ref]] = matches
             cost_dict[ref_beads[idx_ref]] = costs
-        # error: Incompatible return value type
         return match_dict, cost_dict, thresh_dist
 
     def calc_cross_offset(self):

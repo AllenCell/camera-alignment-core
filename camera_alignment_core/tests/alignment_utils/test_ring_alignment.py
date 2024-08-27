@@ -13,9 +13,9 @@ class TestRingAlign:
     @pytest.mark.parametrize(
         ["num_beads", "perturb_x", "perturb_y"],
         [
-            ((4, 4), 1, 1),
-            ((10, 10), -4, 20),
-            ((15, 10), 30, -20),
+            ((4, 4), 1, 1),  # very simple test
+            ((10, 10), -4, 20),  # small test
+            ((15, 10), 30, -20),  # mid-range test
             ((15, 10), 60, -40),  # total perturb close to distance between pts
         ],
     )
@@ -38,6 +38,7 @@ class TestRingAlign:
         bead_num = 0
         for x in range(num_beads[0]):
             for y in range(num_beads[1]):
+                # multiply coor by 100 to expand the field
                 ref_coor = (x * 100, y * 100)
                 mov_coor = (ref_coor[0] + perturb_x, ref_coor[1] + perturb_y)
 
