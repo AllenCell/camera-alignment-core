@@ -103,7 +103,7 @@ class SegmentRings:
         self,
         img: np.typing.NDArray[np.uint16],
         mult_factor_range: Tuple[int, int] = (1, 5),
-        input_mult_factor: float = None,
+        input_mult_factor: Optional[float] = 0.0,
     ) -> Tuple[np.typing.NDArray[np.bool_], pd.DataFrame]:
         """
         Segments the center cross in the image through iterating the intensity-threshold parameter until one object
@@ -210,7 +210,9 @@ class SegmentRings:
                 seg > 0, min_size=minArea, connectivity=1
             )
 
-            dilate = morphology.binary_dilation(remove_small, footprint=morphology.disk(2))
+            dilate = morphology.binary_dilation(
+                remove_small, footprint=morphology.disk(2)
+            )
             seg_rings = morphology.binary_erosion(dilate, footprint=morphology.disk(2))
 
             seg = np.logical_or(seg_cross, seg_rings).astype(np.bool_)

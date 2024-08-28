@@ -1,4 +1,5 @@
 import typing
+from typing import Dict, List
 
 import pandas
 import pytest
@@ -12,9 +13,10 @@ class TestRingAlign:
     @pytest.mark.parametrize(
         ["num_beads", "perturb_x", "perturb_y"],
         [
-            ((4, 4), 1, 1),
-            ((10, 10), -4, 20),
-            ((15, 10), 60, -40),
+            ((4, 4), 1, 1),  # very simple test
+            ((10, 10), -4, 20),  # small test
+            ((15, 10), 30, -20),  # mid-range test
+            ((15, 10), 60, -40),  # total perturb close to distance between pts
         ],
     )
     def test_assign_ref_to_mov(
@@ -23,23 +25,40 @@ class TestRingAlign:
         # Assign
         ref_dict = {}
         mov_dict = {}
-
+        ref_data_dict: Dict[str, List[int]] = {
+            "label": [],
+            "centroid-0": [],
+            "centroid-1": [],
+        }
+        mov_data_dict: Dict[str, List[int]] = {
+            "label": [],
+            "centroid-0": [],
+            "centroid-1": [],
+        }
         bead_num = 0
         for x in range(num_beads[0]):
             for y in range(num_beads[1]):
+                # multiply coor by 100 to expand the field
                 ref_coor = (x * 100, y * 100)
                 mov_coor = (ref_coor[0] + perturb_x, ref_coor[1] + perturb_y)
 
                 ref_dict[bead_num] = ref_coor
                 mov_dict[bead_num] = mov_coor
+
+                ref_data_dict["label"].append(bead_num)
+                ref_data_dict["centroid-0"].append(x * 100)
+                ref_data_dict["centroid-1"].append(y * 100)
+                mov_data_dict["label"].append(bead_num)
+                mov_data_dict["centroid-0"].append(ref_coor[0] + perturb_x)
+                mov_data_dict["centroid-1"].append(ref_coor[1] + perturb_y)
                 bead_num += 1
 
         # Act
         # dummy init parameters
         ref_mov_coor_dict = RingAlignment(
-            pandas.DataFrame(),
+            pandas.DataFrame(ref_data_dict),
             0,
-            pandas.DataFrame(),
+            pandas.DataFrame(mov_data_dict),
             0,
         ).assign_ref_to_mov(ref_dict, mov_dict)
 

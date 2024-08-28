@@ -1,19 +1,17 @@
-from collections import OrderedDict
-from distutils import dist
 import logging
-from typing import Dict, Tuple, List
 from math import sqrt
+from typing import Dict, List, Tuple
 
 import numpy as np
 import pandas as pd
-from scipy.spatial import distance, KDTree
+from scipy.optimize import (
+    linear_sum_assignment as linsum,
+)
+from scipy.spatial import KDTree, distance
 from skimage import transform as tf
 from sklearn.neighbors import NearestNeighbors
-from scipy.optimize import linprog
-from scipy.optimize import linear_sum_assignment as linsum
 
 from ..constants import LOGGER_NAME
-from ..exception import AlignmentUnsuccessful
 from .alignment_info import AlignmentInfo
 
 log = logging.getLogger(LOGGER_NAME)
@@ -53,6 +51,7 @@ class RingAlignment:
                 and moving bead coordinates
         """
         # find potential matches for beads
+        # max_cost gets a value from thresh_dist in the function
         match_dict, cost_dict, max_cost = self.pos_bead_matches(
             updated_ref_peak_dict, updated_mov_peak_dict
         )
@@ -89,7 +88,7 @@ class RingAlignment:
         self,
         ref_peak_dict: Dict[int, Tuple[int, int]],
         mov_peak_dict: Dict[int, Tuple[int, int]],
-    ) -> Tuple[Dict[int, List[int]], Dict[int, int], Dict[int, int], int]:
+    ) -> Tuple[Dict[int, List[int]], Dict[int, List[float]], float]:
         """
         Constrain ring matching problem by identifying which rings in the
         moving image are closer to a given reference image ring than the
@@ -116,7 +115,7 @@ class RingAlignment:
             dist, _ = neigh.kneighbors([coor], n_neighbors=4)
             mean_dist.append(dist)
 
-        thresh_dist = np.median(mean_dist) * 0.9
+        thresh_dist: float = np.median(mean_dist) * 0.9
 
         offset = self.calc_cross_offset()
         offset_mag = sqrt(offset[0] ** 2 + offset[1] ** 2)
@@ -129,13 +128,13 @@ class RingAlignment:
         neigh = tree_ref.query_ball_tree(tree_mov, thresh_dist)
 
         # match reference beads to moving beads within threshold distance
-        match_dict = {}
-        cost_dict = {}
+        match_dict: Dict[int, List[int]] = {}
+        cost_dict: Dict[int, List[float]] = {}
         ref_beads = list(ref_peak_dict.keys())
         mov_beads = list(mov_peak_dict.keys())
         for idx_ref, idxs_mov in enumerate(neigh):
-            matches = []
-            costs = []
+            matches: List[int] = []
+            costs: List[float] = []
             for idx_mov in idxs_mov:
                 matches.append(mov_beads[idx_mov])
                 dist = distance.euclidean(
@@ -151,7 +150,6 @@ class RingAlignment:
 
             match_dict[ref_beads[idx_ref]] = matches
             cost_dict[ref_beads[idx_ref]] = costs
-
         return match_dict, cost_dict, thresh_dist
 
     def calc_cross_offset(self):
