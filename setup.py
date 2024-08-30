@@ -2,7 +2,7 @@ from setuptools import find_packages, setup
 
 
 requirements = [
-    "aicsimageio ~= 4.9.2",
+    "aicsimageio ~= 4.13.0",
     "aicspylibczi ~= 3.2",
     "numpy",
     # v0.19.3 causes test failure for TestAlignmentCore::test_align_image
