@@ -1,1 +1,2 @@
 -e .[dev]
+imagecodecs==2021.4.28
