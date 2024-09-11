@@ -27,7 +27,7 @@ dev_requirements = [
     # Publish
     "twine ~= 3.7.1",
     # Documentation generation
-    "Sphinx ~= 4.4.0",
+    "Sphinx ~= 5.0.0",
     "furo == 2022.1.2",  # Third-party theme (https://pradyunsg.me/furo/quickstart/)
     "m2r2 ~= 0.3.2",  # Sphinx extension for parsing README.md as reST and including in Sphinx docs
 ]
