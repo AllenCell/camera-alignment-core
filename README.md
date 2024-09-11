@@ -129,6 +129,12 @@ see `Makefile` for others or to inspect the underlying scripts run as part of th
     that you are working in a clean workspace. This, in combination with `make install`,
     should be the first thing you do if your branch is building locally but failing in CI.
 
+4.  Releases:
+
+    Releasing fixes requires more than merging to main.
+    1. everything in step 2 above: (eg, make lint type-check fmt import-sort )
+    2. make doc:  (to confirm the docs build)
+    3. make \[bumpversion-major|bumpversion-minor|bumpversion-patch|bumpversion-dev\]: to actually create a new tag
 
 **Allen Institute Software License**
 
