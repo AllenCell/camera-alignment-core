@@ -12,6 +12,14 @@ camera\_alignment\_core.alignment\_utils.alignment\_info module
    :undoc-members:
    :show-inheritance:
 
+camera\_alignment\_core.alignment\_utils.alignment\_qc module
+-------------------------------------------------------------
+
+.. automodule:: camera_alignment_core.alignment_utils.alignment_qc
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 camera\_alignment\_core.alignment\_utils.crop\_rings module
 -----------------------------------------------------------
 
