@@ -91,9 +91,9 @@ alignment_info = align.alignment_transform.info
 ##### Low-level API
 In addition, the lower-level functional building blocks used internally by [Align](https://aics-int.github.io/camera-alignment-core/camera_alignment_core.html#camera_alignment_core.align.Align) are accessible in the `camera_alignment_core.alignment_core` module. See:
 1. [align_image](https://aics-int.github.io/camera-alignment-core/camera_alignment_core.html#camera_alignment_core.alignment_core.align_image)
-1. [apply_alignment_matrix](https://aics-int.github.io/camera-alignment-core/camera_alignment_core.html#camera_alignment_core.alignment_core.apply_alignment_matrix)
-1. [crop](https://aics-int.github.io/camera-alignment-core/camera_alignment_core.html#camera_alignment_core.alignment_core.crop)
-1. [generate_alignment_matrix](https://aics-int.github.io/camera-alignment-core/camera_alignment_core.html#camera_alignment_core.alignment_core.generate_alignment_matrix)
+2. [apply_alignment_matrix](https://aics-int.github.io/camera-alignment-core/camera_alignment_core.html#camera_alignment_core.alignment_core.apply_alignment_matrix)
+3. [crop](https://aics-int.github.io/camera-alignment-core/camera_alignment_core.html#camera_alignment_core.alignment_core.crop)
+4. [generate_alignment_matrix](https://aics-int.github.io/camera-alignment-core/camera_alignment_core.html#camera_alignment_core.alignment_core.generate_alignment_matrix)
 
 
 ## Development
@@ -134,7 +134,7 @@ see `Makefile` for others or to inspect the underlying scripts run as part of th
     Releasing fixes requires more than merging to main.
     1. everything in step 2 above: (eg, make lint type-check fmt import-sort )
     2. make doc:  (to confirm the docs build)
-    3. make \[bumpversion-major|bumpversion-minor|bumpversion-patch|bumpversion-dev\]: to actually create a new tag
+    3. make [bumpversion-major|bumpversion-minor|bumpversion-patch|bumpversion-dev]: to actually create a new tag
 
 **Allen Institute Software License**
 
