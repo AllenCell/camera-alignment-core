@@ -134,7 +134,7 @@ see `Makefile` for others or to inspect the underlying scripts run as part of th
     Releasing fixes requires more than merging to main.
     1. everything in step 2 above: (eg, make lint type-check fmt import-sort )
     2. make doc:  (to confirm the docs build)
-    3. make [bumpversion-major|bumpversion-minor|bumpversion-patch|bumpversion-dev]: to actually create a new tag
-
+    3. Create a new tag on github: https://github.com/AllenCell/camera-alignment-core/releases/new
+    
 **Allen Institute Software License**
 
