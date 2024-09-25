@@ -6,7 +6,7 @@
 <link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" /><link rel="next" title="camera_alignment_core" href="modules.html" />
 
     <meta name="generator" content="sphinx-5.0.2, furo 2022.06.04"/>
-        <title>camera_alignment_core 1.0.5 documentation</title>
+        <title>camera_alignment_core 1.0.6 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?digest=40978830699223671f4072448e654b5958f38b89" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo-extensions.css?digest=30d1aed668e5c3a91c3e3bf6a60b675221979f0e" />
@@ -123,7 +123,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="#"><div class="brand">camera_alignment_core 1.0.5 documentation</div></a>
+      <a href="#"><div class="brand">camera_alignment_core 1.0.6 documentation</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -146,7 +146,7 @@
       <div class="sidebar-sticky"><a class="sidebar-brand" href="#">
   
   
-  <span class="sidebar-brand-text">camera_alignment_core 1.0.5 documentation</span>
+  <span class="sidebar-brand-text">camera_alignment_core 1.0.6 documentation</span>
   
 </a><form class="sidebar-search-container" method="get" action="search.html" role="search">
   <input class="sidebar-search" placeholder=Search name="q" aria-label="Search">
@@ -207,7 +207,7 @@
 <hr class="docutils" />
 <section id="installation">
 <h2>Installation<a class="headerlink" href="#installation" title="Permalink to this heading">#</a></h2>
-<p><code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">camera_alignment_core==1.0.5</span></code><span class="raw-html-m2r"><br></span></p>
+<p><code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">camera_alignment_core==1.0.6</span></code><span class="raw-html-m2r"><br></span></p>
 <p>This library is published to a private PyPI server (“Artifactory”) accessible within the Allen Institute network or over VPN. This has downstream effects for how this library is installed into other Python packages.</p>
 <p>Having trouble installing? Start here: <a class="reference external" href="http://confluence.corp.alleninstitute.org/display/SF/Using+Artifactory#UsingArtifactory-Python">http://confluence.corp.alleninstitute.org/display/SF/Using+Artifactory#UsingArtifactory-Python</a>.</p>
 </section>
@@ -333,6 +333,14 @@ if they don’t exit successfully, they will modify your staged files, and you w
 that you are working in a clean workspace. This, in combination with <code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">install</span></code>,
 should be the first thing you do if your branch is building locally but failing in CI.</p>
 </div></blockquote>
+</li>
+<li><p>Releases:</p>
+<p>Releasing fixes requires more than merging to main.</p>
+<ol class="arabic simple">
+<li><p>everything in step 2 above: (eg, make lint type-check fmt import-sort )</p></li>
+<li><p>make doc:  (to confirm the docs build)</p></li>
+<li><p>Some sort of github magic to get the wheel published to artifactory?</p></li>
+</ol>
 </li>
 </ol>
 <p><strong>Allen Institute Software License</strong></p>
