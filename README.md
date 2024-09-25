@@ -8,7 +8,7 @@ Core algorithms for aligning two-camera microscopy imagery
 
 ## Installation
 
-`pip install camera_alignment_core==1.0.5`<br>
+`pip install camera_alignment_core==1.0.6`<br>
 
 This library is published to a private PyPI server ("Artifactory") accessible within the Allen Institute network or over VPN. This has downstream effects for how this library is installed into other Python packages.
 
@@ -91,9 +91,9 @@ alignment_info = align.alignment_transform.info
 ##### Low-level API
 In addition, the lower-level functional building blocks used internally by [Align](https://aics-int.github.io/camera-alignment-core/camera_alignment_core.html#camera_alignment_core.align.Align) are accessible in the `camera_alignment_core.alignment_core` module. See:
 1. [align_image](https://aics-int.github.io/camera-alignment-core/camera_alignment_core.html#camera_alignment_core.alignment_core.align_image)
-1. [apply_alignment_matrix](https://aics-int.github.io/camera-alignment-core/camera_alignment_core.html#camera_alignment_core.alignment_core.apply_alignment_matrix)
-1. [crop](https://aics-int.github.io/camera-alignment-core/camera_alignment_core.html#camera_alignment_core.alignment_core.crop)
-1. [generate_alignment_matrix](https://aics-int.github.io/camera-alignment-core/camera_alignment_core.html#camera_alignment_core.alignment_core.generate_alignment_matrix)
+2. [apply_alignment_matrix](https://aics-int.github.io/camera-alignment-core/camera_alignment_core.html#camera_alignment_core.alignment_core.apply_alignment_matrix)
+3. [crop](https://aics-int.github.io/camera-alignment-core/camera_alignment_core.html#camera_alignment_core.alignment_core.crop)
+4. [generate_alignment_matrix](https://aics-int.github.io/camera-alignment-core/camera_alignment_core.html#camera_alignment_core.alignment_core.generate_alignment_matrix)
 
 
 ## Development
@@ -129,6 +129,12 @@ see `Makefile` for others or to inspect the underlying scripts run as part of th
     that you are working in a clean workspace. This, in combination with `make install`,
     should be the first thing you do if your branch is building locally but failing in CI.
 
+4.  Releases:
 
+    Releasing fixes requires more than merging to main.
+    1. everything in step 2 above: (eg, make lint type-check fmt import-sort )
+    2. make doc:  (to confirm the docs build)
+    3. Some sort of github magic to get the wheel published to artifactory?
+    
 **Allen Institute Software License**
 
