@@ -134,7 +134,7 @@ see `Makefile` for others or to inspect the underlying scripts run as part of th
     Releasing fixes requires more than merging to main.
     1. everything in step 2 above: (eg, make lint type-check fmt import-sort )
     2. make doc:  (to confirm the docs build)
-    3. NOT SURE
+    3. Some sort of github magic to get the wheel published to artifactory?
     
 **Allen Institute Software License**
 
