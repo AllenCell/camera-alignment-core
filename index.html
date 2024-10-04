@@ -339,7 +339,12 @@ should be the first thing you do if your branch is building locally but failing 
 <ol class="arabic simple">
 <li><p>everything in step 2 above: (eg, make lint type-check fmt import-sort )</p></li>
 <li><p>make doc:  (to confirm the docs build)</p></li>
-<li><p>Some sort of github magic to get the wheel published to artifactory?</p></li>
+<li><dl class="simple">
+<dt>make publish: to publish to artifactory.  Requires a ~/.pypirc file with an entry like:</dt><dd><p>[release-local]
+repository = <a class="reference external" href="https://artifactory.corp.alleninstitute.org/artifactory/api/pypi/pypi-release-local">https://artifactory.corp.alleninstitute.org/artifactory/api/pypi/pypi-release-local</a></p>
+</dd>
+</dl>
+</li>
 </ol>
 </li>
 </ol>
