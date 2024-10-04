@@ -134,7 +134,10 @@ see `Makefile` for others or to inspect the underlying scripts run as part of th
     Releasing fixes requires more than merging to main.
     1. everything in step 2 above: (eg, make lint type-check fmt import-sort )
     2. make doc:  (to confirm the docs build)
-    3. Some sort of github magic to get the wheel published to artifactory?
+    3. make publish: to publish to artifactory.  Requires a ~/.pypirc file with an entry like:
+        [release-local]
+        repository = https://artifactory.corp.alleninstitute.org/artifactory/api/pypi/pypi-release-local
+
     
 **Allen Institute Software License**
 
