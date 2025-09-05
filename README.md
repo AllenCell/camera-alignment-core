@@ -137,6 +137,10 @@ see `Makefile` for others or to inspect the underlying scripts run as part of th
     3. make publish: to publish to artifactory.  Requires a ~/.pypirc file with an entry like:
         [release-local]
         repository = https://artifactory.corp.alleninstitute.org/artifactory/api/pypi/pypi-release-local
+    4. Update the example-venv lockfile to use the new release.
+        1. [Install uv](https://docs.astral.sh/uv/getting-started/installation/)
+        2. `cd example-venv && uv lock && uv sync`
+        3. `uv pip list | grep camera-alignment-core` (This should show the new version.)
 
     
 **Allen Institute Software License**
