@@ -1,0 +1,29 @@
+[project]
+name = "example-venv"
+version = "0.1.0"
+description = "Virtual environment with camera-alignment-core"
+readme = "README.md"
+requires-python = ">=3.8,<3.12"
+dependencies = [
+    # One main dependency for this example virtual environment
+    "camera-alignment-core",
+    # numcodecs is an indirect dependency of aicsimageio, and recent versions
+    # of numcodecs are incompatible with the version of zarr needed by
+    # aicsimageio. aicsimageio is deprecated, and ultimately this
+    # pin should be made unnecessary by upgrading camera-alignment-core to use
+    # bioio.
+    "numcodecs<=0.15.0",
+]
+license = { text = "BSD-3-Clause" }
+
+[tool.uv.sources]
+# There are two internal-only dependencies: get these from Artifactory
+aicsfiles = { index = "artifactory" }
+camera-alignment-core = { index = "artifactory" }
+
+[[tool.uv.index]]
+name = "artifactory"
+url = "https://artifactory.corp.alleninstitute.org/artifactory/api/pypi/pypi-snapshot-local/simple"
+# The `explicit = true` ensures that the default index (usually PyPi) is used
+# for all packages not explicitly listed in `tool.uv.sources`.
+explicit = true
