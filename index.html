@@ -215,8 +215,8 @@
 <h2>Documentation<a class="headerlink" href="#documentation" title="Permalink to this heading">#</a></h2>
 <p>The primary export of this package is the <a class="reference external" href="https://aics-int.github.io/camera-alignment-core/camera_alignment_core.html#camera_alignment_core.align.Align">Align</a> class.
 It provides a convenient abstraction over what is expected to be the most common usage of this package. Example use:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">camera_alignment_core</span> <span class="kn">import</span> <span class="n">Align</span><span class="p">,</span> <span class="n">Magnification</span>
-<span class="kn">from</span> <span class="nn">camera_alignment_core.channel_info</span> <span class="kn">import</span> <span class="n">channel_info_factory</span><span class="p">,</span> <span class="n">CameraPosition</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">camera_alignment_core</span><span class="w"> </span><span class="kn">import</span> <span class="n">Align</span><span class="p">,</span> <span class="n">Magnification</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">camera_alignment_core.channel_info</span><span class="w"> </span><span class="kn">import</span> <span class="n">channel_info_factory</span><span class="p">,</span> <span class="n">CameraPosition</span>
 
 
 <span class="n">biological_data_to_align_path</span> <span class="o">=</span> <span class="s2">&quot;/some/path/to/an/image.czi&quot;</span>
@@ -344,6 +344,13 @@ should be the first thing you do if your branch is building locally but failing 
 repository = <a class="reference external" href="https://artifactory.corp.alleninstitute.org/artifactory/api/pypi/pypi-release-local">https://artifactory.corp.alleninstitute.org/artifactory/api/pypi/pypi-release-local</a></p>
 </dd>
 </dl>
+</li>
+<li><p>Update the example-venv lockfile to use the new release.</p>
+<ol class="arabic simple">
+<li><p><a class="reference external" href="https://docs.astral.sh/uv/getting-started/installation/">Install uv</a></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">cd</span> <span class="pre">example-venv</span> <span class="pre">&amp;&amp;</span> <span class="pre">uv</span> <span class="pre">lock</span> <span class="pre">&amp;&amp;</span> <span class="pre">uv</span> <span class="pre">sync</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">uv</span> <span class="pre">pip</span> <span class="pre">list</span> <span class="pre">|</span> <span class="pre">grep</span> <span class="pre">camera-alignment-core</span></code> (This should show the new version.)</p></li>
+</ol>
 </li>
 </ol>
 </li>
