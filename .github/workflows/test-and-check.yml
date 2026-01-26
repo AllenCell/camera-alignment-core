@@ -66,12 +66,38 @@ jobs:
     needs: [test]
     runs-on: [self-hosted, build]
 
+    permissions:
+      id-token: write        # Needed for OIDC
+      contents: read         # Needed to check out code
+
+    env:
+      AWS_REGION: ${{ vars.AWS_DEFAULT_REGION }}
+      AWS_ACCOUNT_ID: ${{ vars.AWS_SOFTWARE_ACCOUNT_ID }}
+      ENVIRONMENT: production
+
     steps:
     - uses: actions/checkout@v4
     - name: Set up Python
       uses: actions/setup-python@v4
       with:
         python-version: "3.9"
+
+    
+    - name: Configure AWS credentials via OIDC
+      uses: aws-actions/configure-aws-credentials@v2
+      with:
+        role-to-assume: arn:aws:iam::${{ env.AWS_ACCOUNT_ID }}:role/github_camera_alignment_core
+        aws-region: ${{ env.AWS_REGION }}
+
+    - name: Get CodeArtifact auth token
+      id: codeartifact
+      run: |
+        export CODEARTIFACT_AUTH_TOKEN=$(aws codeartifact get-authorization-token \
+          --domain ${{ env.ENVIRONMENT}} \
+          --domain-owner ${{ env.AWS_ACCOUNT_ID }} \
+          --query authorizationToken --output text)
+        echo "CODEARTIFACT_AUTH_TOKEN=$CODEARTIFACT_AUTH_TOKEN" >> $GITHUB_ENV
+    
     - name: Install Dependencies
       run: |
         python -m pip install --upgrade pip
@@ -81,7 +107,7 @@ jobs:
         make build
     - name: Publish to internal package index
       env:
-        TWINE_USERNAME: ${{ secrets.ARTIFACTORY_USER }}
-        TWINE_PASSWORD: ${{ secrets.ARTIFACTORY_PASSWORD }}
+        TWINE_USERNAME: aws
+        TWINE_PASSWORD: ${{ env.CODEARTIFACT_AUTH_TOKEN }}
         TWINE_NON_INTERACTIVE: true
-      run: twine upload --verbose --repository-url='https://artifactory.corp.alleninstitute.org/artifactory/api/pypi/pypi-release-local' dist/*
+      run: twine upload --verbose --repository-url='https://${{ env.ENVIRONMENT}}-${{ env.AWS_ACCOUNT_ID }}.d.codeartifact.us-west-2.amazonaws.com/pypi/pypi-release-local/' dist/*

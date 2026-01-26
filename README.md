@@ -10,9 +10,7 @@ Core algorithms for aligning two-camera microscopy imagery
 
 `pip install camera_alignment_core==1.0.6`<br>
 
-This library is published to a private PyPI server ("Artifactory") accessible within the Allen Institute network or over VPN. This has downstream effects for how this library is installed into other Python packages.
-
-Having trouble installing? Start here: http://confluence.corp.alleninstitute.org/display/SF/Using+Artifactory#UsingArtifactory-Python.
+This library is published to a private PyPI server on AWS CodeArtifact accessible within the Allen Institute network or over VPN. This has downstream effects for how this library is installed into other Python packages.
 
 
 ## Documentation
@@ -134,9 +132,9 @@ see `Makefile` for others or to inspect the underlying scripts run as part of th
     Releasing fixes requires more than merging to main.
     1. everything in step 2 above: (eg, make lint type-check fmt import-sort )
     2. make doc:  (to confirm the docs build)
-    3. make publish: to publish to artifactory.  Requires a ~/.pypirc file with an entry like:
+    3. make publish: to publish to CodeArtifact.  Requires a ~/.pypirc file with an entry like:
         [release-local]
-        repository = https://artifactory.corp.alleninstitute.org/artifactory/api/pypi/pypi-release-local
+        repository = https://production-239877123246.d.codeartifact.us-west-2.amazonaws.com/pypi/pypi-release-local/
     4. Update the example-venv lockfile to use the new release.
         1. [Install uv](https://docs.astral.sh/uv/getting-started/installation/)
         2. `cd example-venv && uv lock && uv sync`
