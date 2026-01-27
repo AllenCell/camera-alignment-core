@@ -208,8 +208,7 @@
 <section id="installation">
 <h2>Installation<a class="headerlink" href="#installation" title="Permalink to this heading">#</a></h2>
 <p><code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">camera_alignment_core==1.0.6</span></code><span class="raw-html-m2r"><br></span></p>
-<p>This library is published to a private PyPI server (“Artifactory”) accessible within the Allen Institute network or over VPN. This has downstream effects for how this library is installed into other Python packages.</p>
-<p>Having trouble installing? Start here: <a class="reference external" href="http://confluence.corp.alleninstitute.org/display/SF/Using+Artifactory#UsingArtifactory-Python">http://confluence.corp.alleninstitute.org/display/SF/Using+Artifactory#UsingArtifactory-Python</a>.</p>
+<p>This library is published to a private PyPI server on AWS CodeArtifact accessible within the Allen Institute network or over VPN. This has downstream effects for how this library is installed into other Python packages.</p>
 </section>
 <section id="documentation">
 <h2>Documentation<a class="headerlink" href="#documentation" title="Permalink to this heading">#</a></h2>
@@ -340,8 +339,8 @@ should be the first thing you do if your branch is building locally but failing 
 <li><p>everything in step 2 above: (eg, make lint type-check fmt import-sort )</p></li>
 <li><p>make doc:  (to confirm the docs build)</p></li>
 <li><dl class="simple">
-<dt>make publish: to publish to artifactory.  Requires a ~/.pypirc file with an entry like:</dt><dd><p>[release-local]
-repository = <a class="reference external" href="https://artifactory.corp.alleninstitute.org/artifactory/api/pypi/pypi-release-local">https://artifactory.corp.alleninstitute.org/artifactory/api/pypi/pypi-release-local</a></p>
+<dt>make publish: to publish to CodeArtifact.  Requires a ~/.pypirc file with an entry like:</dt><dd><p>[release-local]
+repository = <a class="reference external" href="https://production-239877123246.d.codeartifact.us-west-2.amazonaws.com/pypi/pypi-release-local/">https://production-239877123246.d.codeartifact.us-west-2.amazonaws.com/pypi/pypi-release-local/</a></p>
 </dd>
 </dl>
 </li>
